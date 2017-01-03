@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+    <link th:href="@{/static/css/plugins/treegrid/jquery.treegrid.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/jsTree/style.min.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/pickList/pickList.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/iconpicker/fontawesome-iconpicker.min.css}" rel="stylesheet"/>
+
+	<script th:src="@{/static/js/plugins/treegrid/jquery.treegrid.min.js}"></script>
+	<script th:src="@{/static/js/plugins/treegrid/jquery.treegrid.bootstrap3.js}"></script>
+	<script th:src="@{/static/js/plugins/jsTree/jstree.min.js}"></script>
+	<script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/pickList/pickList.js}"></script>
+	<script th:src="@{/static/js/plugins/iconpicker/fontawesome-iconpicker.min.js}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<div class="btn-group hidden-xs" th:replace="fragments/include::toolbar(true,false)">
+				</div>
+
+				<table id="treeTable" class="table table-bordered table-condensed">
+					<thead>
+						<tr>
+							<th th:text="#{sys.menu.name}">名称</th>
+							<th th:text="#{sys.menu.url}">链接</th>
+							<th th:text="#{sys.menu.icon}">图标</th>
+							<th th:text="#{sys.sort}">排序</th>
+							<th th:text="#{sys.menu.permission}">权限标示</th>
+							<th th:text="#{sys.isenable}">是否启用</th>
+							<th th:text="#{sys.createdate}">创建日期</th>
+							<th th:text="#{sys.operate}">操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="menu:${menus}"
+							th:class="${#strings.isEmpty(menu.parentId)}?'treegrid-'+${menu.id}:'treegrid-'+${menu.id}+' treegrid-parent-'+${menu.parentId}">
+							<td th:text="#{${menu.name}}"></td>
+							<td th:text="${menu.url}"></td>
+							<td th:text="${menu.icon}"></td>
+							<td th:text="${menu.sort}"></td>
+							<td th:text="${menu.permission}"></td>
+							<td><span class="label label-success"
+								th:if="${menu.isEnable}" th:text="#{sys.enable}">已启用</span> <span
+								class="label" th:if="${!menu.isEnable}"
+								th:text="#{sys.unenable}">未启用</span></td>
+							<td th:text="${#dates.format(menu.createDate, 'yyyy-MM-dd HH:mm:ss')}"></td>
+							<td><div class="btn-group hidden-xs">
+							<button type="button" class="btn btn-xs btn-info"
+									th:onclick="'javascript:editRole(\''+${menu.id}+'\');'"
+									th:text="#{sys.user.role}">角色</button>
+							<button type="button" class="btn btn-xs btn-primary"
+									th:onclick="'javascript:editMenu(\''+${menu.parentId}+'\',this,\''+${menu.isEnable}+'\',\''+${menu.name}+'\',\''+${menu.id}+'\');'"
+									th:text="#{sys.edit}">编辑</button>
+							<button type="button" class="btn btn-xs btn-danger"
+									th:onclick="'javascript:deleteMenu(\''+${menu.id}+'\');'"
+									th:text="#{sys.delete}">删除</button></div></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="addModal" role="dialog"
+		aria-labelledby="roleLabel">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h3 class="modal-title" id="menuLabel"
+						th:text="#{sys.menu.resource}">菜单管理</h3>
+				</div>
+				<form class="form-horizontal" id="menuForm">
+					<div class="modal-body">
+						<input type="hidden" name="id" id="id" value="" />
+						<div class="form-group">
+							<label class="col-sm-3 control-label"
+								th:text="#{sys.menu.parent}">父类菜单：</label>
+							<div class="col-sm-7">
+								<input type="text" name="parentName" id="parentName"
+									class="form-control" onFocus="showMenuTree()" /> <input
+									type="hidden" name="parentId" id="parentId"
+									class="form-control" />
+							</div>
+						</div>
+
+						<div class="form-group"
+							style="position: absolute; z-index: 5555; left: 187px;top:54px; background-color: #F0F0F0" id="showTree">
+							<div class="col-sm-7" style="">
+								<div id="menuTree" style="display: none;"></div>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.menu.name}">名称：</label>
+							<div class="col-sm-7">
+								<input type="text" name="name" id="name" class="form-control"
+									required="required" />
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.menu.url}">链接：</label>
+							<div class="col-sm-7">
+								<input type="text" name="url" id="url" class="form-control" />
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.menu.icon}">图标：</label>
+							<div class="col-sm-7">
+								<input type="text" name="icon" id="icon" class="form-control" />
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.sort}">排序：</label>
+							<div class="col-sm-7">
+								<input type="text" name="sort" id="sort" class="form-control"
+									onkeyup="this.value=this.value.replace(/\D/g,'')" />
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label class="col-sm-3 control-label"
+								th:text="#{sys.menu.permission}">权限标识：</label>
+							<div class="col-sm-7">
+								<input type="text" name="permission" id="permission"
+									class="form-control" />
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.isenable}">是否启用：</label>
+							<div class="col-sm-7">
+								<select class="form-control" name="isEnable" id="isEnable">
+									<option value="true" selected="selected" th:text="#{sys.true}">是</option>
+									<option value="false" th:text="#{sys.false}">否</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button class="btn btn-primary" th:text="#{sys.save}">保存</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="editRoleModel">
+		<div class="modal-dialog">
+			<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h3 class="modal-title" th:text="#{sys.menu.role}">角色管理</h3>
+					</div>
+					<div class="modal-body">
+						<div id="pickList"></div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary"
+							th:text="#{sys.save}" id="getSelected">保存</button>
+					</div>
+			</div>
+		</div>
+	</div>
+	
+</body>
+<script type="text/javascript" th:inline="javascript">
+$(function(){
+	$("#menuForm").validate({
+		rules : {
+				name :"required"
+			},
+			submitHandler : function(form) {
+				saveMenu();
+			}
+	});
+	
+	$("#treeTable").treegrid({
+        expanderExpandedClass: "glyphicon glyphicon-minus",
+        expanderCollapsedClass: "glyphicon glyphicon-plus",
+        initialState: "collapsed"
+        
+    });
+	initTree();
+	
+	$("#icon").iconpicker({
+		hideOnSelect : true
+	});
+});
+
+function initTree(){
+	$.ajax({
+		url : "/menu/treeList",
+		dataType : "json",
+		type : "get",
+		data : "id=" + id,
+		success : function(data) {
+			data.unshift([[#{sys.menu.parent}]]);
+			$("#menuTree").jstree({
+				"core":{
+					"data":data,
+					"multiple":false,
+					"animation" : 0
+				}
+			});
+		},
+		error : function(XMLHttpRequest, textStatus, errorThrown) {
+			swal("", "Error", "error");
+		}
+	});
+}
+
+//show后立即触发该事件，清除模板数据
+$("#addModal").on("show.bs.modal", function() {
+	validate(); //重置校验
+	$("#menuForm")[0].reset();
+	$("#id").val("");
+	$("#menuTree").jstree("deselect_all");
+	$("#menuTree").jstree().select_node("j1_1_anchor"); //默认选择父菜单
+}); 
+
+function showMenuTree(){
+	$("#menuTree").show();
+}
+
+document.onclick=function(e){
+	  var event = e || window.event;
+	  var ele = event.srcElement || event.target;
+	  if(ele.id != "showTree"){//鼠标点击的范围不在指定范围内
+		  if(ele.id != "parentName"){
+			  $("#menuTree").hide();
+		  }
+	  }
+	}
+
+$("#menuTree").on("changed.jstree", function (e, data) {
+	$("#parentName").val(data.instance.get_node(data.selected[0]).text);
+	$("#parentId").val(data.selected);
+	$("#menuTree").hide();
+});
+
+function saveMenu(){
+	if($("#parentId").val()=="j1_1"){
+		$("#parentId").val("");
+	}
+ 	gameAjax({
+		url : "/menu/add",
+		data : $("#menuForm").serialize(),
+		callback : function(data) {
+			//resetPageData();
+			location.reload();
+		}
+	}); 
+}
+
+function editMenu(parentId,obj,isEnable,name,id){
+	$("#addModal").modal("show");
+	$("#menuTree").jstree("deselect_all");
+	if(!parentId || parentId=="undefined"){
+		parentId="j1_1";
+	}
+	$("#menuTree").jstree().select_node(parentId + "_anchor");
+	var menuArr=[];
+	$(obj).closest("tr").find("td").each(function(index,element){
+		menuArr[index]=$(element).text();
+	});
+	$("#name").val(name);
+	$("#url").val(menuArr[1]);
+	$("#icon").val(menuArr[2]);
+	$("#sort").val(menuArr[3]);
+	$("#permission").val(menuArr[4]);
+	
+	$("#isEnable").val(isEnable.toString());
+ 	$("#id").val(id);
+}
+
+function deleteMenu(id){
+	swal({
+		title : [[#{sys.confirm.title}]],
+		text : [[#{sys.confirm.text}]],
+		type : "warning",
+		showCancelButton : true,
+		confirmButtonColor : "#DD6B55",
+		confirmButtonText : [[#{sys.confirm.confirmtext}]],
+		cancelButtonText : [[#{sys.confirm.canceltext}]],
+		closeOnConfirm: false
+	}, function(isConfirm) {
+		if (isConfirm) {
+			gameAjax({
+				url : "/menu/delete",
+				data : "id=" + id,
+				callback : function(data, message) {
+					swal([[#{sys.delete.success}]],"","success");
+					location.reload();
+				}
+			});
+		}
+	})
+}
+
+function validate(){
+	$("#menuForm").validate({
+		submitHandler : function(form) {
+			saveRole();
+		}
+	}).resetForm(); 
+}
+
+function resetPageData() {
+	$("#addModal").modal("hide");
+	$("#menuForm")[0].reset();
+	$("#menuTree").jstree("deselect_all");
+}
+
+function add(){
+	$("#addModal").modal("show");
+}
+
+function editRole(id){
+	gameAjax({
+		url : "/menu/pickList",
+		data : "id=" + id,
+		callback : function(data, message) {
+		/* 	$("#pickList").pickList.defaults = {
+			      add: "Add"
+			   }; */
+			 var pick = $("#pickList").pickList({data: data});
+			 
+			 $("#getSelected").click(function () {
+				 var roles=pick.getValues();
+			     saveRole(id,roles);
+			     }); 
+			 $("#editRoleModel").modal("show");
+		}
+	});
+}
+
+function saveRole(id,roles){
+	gameAjax({
+		url : "/menu/updataRoleByMenu",
+		data : {"id":id,"data":roles},
+		callback : function(data, message) {
+			   $("#editRoleModel").modal("hide");
+		}
+	});  
+}
+
+//hide后立即触发该事件，清除div
+$("#editRoleModel").on("hide.bs.modal", function() {
+		$("#getSelected").unbind("click");
+		$("#pickList").empty();
+}); 
+</script>
+</html>

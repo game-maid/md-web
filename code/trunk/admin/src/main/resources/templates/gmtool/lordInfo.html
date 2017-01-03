@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+	<link th:href="@{/static/css/plugins/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet" />
+	<link th:href="@{/static/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css}" rel="stylesheet" />
+
+	<script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.js}"></script>
+	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<h5 th:text="#{sys.search.condition}">查询条件</h5>
+			</div>
+			<div class="ibox-content">
+				<div class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-2">
+							<select class="form-control" id="type" name="type">
+								<option value="1" th:text="#{gmtool.lord.id}">玩家ID</option>
+								<option value="2" th:text="#{gmtool.lord.name}">玩家名称</option>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<input type="text" name="lordId" class="form-control" id="lordId" />
+						</div>
+						<div id="zoneDiv" style="display: none;">
+							<label class="col-sm-1 control-label"
+								th:text="#{gamelog.gamezone}">区服</label>
+							<div class="col-sm-2">
+								<select id="gamezone" name="gamezone" class="form-control"></select>
+							</div>
+						</div>
+						<div class="col-sm-2">
+							<button class="btn btn-primary" onclick="search()">
+								<i class="fa fa-search"></i>&nbsp;<span th:text="#{sys.select}">查询</span>&nbsp;
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="ibox float-e-margins" >
+				<div class="ibox-content">
+					<div style="display: none;" id="messages"><strong th:text="#{gmtool.lord.palyer.isnull}+...">没有此玩家信息...</strong></div>
+					<div style="display: none;" id="info">
+						<div class="tabs-container">
+							<ul class="nav nav-tabs">
+								<li class="active"><a data-toggle="tab" href="#playerInfo" aria-expanded="true" th:text="#{gmtool.lord.info}">玩家信息</a></li>
+								<li class=""><a data-toggle="tab" href="#user" aria-expanded="false" onclick="userInfo()" th:text="#{gmtool.lord.user.info}">用户信息</a></li>
+								<li class=""><a data-toggle="tab" href="#form" aria-expanded="false" th:text="#{gmtool.lord.form}">阵容</a></li>
+								<li class=""><a data-toggle="tab" href="#hero" aria-expanded="false" th:text="#{gmtool.lord.hero}">英雄</a></li>
+								<li class=""><a data-toggle="tab" href="#equip" aria-expanded="false" th:text="#{gmtool.lord.equip}">装备</a></li>
+								<li class=""><a data-toggle="tab" href="#skill" aria-expanded="false" th:text="#{gmtool.lord.skill}">技能</a></li>
+								<li class=""><a data-toggle="tab" href="#item" aria-expanded="false" th:text="#{gmtool.lord.item}">道具</a></li>
+								<li class=""><a data-toggle="tab" href="#stage" aria-expanded="false" onclick="stage()" th:text="#{gamelog.stage}">关卡</a></li>
+								<li class=""><a data-toggle="tab" href="#souls" aria-expanded="false" th:text="#{gmtool.lord.souls}">英雄碎片</a></li>
+							</ul>
+							<div class="tab-content">
+								<div id="playerInfo" class="tab-pane active">
+									<div class="panel-body">
+										<table class="table table-bordered table-hover mainInfo">
+											<thead>
+												<tr>
+													<td th:text="#{sys.info}">信息</td>
+													<td th:text="#{sys.data}">数据</td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td th:text="#{gmtool.lord.id}">ID</td>
+													<td id="id"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.name}">名称</td>
+													<td id="name"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.icon}+ID">头像ID</td>
+													<td id="headIcon"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gamelog.level}">等级</td>
+													<td id="level"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.exp}">当前经验值</td>
+													<td id="exp"></td>
+												</tr>
+												<tr>
+													<td th:text="VIP+#{gamelog.level}">VIP等级</td>
+													<td id="vipLevel"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.vip.score}">当前vip积分</td>
+													<td id="vipScore"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.diamond}">钻石</td>
+													<td id="diamond"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.gold}">金币</td>
+													<td id="gold"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.breakcoin}">突破币</td>
+													<td id="breakcoin"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.strength}">体力</td>
+													<td id="strength"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.strengthTime}">体力值最后结算时间</td>
+													<td id="strengthTime"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.energy}">精力</td>
+													<td id="energy"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.energyTime}">精力值最后结算时间</td>
+													<td id="energyTime"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.skillLimit}">技能数量上线</td>
+													<td id="skillLimit"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.heroLimit}">英雄数量上线</td>
+													<td id="heroLimit"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.equipLimit}">英雄数量上线</td>
+													<td id="equipLimit"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.itemLimit}">道具数量上线</td>
+													<td id="itemLimit"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.lord.registerTime}">注册时间</td>
+													<td id="registerTime"></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+								<div id="user" class="tab-pane">
+									<div class="panel-body">
+										<table class="table table-bordered table-hover mainInfo">
+											<thead>
+												<tr>
+													<td th:text="#{sys.info}">信息</td>
+													<td th:text="#{sys.data}">数据</td>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td th:text="#{gmtool.user.sso.id}">平台账号ID</td>
+													<td id="ssoId"></td>
+												</tr>
+												<tr>
+													<td th:text="#{sys.platform.id}">平台ID</td>
+													<td id="platformId"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.user.game.zone.id}">游戏区服ID</td>
+													<td id="gameZoneId"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.user.game.sessionId}">登录游戏服务器的凭证</td>
+													<td id="gamesessionId"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.user.client.version}">客户端的版本号</td>
+													<td id="clientVersion"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gmtool.user.package.id}">客户端包ID</td>
+													<td id="packageId"></td>
+												</tr>
+												<tr>
+													<td th:text="#{gamelog.physical}+ID">物理服务器ID</td>
+													<td id="physicalServerId"></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+								<div id="form" class="tab-pane">
+									<div class="panel-body" id="formBody"></div>
+								</div>
+								<div id="hero" class="tab-pane">
+									<div class="panel-body">
+										<table id="herosTable" class="table table-striped bootstrapTable"></table>
+									</div>
+								</div>
+								<div id="equip" class="tab-pane">
+									<div class="panel-body">
+										<table id="equipTable" class="table table-striped bootstrapTable"></table>
+									</div>
+								</div>
+								<div id="skill" class="tab-pane">
+									<div class="panel-body">
+										<table id="skillsTable" class="table table-striped bootstrapTable"></table>
+									</div>
+								</div>
+								<div id="stage" class="tab-pane">
+									<div class="panel-body">
+										<table id="stageTable" class="table table-bordered">
+											<thead>
+												<tr>
+													<th th:text="#{gamelog.stage}+ID">关卡ID</th>
+													<th th:text="#{gamelog.stage.result}">战斗结果</th>
+													<th th:text="#{gamelog.stage.intraday.challenge.times}">今日挑战次数</th>
+													<th th:text="#{gamelog.stage.intraday.refresh.times}">今日刷新次数</th>
+												</tr>
+											</thead>
+											<tbody id="stageRecord">
+											</tbody>
+										</table>
+									</div>
+								</div>
+								<div id="item" class="tab-pane">
+									<div class="panel-body">
+										<table id="itemsTable" class="table-striped " data-toggle="table" data-unique-id="id" data-pagination="true" data-sort-name="itemId" data-sort-order="asc">
+											<thead>
+												<tr>
+													<th data-field="itemId" th:text="#{sys.item}+ID">道具ID</th>
+													<th data-field="name" th:text="#{sys.item.name}">名称</th>
+													<th data-field="amount" th:text="#{sys.item.amount}">数量</th>
+												</tr>
+											</thead>
+										</table>
+									</div>
+								</div>
+								<div id="souls" class="tab-pane">
+									<div class="panel-body">
+										<table id="soulsTable" class="table-striped " data-toggle="table" data-unique-id="id" data-pagination="true" data-sort-name="soulId" data-sort-order="asc">
+											<thead>
+												<tr>
+													<th data-field="soulId" th:text="#{gmtool.lord.souls}+ID">英雄碎片ID</th>
+													<th data-field="name" th:text="#{sys.item.name}">名称</th>
+													<th data-field="amount" th:text="#{sys.item.amount}">数量</th>
+												</tr>
+											</thead>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" th:inline="javascript">
+$(function() {
+	itemNames(); //获取道具名称
+	table = $("#table");
+	loadZoneList("gamezone");
+	lord = [];
+	form = [];
+	heros = [];
+	items = [];
+	skills = [];
+	equip = [];
+});
+$("#type").change(function() {
+	if ($(this).val() == 1) {
+		$("#zoneDiv").hide();
+	} else {
+		$("#zoneDiv").show();
+	}
+});
+function search() {
+	var type=$("#type").val();
+	var gamezone=$("#gamezone").val();
+	var lordId=$("#lordId").val();
+	gameAjax({
+		url : "/lordInfo/list",
+		data : {"type":type,"lordId":lordId,"gamezone":gamezone},
+		callback : function(data) {
+			destroyTable();
+			if (data == null) {
+				$("#info").hide();
+				$("#messages").show();
+			} else {
+				$("#messages").hide();
+				$("#info").show();
+				heros = data.heros;
+				items = data.items;
+				skills = data.skills;
+				equip = data.equips;
+				lord = data;
+				mainInfo(data);
+			}
+		}
+	});
+}
+function mainInfo(data) {
+	//基本信息
+	$.each(data, function(id, val) {
+		if (id == "form") {
+			formInfo();
+		} else if (id == "heros") {
+			herosInfo();
+		} else if (id == "items") {
+			itemsInfo();
+		} else if (id == "skills") {
+			skillsInfo();
+		} else if (id == "equips") {
+			equipInfo();
+		} else if (id == "souls") {
+			soulsInfo(data.souls);
+		} else {
+			if (id.indexOf("Time") > 0) {
+				$("#" + id).text(
+						new Date(val).format("yyyy-MM-dd hh:mm:ss"));
+			} else {
+				$("#" + id).text(val);
+			}
+		}
+	});
+}
+
+function userInfo() {
+	//用户信息
+	var data=getUser(lord.id);
+	$("#ssoId").text(data.ssoId);
+	$("#platformId").text(getPlatForm(data.platformId));
+	$("#gameZoneId").text(getZone(data.gameZoneId));
+	$("#gamesessionId").text(data.gamesessionId);
+	$("#clientVersion").text(data.clientVersion);
+	$("#packageId").text(getPackage(data.packageId));
+	$("#physicalServerId").text(getServer(data.physicalServerId)); 
+}
+function getUser(id){
+	var userData={};
+	gameAjax({
+		url : "/lordInfo/user",
+		data : "id=" + id,
+		async : false,
+		callback : function(data) {
+			userData=data;
+		}
+	});
+	return userData;
+}
+function getPlatForm(id){
+	var platFormName="";
+	gameAjax({
+		url : "/platform/findOne",
+		data : "id=" + id,
+		async : false,
+		callback : function(data) {
+			if(data!=null){
+				platFormName=data.name;
+			}
+		}
+	});
+	return platFormName;
+}
+var getZone = function(id){
+	var zoneName="";
+	gameAjax({
+		url : "/gamezone/findOne",
+		data : "id=" + id,
+		async : false,
+		callback : function(data) {
+			if(data!=null){
+				zoneName=data.name;
+			}
+		}
+	});
+	return zoneName;
+}
+var getPackage = function(id){
+	var packageName="";
+	gameAjax({
+		url : "/package/findOne",
+		data : "id=" + id,
+		async : false,
+		callback : function(data) {
+			if(data!=null){
+				packageName=data.name;
+			}
+		}
+	});
+	return packageName;
+}
+var getServer = function(id){
+	var ServerName="";
+	gameAjax({
+		url : "/physical/findOne",
+		data : "id=" + id,
+		async : false,
+		callback : function(data) {
+			if(data!=null){
+				ServerName=data.name;
+			}
+		}
+	});
+	return ServerName;
+}
+function formInfo() {
+	form = lord.form;
+	$.each(form,function(index, data) {
+		if(data!=null){
+			if(index==0){
+				var title=[[#{gmtool.lord.form.now.title}]];
+			}else{
+				var title=[[#{gmtool.lord.form.title}]]+(index);
+			}
+		var html = '<center style="margin: 10px;">---'+title+'---</center><table id="form_'+index+'" class="table table-striped bootstrapTable"></table>';
+		$("#formBody").append(html);
+		$("#form_" + index).bootstrapTable({
+			data : data,
+			uniqueId : "heroUid",
+			detailView : true,
+			detailFormatter : function(index, row) {
+				var equipUid = row.equipUid;
+				var skillUid = row.skillUid;
+				var html = '<strong th:text="#{gmtool.lord.equip.list}">装备列表</strong><table class="table table-bordered table-hover"><tbody><tr><td th:text="#{gmtool.lord.index}">位置</td><td th:text="#{gmtool.lord.equip}+ID">装备ID</td><td th:text="#{sys.item.name}">名称</td><td th:text="#{gmtool.lord.equip.uid}">装备标识</td><td th:text="#{gmtool.lord.equip.level}">强化等级</td><td th:text="#{gmtool.lord.equip.stage}">精炼等级</td><td th:text="#{gmtool.lord.equip.exp.stage}">精炼经验</td></tr>';
+				$.each(equipUid,function(index,val) {
+					var equipData = equip[val];
+					if (equipData !== undefined) {
+					var equipId = equipData.equipId;
+					var name = window.itemAll[equipId];
+					var level = equipData.level;
+					var stage = equipData.stage;
+					var expStage = equip[val].expStage;
+					html += '<tr><td>'+ index + '</td><td>'+ equipId + '</td><td>' + name + '</td><td>' + val + '</td><td>' + level + '</td><td>' + stage + '</td><td>' + expStage + '</td></tr>';
+				}
+			});
+			html += '</tbody></table>';
+			html += '<strong th:text="#{gmtool.lord.skill.list}">技能列表</strong><table class="table table-bordered table-hover"><tbody><tr><td th:text="#{gmtool.lord.index}">位置</td><td th:text="#{gmtool.lord.skill}+ID">技能ID</td><td th:text="#{sys.item.name}">技能名称</td><td th:text="#{gmtool.lord.skill.uid}">技能标识</td><td th:text="#{gamelog.level}">等级</td><td th:text="#{sys.item.exp}">经验</td></tr>';
+			$.each(skillUid,function(index,val) {
+				var skillData = skills[val];
+					if (skillData !== undefined) {
+						var skillId = skills[val].skillId;
+						var name = window.itemAll[skillId];
+						var level = skills[val].level;
+						var exp = skills[val].exp;
+						html += '<tr><td>'+ index+ '</td><td>'+ skillId+ '</td><td>'+ name+ '</td><td>'+ val+ '</td><td>'+ level+ '</td><td>'+ exp+ '</td></tr>';
+					}
+			});
+			html += '</tbody></table>';
+			return html;
+			},
+			columns : [{
+				title : [[#{gmtool.lord.index}]],
+				field : "index",
+				align : "center",
+				formatter : function(value, row,index) {
+					return index;
+				}
+			},
+			{
+				title : [[#{gmtool.lord.hero}+ID]],
+				field : "heroUid",
+				align : "center",
+				formatter : function(value) {
+					var id = heros[value].heroId;
+					return id;
+				}
+			},
+			{
+				title : [[#{sys.item.name}]],
+				field : "heroUid",
+				align : "center",
+				formatter : function(value) {
+					var id = heros[value].heroId;
+					return window.itemAll[id];
+				}
+			},
+			{
+				title : [[#{gmtool.lord.hero.uid}]],
+				field : "heroUid",
+				align : "center",
+			},
+			{
+				title : [[#{gamelog.level}]],
+				field : "heroUid",
+				align : "center",
+				formatter : function(value) {
+					var level = heros[value].level;
+					return level;
+				}
+			},
+			{
+				title : [[#{sys.item.exp}]],
+				field : "heroUid",
+				align : "center",
+				formatter : function(value) {
+					var exp = heros[value].exp;
+					return exp;
+				}
+			},
+			{
+				title : [[#{gmtool.lord.hero.break.level}]],
+				field : "heroUid",
+				align : "center",
+				formatter : function(value) {
+					var breakLevel = heros[value].breakLevel;
+					return breakLevel;
+				}
+			},
+			{
+				title : [[#{gmtool.lord.hero.default.skill}]],
+				field : "heroUid",
+				align : "center",
+				formatter : function(value) {
+					var defaultSkill = heros[value].defaultSkill;
+					if (defaultSkill != null) {
+						defaultSkill = defaultSkill.skillId+ '-'+ window.itemAll[defaultSkill.skillId];
+					}
+					return defaultSkill;
+				}	
+			} ]
+		});
+		}
+	});
+}
+function herosInfo() {
+	data = [];
+	$.each(heros, function(uid, val) {
+		data.push(val);
+	});
+	$("#herosTable").bootstrapTable({
+		data : data,
+		uniqueId : "heroUid",
+		pagination : true,
+		sortName : "heroId",
+		sortOrder : "asc",
+		columns : [ {
+			title : [[#{gmtool.lord.hero}+ID]],
+			field : "heroId",
+			align : "center",
+		}, {
+			title : [[#{sys.item.name}]],
+			field : "heroId",
+			align : "center",
+			formatter : function(value) {
+				return window.itemAll[value];
+			}
+
+		}, {
+			title : [[#{gmtool.lord.hero.uid}]],
+			field : "heroUid",
+			align : "center",
+		}, {
+			title : [[#{gamelog.level}]],
+			field : "level",
+			align : "center",
+		}, {
+			title : [[#{sys.item.exp}]],
+			field : "exp",
+			align : "center",
+		}, {
+			title : [[#{gmtool.lord.hero.break.level}]],
+			field : "breakLevel",
+			align : "center",
+		}, {
+			title : [[#{gmtool.lord.hero.default.skill}]],
+			field : "defaultSkill",
+			align : "center",
+			formatter : function(value) {
+				var val="";
+				if(value!=null){
+					val=value.skillId+"-"+window.itemAll[value.skillId]
+				}
+				return val;
+			}
+		}, {
+			title : [[#{gmtool.lord.gain.time}]],
+			field : "time",
+			align : "center",
+			formatter : function(value){
+				return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+			},
+		} ]
+	});
+}
+function skillsInfo() {
+	data = [];
+	$.each(skills, function(uid, val) {
+		data.push(val);
+	});
+	$("#skillsTable").bootstrapTable({
+		data : data,
+		uniqueId : "skillUid",
+		pagination : true,
+		sortName : "skillId",
+		sortOrder : "asc",
+		columns : [ {
+			title : [[#{gmtool.lord.skill}+ID]],
+			field : "skillId",
+			align : "center",
+		}, {
+			title : [[#{sys.item.name}]],
+			field : "skillId",
+			align : "center",
+			formatter : function(value) {
+				return window.itemAll[value];
+			}
+
+		}, {
+			title : [[#{gmtool.lord.skill.uid}]],
+			field : "skillUid",
+			align : "center",
+		}, {
+			title : [[#{gamelog.level}]],
+			field : "level",
+			align : "center",
+		}, {
+			title : [[#{sys.item.exp}]],
+			field : "exp",
+			align : "center",
+		}, {
+			title : [[#{gmtool.lord.gain.time}]],
+			field : "time",
+			align : "center",
+			formatter : function(value){
+				return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+			},
+		}]
+	});
+}
+function itemsInfo() {
+	data = [];
+	$.each(items, function(id, amount) {
+		var name = window.itemAll[id];
+		data.push({
+			itemId : id,
+			name : name,
+			amount : amount
+		});
+	});
+
+	$("#itemsTable").bootstrapTable("append", data);
+}
+//英雄碎片信息
+function soulsInfo(souls) {
+	data = [];
+	if(souls!=null){
+		$.each(souls, function(id, amount) {
+			var name = window.itemAll[id];
+			data.push({
+				soulId : id,
+				name : name,
+				amount : amount
+			});
+		});
+	}
+
+	$("#soulsTable").bootstrapTable("append", data);
+}
+function equipInfo() {
+	data = [];
+	$.each(equip, function(uid, val) {
+		data.push(val);
+	});
+	$("#equipTable").bootstrapTable({
+		data : data,
+		uniqueId : "equipUid",
+		pagination : true,
+		sortName : "equipId",
+		sortOrder : "asc",
+		columns : [ {
+			title : [[#{gmtool.lord.equip}]],
+			field : "equipId",
+			align : "center",
+		}, {
+			title : [[#{sys.item.name}]],
+			field : "equipId",
+			align : "center",
+			formatter : function(value) {
+				return window.itemAll[value];
+			}
+
+		}, {
+			title : [[#{gmtool.lord.equip.uid}]],
+			field : "equipUid",
+			align : "center",
+		}, {
+			title : [[#{gmtool.lord.equip.level}]],
+			field : "level",
+			align : "center",
+		}, {
+			title : [[#{gmtool.lord.equip.stage}]],
+			field : "stage",
+			align : "center",
+		}, {
+			title : [[#{gmtool.lord.equip.exp.stage}]],
+			field : "expStage",
+			align : "center",
+		} , {
+			title : [[#{gmtool.lord.gain.time}]],
+			field : "time",
+			align : "center",
+			formatter : function(value){
+				return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+			},
+		}]
+	});
+}
+function destroyTable() {
+	$(".bootstrapTable").bootstrapTable("destroy");
+	$("#itemsTable").bootstrapTable("removeAll");
+	$("#soulsTable").bootstrapTable("removeAll");
+}
+
+function stage(){
+	gameAjax({
+		url : "/lordInfo/stage",
+		data : "playerId=" + lord.id,
+		async : false,
+		callback : function(data) {
+			var stageHtml = "";
+			$.each(data.stages, function(stageId, stage) {
+				stageHtml += "<tr>"
+				stageHtml += "<td>" + stageId + "</td>"
+				stageHtml += "<td>" + stage.star + "</td>"
+				stageHtml += "<td>" + stage.times + "</td>"
+				stageHtml += "<td>" + data.refresh + "</td>"
+				stageHtml += "</tr>"
+			});
+			$("#stageRecord").html(stageHtml);
+		}
+	});
+}
+</script>
+</html>

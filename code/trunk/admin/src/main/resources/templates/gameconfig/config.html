@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+    <link th:href="@{/static/css/plugins/jsTree/style.min.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/webuploader/webuploader.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
+     
+	<script th:src="@{/static/js/plugins/jsTree/jstree.min.js}"></script>
+	<script th:src="@{/static/js/plugins/webuploader/webuploader.min.js}"></script>
+	<script th:src="@{/static/js/plugins/iCheck/icheck.min.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-waitingfor/bootstrap-waitingfor.min.js}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="row">
+			<div class="col-sm-4">
+				<div class="ibox float-e-margins">
+					<div class="ibox-title">
+                        <h5 th:text="#{sys.config.version}">版本号信息</h5>
+                    </div>
+                 	<div class="ibox-content">
+                  		<div id="tree"></div>
+                  	</div>
+                </div>
+			</div>
+			<div class="col-sm-8">
+				<div class="ibox float-e-margins">
+					<div class="ibox-title">
+                        <h5 th:text="#{sys.config.title}">更新配置</h5>
+                    </div>
+                	<div class="ibox-content">
+                		<div class="form-horizontal">
+                			<div class="form-group">
+                                <label class="col-sm-3 control-label" th:text="#{sys.config.content}">更新内容</label>
+                                <div class="col-sm-7">
+                                    <label class="checkbox-inline i-checks">
+                                        <input type="checkbox" value="3" th:text="#{sys.config.online}" /></label>
+                                    <label class="checkbox-inline i-checks">
+                                        <input type="checkbox" value="1" th:text="#{sys.config.test}" /></label>
+                                    <label class="checkbox-inline i-checks">
+                                        <input type="checkbox" value="2" th:text="#{sys.config.submit}" /></label>
+                                </div>
+                            </div>
+                            
+                            <div class="hr-line-dashed"></div>
+                            
+                            <div class="form-group">
+		      					<label class="col-sm-3 control-label" th:text="#{sys.config.file}">选择文件</label>
+		      					<div class="col-sm-7">
+		      						<div id="uploader">
+										<div id="thelist" class="uploader-list"></div>
+										<div id="picker" style="width: 82px;margin:0" th:text="#{sys.config.file}">选择文件</div>
+										<button id="ctlBtn" class="btn btn-info" th:text="#{sys.config.upload}">开始上传</button>
+									</div>
+	          					</div>
+	      					</div>
+	      					
+	      					<div class="hr-line-dashed"></div>
+	      					
+	      					<div class="form-group">
+                                <div class="col-sm-4 col-sm-offset-3">
+                                    <button class="btn btn-primary" type="button" onclick="update()" id="update" th:text="#{sys.config.title}">更新配置</button>
+                                </div>
+                            </div>
+		      			</div>
+                 	</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript"  th:inline="javascript">
+var tree = $("#tree");
+$list = $('#thelist'),
+$btn = $('#ctlBtn'),
+state = 'pending',
+uploader;
+
+$(function() {
+	initTree();
+	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
+	initUploader();
+	 
+});
+
+function initTree(){
+	tree.jstree({
+		"core":{
+			"data": {
+				url : "/config/treeList",
+			}
+		}
+	});
+}
+
+function initUploader(){
+
+	uploader = WebUploader.create({
+		resize: false,
+		server: '/config/upload',
+		pick: '#picker',
+		accept: {
+		title: "Excel",
+		extensions: "xls",
+		mimeTypes: "application/vnd.ms-excel"
+		},
+ 	});
+
+	uploader.on('fileQueued', function( file ) {
+    	$list.append( '<div id="' + file.id + '" class="item">' +
+        '<h4 class="info">' + file.name + '<i class="glyphicon glyphicon-remove" id="del_'+file.id+'" ></i></h4>' +
+        '<p class="state">'+[[#{sys.config.upload.wait}]]+'...</p>' +
+    	'</div>' );
+    	$("#del_"+file.id).click(function(){
+    	    uploader.removeFile(file);
+    	    $("#"+file.id).remove();
+    	});
+	});
+	
+	uploader.on('beforeFileQueued', function() {
+		$.each(uploader.getFiles('complete'),function(index,f){
+			uploader.removeFile(f);
+    	    $("#"+f.id).remove();
+		});
+	}); 
+
+	uploader.on('uploadAccept', function(obj,response) {
+		if(response.code != undefined){
+			return false;
+		}
+	}); 
+	
+	uploader.on( 'uploadProgress', function( file, percentage ) {
+		$("#update").attr({"disabled":"disabled"});
+		$("#update").addClass("btn-default");
+    	var $li = $( '#'+file.id ),
+       		$percent = $li.find('.progress .progress-bar');
+
+    	if ( !$percent.length ) {
+        	$percent = $('<div class="progress progress-striped active">' +
+          	'<div class="progress-bar" role="progressbar" style="width: 0%">' +
+          	'</div>' +
+        	'</div>').appendTo( $li ).find('.progress-bar');
+    	}
+    	$li.find('p.state').text([[#{sys.config.upload}]]+'...');
+    	$percent.css( 'width', percentage * 100 + '%' );
+	});
+
+	uploader.on( 'uploadSuccess', function( file ) {
+    	$( '#'+file.id ).find('p.state').text([[#{sys.config.uploaded}]]);
+	});
+
+	uploader.on( 'uploadError', function( file ) {
+    	$( '#'+file.id ).find('p.state').text([[#{sys.config.upload.error}]]);
+	});
+
+	uploader.on( 'uploadComplete', function( file ) {
+    	$( '#'+file.id ).find('.progress').fadeOut();
+	});
+	
+	uploader.on( 'uploadFinished', function() {
+    	$("#update").removeAttr("disabled");
+    	$("#update").removeClass("btn-default");
+	});
+	
+	uploader.on('startUpload',function(){
+		var arr=[];
+    	$(".checked input").each(function(){ 
+    		arr.push($(this).val());
+    	})
+    	if(arr.length==0){
+    		swal("", [[#{sys.config.select.error}]], "warning");
+    		uploader.stop(true);
+    	}
+	});
+
+	uploader.on( 'uploadBeforeSend', function(obj,data ) {
+		var arr=[];
+    	$(".checked input").each(function(){ 
+    		arr.push($(this).val());
+    	})
+		data.type = arr;
+	});
+
+	$btn.on( 'click', function() {
+    	if ( state === 'uploading' ) {
+        	uploader.stop();
+    	} else {
+        	uploader.upload();
+    	}
+	});
+}
+
+function update(){
+	var arr=[];
+    $(".checked input").each(function(){ 
+    	arr.push($(this).val());
+    })
+    if(arr.length==0){
+    	swal("", [[#{sys.config.select.error}]], "warning");
+    	return;
+    }
+    waitingDialog.show([[#{sys.config.updataing}+...]]);
+    $btn.attr({"disabled":"disabled"});
+    $btn.addClass("btn-default");
+    $("input[name=file]").attr({"disabled":"disabled"});
+    gameAjax({
+		url : "/config/update",
+		data :"type="+arr,
+		callback : function(data) {
+			waitingDialog.hide();
+			$btn.removeAttr("disabled");
+			$btn.removeClass("btn-default");
+			$("input[name=file]").removeAttr("disabled");
+			tree.jstree("refresh");
+		}
+	});
+}
+
+function delFile(id){
+	uploader.removeFile(id,true);
+}
+
+</script>
+</html>
