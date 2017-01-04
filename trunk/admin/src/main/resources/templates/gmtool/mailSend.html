@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+	<link th:href="@{/static/css/plugins/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/autocompleter/jquery.autocompleter.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/pickList/pickList.css}" rel="stylesheet"/>
+	
+    <script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/autocompleter/jquery.autocompleter.min.js}"></script>
+	<script th:src="@{/static/js/plugins/datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+	<script th:src="@{/static/js/plugins/pickList/pickList.js}"></script>
+	<script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<button type="button" class="btn btn-sm btn-info" onclick="showModel()">
+				        <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>&nbsp;<span th:text="#{gmtool.mail.title}">发送邮件</span>
+				</button>
+			</div>
+			<div class="ibox-content">
+				<div class="form-group" style="width: 800px">
+						<div class="col-sm-2" style="float: right;">
+							<button class="btn btn-primary" type="button" id="select" th:text="#{sys.select}">查询</button>
+						</div>
+						<div class="col-sm-1" >
+							<label class="control-label" style="margin-top: 10px;" th:text="#{sys.time}">时间</label>
+						</div>
+						<div class="col-sm-8 input-daterange input-group" id="datepicker">
+                        	<input type="text" name="startTime" class="form-control" required="required" id="startDatetimepicker" />
+                            <span class="input-group-addon">-</span>
+                            <input type="text" name="endTime" class="form-control" required="required" id="endDatetimepicker" />
+                        </div>
+                    </div>
+				<table id="panelTable" class="table-striped" data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="addModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form class="form-horizontal" id="addForm">
+					<input type="hidden" name="id" id="mailFormId" value="" />
+					<div class="form-horizontal">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h3 class="modal-title" id="roleLabel" th:text="#{gmtool.mail.title}">发送道具</h3>
+						</div>
+						<div class="modal-body">
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.sender}">发送者：</label>
+								<div class="col-sm-7">
+									<input type="text" name="sender" id="sender" class="form-control" required="required" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.sender.headicon}">发送者头像：</label>
+								<div class="col-sm-7">
+									<input type="text" name="senderHeadIcon" id="senderHeadIcon" class="form-control" required="required" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.valid.daytimes}">有效天数：</label>
+								<div class="col-sm-7">
+									<select class="form-control" id="validDay" name="validDay" required="required" >
+										<option value="0" th:text="#{gmtool.mail.valid.long}">永久有效</option>
+										<option value="7" th:text="7 + #{gmtool.mail.valid.day}">7天</option>
+										<option value="15" th:text="15 + #{gmtool.mail.valid.day}">15天</option>
+										<option value="30" th:text="30 + #{gmtool.mail.valid.day}">30天</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.goal}">发送目标：</label>
+								<div class="col-sm-7">
+									<select class="form-control" id="goal" name="goal">
+										<option value="1" th:text="#{gmtool.mail.one}">单一玩家</option>
+										<option value="2" th:text="#{gmtool.mail.all}">全体玩家</option>
+										<option value="3" th:text="#{gmtool.mail.condition}">条件玩家</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group" id="palyer_div">
+								<label class="col-sm-3 control-label" th:text="#{sys.player}">玩家：</label>
+								<div class="col-sm-7">
+									<div class="input-group col-sm-12">
+										<input type="text" placeholder="玩家ID" class="form-control" id="playerId" name="playerId" /> 
+										<span class="input-group-btn">
+											<button type="button" class="btn btn-info" onclick="addPlayer()" th:text="#{sys.add}">添加</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group" style="display:none;" id="playerData">
+		      					<label class="col-sm-3"></label>
+		      					<div class="col-sm-7">
+									<table id="playerTable" class="table-striped" data-toggle="table" data-unique-id="id" data-mobile-responsive="true">
+										<thead>
+											<tr>
+												<th data-field="id">ID</th>
+												<th data-field="name" th:text="#{sys.item.name}">name</th>
+												<th data-field="remove" th:text="#{sys.operate}">操作</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+							</div>
+							<div class="form-group" id="condition_div" style="display: none;">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.condition.select}">条件选择：</label>
+								<div class="col-sm-7">
+									<select class="form-control" id="condition" name="condition">
+									</select>
+								</div>
+							</div>
+							<div class="form-group" id="zone_div" style="display: none;">
+								<label class="col-sm-3 control-label" th:text="#{sys.zone.select}">区服：</label>
+								<div class="col-sm-7">
+									<div id="zonelist"></div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{sys.time}">时间：</label>
+								<div class="col-sm-7 input-daterange">
+                        			<input type="text" name="sendDate" class="form-control" required="required" id="sendDatetimepicker" />
+                        		</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.show.title}">标题：</label>
+								<div class="col-sm-7">
+									<textarea rows="2" class="form-control" id="title" name="title" required="required" ></textarea>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.show.content}">描述：</label>
+								<div class="col-sm-7">
+									<textarea rows="2" class="form-control" id="content" name="content" required="required" ></textarea>
+								</div>
+							</div>
+		      				<div class="form-group">
+	                        	<label class="col-sm-3 control-label" th:text="#{sys.item}">道具：</label>
+		      					<div class="col-sm-7" >
+		      						<div class="form-group">
+										<div class="col-sm-7" style="padding-right: 0px;">
+											<input placeholder="选择道具" class="form-control" id="itemId" name="itemId" th:placeholder="#{sys.item.select}"/> 
+										</div>
+										<div class="col-sm-5" style="padding-left: 0px;">
+	                            			<div class="input-group">
+	                                			<input type="text" placeholder="数量" class="form-control" id="amount" name="amount" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{sys.item.amount}"/> 
+	                                			<span class="input-group-btn">
+	                                				<button type="button" class="btn btn-info" onclick="addItem()" th:text="#{sys.add}">添加</button> 
+	                                			</span>
+	                            			</div>
+	                            		</div>
+	                            	</div>
+	                        	</div>
+		      				</div>
+		      				<div class="form-group" style="display:none;" id="itemData">
+		      					<label class="col-sm-3"></label>
+		      					<div class="col-sm-7">
+									<table id="itemTable" class="table-striped" data-toggle="table" data-unique-id="id" data-mobile-responsive="true">
+										<thead>
+											<tr>
+												<th data-field="id">ID</th>
+												<th data-field="name" th:text="#{sys.item.name}">Name</th>
+												<th data-field="amount" th:text="#{sys.item.amount}">amount</th>
+												<th data-field="remove" th:text="#{sys.operate}">操作</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button class="btn btn-primary" th:text="#{sys.send}">发送</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" th:inline="javascript">
+
+$(function(){
+	table=$("#itemTable");
+	panelTable=$("#panelTable");
+	initItemInput($("#itemId"));
+	initDataTimePicker();
+	initBootstrapTable();
+	var	zoneNames;
+	var lordNames;
+});
+function initZone(){
+	var data=loadZonePickList();
+	$("#zonelist").empty();
+	$("#zonelist").pickList({data: data,add:true});
+}
+$("#goal").change(function(){
+	if($("#goal").val()==1){
+		
+	}else if($("#goal").val()==2){
+		
+	}else if($("#goal").val()==3){
+		
+	}
+});
+
+function showModel(){
+	$("#mailFormId").val("");
+	$("#palyer_div").show();
+	$("#zone_div").hide();
+	$("#condition_div").hide();
+	$("#addForm")[0].reset();
+	table.bootstrapTable("removeAll");
+	$("#playerTable").bootstrapTable("removeAll");
+	$("#itemData").hide();
+	$("#playerData").hide();
+	$("#addForm")[0].reset();
+	$("#addForm").validate({
+		submitHandler:function(form){
+			send();
+        }
+	}).resetForm();
+	initZone();
+	$("#addModal").modal("show");
+}
+
+function addItem(){
+	var id = $("#itemId").val();
+	var amount = $("#amount").val();
+	if(id.length==0||amount==0||amount.length==0){
+		return;
+	}
+	if(!window.itemAll.hasOwnProperty(id)){
+		$("#itemId").val("");
+		return;
+	}
+	amount = parseInt(amount);
+	$("#itemData").show();
+	//清空文本框
+	$("#itemId").val("");
+	$("#amount").val("");
+	
+	var tableData=table.bootstrapTable('getData');
+	var isAdd=true; //true id重复只增加数量
+	$.each(tableData,function(index,val){
+		if(val.id==id){
+			amount+=parseInt(val.amount);
+			tableData[index]["amount"]=amount;
+			isAdd=false;
+		}
+	});
+	if(isAdd){
+		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removeItem(\''+id+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
+		var name = window.itemAll[id];
+		data=[];
+		data.push({id:id,name:name,amount:amount,remove:remove});
+		table.bootstrapTable("append", data);
+	}else{
+		table.bootstrapTable('load', tableData);
+	}
+}
+
+function removeItem(itemId){
+	 table.bootstrapTable('removeByUniqueId', itemId);
+	 var tableData=table.bootstrapTable('getData');
+	 if(tableData.length==0){
+		 $("#itemData").hide();
+	 }
+}
+
+function addPlayer(){
+	var id = $("#playerId").val();
+	if(id.length==0){
+		return;
+	}
+	$("#playerId").val("");
+	var tableData=$("#playerTable").bootstrapTable('getData');
+	var repeat = false;
+	$.each(tableData,function(index,val){
+		if(val.id==id){
+			repeat = true;
+			return;
+		}
+	});
+	if(repeat){
+		return;
+	}
+ 	gameAjax({
+		url : "/itemSend/lord",
+		data : "id=" + id,
+		callback : function(data) {
+			var name=data.name;
+			$("#playerData").show();
+			var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removePlayer(\''+id+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
+			data=[];
+			data.push({id:id,name:name,remove:remove});
+			$("#playerTable").bootstrapTable("append", data);
+		}
+	}); 
+}
+
+function removePlayer(playerId){
+	$("#playerTable").bootstrapTable('removeByUniqueId', playerId);
+	 var tableData=$("#playerTable").bootstrapTable('getData');
+	 if(tableData.length==0){
+		 $("#playerData").hide();
+	 }
+}
+
+function send(){
+	var itemData=table.bootstrapTable('getData');
+	var playerData=$("#playerTable").bootstrapTable('getData');
+	
+	var item={};
+	$.each(itemData,function(index,val){
+		item[val.id]=val.amount;
+	});
+	var lord=[];
+	var zoneList=[];
+	//单一玩家
+	if($("#goal").val()==1){
+		if(playerData==""){
+			swal("", [[#{sys.item.swal.lord.null}]], "warning");	
+			return;
+		}
+		$.each(playerData,function(index,val){
+			lord.push(val.id);
+		});
+	}else{
+		zoneList=$("#zonelist").getValues();
+		if(!zoneList.length>0){
+			swal("", [[#{activity.zone.null}]], "warning");
+			return;
+		}
+	}
+	
+/*<![CDATA[*/
+	gameAjax({
+			url : "/mailSend/send",
+			data : $("#addForm").serialize()+"&items="+JSON.stringify(item)+"&player="+lord+"&servers="+zoneList,
+			callback : function(data) {
+				$("#addModal").modal("hide");
+				panelTable.bootstrapTable("refresh");
+			}
+	}); 
+/*]]>*/
+}
+
+function initBootstrapTable(){
+	var condition={};
+	panelTable.bootstrapTable({
+		ajax : function(params) {
+			gameBootstrapTable("/mailSend/list", params);
+		},
+		queryParams : function(params) {
+			var query = {
+				limit : params.limit,
+				offset : params.offset,
+				search_sendTime_GTED : $("#startDatetimepicker").val(),
+				search_sendTime_LTED : $("#endDatetimepicker").val(),
+			};
+			return query;
+		},
+		pagination : true,
+		singleSelect : false,
+		uniqueId : "id",
+		sidePagination : "server",
+		detailView:true,
+		detailFormatter:function(index, row){
+			var text="";
+			text+='<table class="table">';
+			text+='<tr><td><b>创建时间</b></td><td>'+row.createTime+'</td></tr>';
+			text+='<tr><td><b>发送者头像</b></td><td>'+row.senderHeadIcon+'</td></tr>';
+			text+='<tr><td><b>标题</b></td><td>'+row.title+'</td></tr>';
+			text+='<tr><td><b>内容</b></td><td>'+row.content+'</td></tr>';
+			var goalText = "";
+			if(row.goal==2){//全体玩家，查询区服信息
+				queryZoneInfoById(row.servers);
+				$.each(zoneNames,function(zoneId,zoneName){
+					goalText += zoneId+"--"+zoneName+"&emsp;";
+				});
+				text+='<tr><td><b>发送区服</b></td><td>'+goalText+'</td></tr>';
+			}else if(row.goal==1){//单一玩家，查询玩家信息
+				queryLordInfoById(row.player);
+				$.each(lordNames,function(lordId,lordName){
+					goalText += lordId+"--"+lordName+"&emsp;";
+				});
+				text+='<tr><td><b>发送玩家</b></td><td>'+goalText+'</td></tr>';
+			}
+			text+='<tr><td colspan="2"><b>奖励</b></td></tr>';
+			text+='<tr><td colspan="2"><table class="table">';
+			text+='<tr><td>ID</td><td>name</td><td>amount</td></tr>';
+			$.each(row.reward,function(itemId){
+				text+='<tr><td>'+itemId+'</td><td>'+window.itemAll[itemId]+'</td><td>'+row.reward[itemId]+'</td></tr>';
+			});
+			text+='</table></td></tr>';
+			text+='</table>';
+			return text;
+		},
+		columns : [
+					{
+						title : [[#{gmtool.mail.number}]],
+						field : "id",
+						align : "center",
+					},
+					{
+						title : [[#{gmtool.mail.send.time}]],
+						field : "sendTime",
+						align : "center"
+					},
+					{
+						title : [[#{gmtool.mail.sender}]],
+						field : "sender",
+						align : "center",
+					},
+					{
+						title : [[#{gmtool.mail.goal}]],
+						field : "goal",
+						align : "center",
+						formatter : function(value){
+							var goal="";
+							if(value==1){
+								goal=[[#{gmtool.mail.one}]];
+							}else if(value==2){
+								goal=[[#{gmtool.mail.all}]];
+							}else if(value==3){
+								goal=[[gmtool.mail.condition]];
+							}
+							return goal; 
+						},
+					},
+	/* 				{
+						title : [[#{gamelog.gamezone}]],
+						field : "servers",
+						align : "center",
+					},
+					{
+						title : [[#{gmtool.mail.show.title}]],
+						field : "title",
+						align : "center"
+					}, */
+					{
+						title : [[#{gmtool.mail.status}]],
+						field : "status",
+						align : "center",
+						formatter : function(value){
+							var status="";
+							if(value==0){
+								status=[[#{gmtool.mail.sent}]];
+							}else if(value==1){
+								status=[[#{gmtool.mail.unsent}]];
+							}else if(value==2){
+								status=[[#{gmtool.mail.cancel}]];
+							}else if(value==3){
+								status=[[#{gmtool.mail.senting}]]+"...";
+							}
+							return status; 
+						}
+					},
+					{
+						title : [[#{sys.operate}]],
+						field : "id",
+						align : "center",
+						formatter : function(value) {
+							var rowData=panelTable.bootstrapTable('getRowByUniqueId', value);
+							var	formatter='';
+							if(rowData.status==0){
+								formatter = '<div class="btn-group hidden-xs">';
+								formatter += '<button type="button" class="btn btn-xs btn-danger" onclick="deleteData(\''
+											+ value + '\')"  th:text="#{sys.delete}">删除</button></div>';
+							}else if(rowData.status==1){
+								formatter = '<div class="btn-group hidden-xs">';
+								formatter += '<button type="button" class="btn btn-xs btn-warning" onclick="cancel(\''
+											+ value + '\')"  th:text="#{gmtool.mail.cancel.send}">取消发送</button></div>';
+							}else if(rowData.status==2){
+								formatter = '<div class="btn-group hidden-xs"><button type="button" class="btn btn-xs btn-primary" onclick="edit(\''
+									+ value + '\')" th:text="#{sys.edit}">编辑</button>';
+									formatter+='<button type="button" class="btn btn-xs btn-warning" onclick="cancel(\''
+										+ value + '\')"  th:text="#{gmtool.mail.verify.send}">确认发送</button>';
+								formatter += '<button type="button" class="btn btn-xs btn-danger" onclick="deleteData(\''
+									+ value + '\')"  th:text="#{sys.delete}">删除</button></div>';
+							}
+						
+							return formatter;
+						},
+					} 
+				]
+	});
+}
+function initDataTimePicker(){
+	$("#startDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
+	    autoclose : true,
+	    todayBtn :true,
+	    endDate : new Date()
+	});
+	$("#endDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
+	    autoclose : true,
+	    todayBtn :true,
+	});
+	$("#sendDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
+	    autoclose : true,
+	    todayBtn :true,
+	});
+	var date=new Date();
+	//date.setDate(date.getDate()-1); //前一天
+	$("#startDatetimepicker").val(new Date().format("yyyy-MM-dd 00:00:00"));
+	$("#endDatetimepicker").val(new Date().format("yyyy-MM-dd 23:59:59"));
+}
+$("#select").click(function(){
+	panelTable.bootstrapTable("refresh");
+});
+$("#goal").change(function(){
+	if($("#goal").val()==1){
+		$("#palyer_div").show();
+		$("#zone_div").hide();
+		$("#condition_div").hide();
+	}else if($("#goal").val()==2){
+		$("#playerTable").bootstrapTable("removeAll");
+		$("#playerData").hide();
+		$("#palyer_div").hide();
+		$("#zone_div").show();
+		$("#condition_div").hide();
+	}else if($("#goal").val()==3){
+		$("#playerTable").bootstrapTable("removeAll");
+		$("#playerData").hide();
+		$("#palyer_div").hide();
+		$("#zone_div").show();
+		$("#condition_div").show();
+	}
+});
+function cancel(mailFormId){
+	gameAjax({
+		url : "/mailSend/cancel",
+		data :"id="+mailFormId,
+		callback : function(data) {
+			panelTable.bootstrapTable("refresh");
+		}
+	}); 
+}
+function edit(mailFormId){
+	table.bootstrapTable("removeAll");
+	$("#playerTable").bootstrapTable("removeAll");
+	$("#addForm")[0].reset();
+	$("#addForm").validate({
+		submitHandler:function(form){
+			send();
+        }
+	}).resetForm();
+	$("#mailFormId").val(mailFormId);
+	var data=panelTable.bootstrapTable('getRowByUniqueId', mailFormId);
+	$.each(data,function(id,val){
+		$("#"+id).val(val);
+	});
+	editDataTimePicker(data);
+	//区服
+	editZone(data.servers);
+	if(data.goal==1){
+		$("#palyer_div").show();
+		$("#zone_div").hide();
+		$("#condition_div").hide();
+		$("#playerData").show();
+		//玩家id表
+		initPlayer(data.player);
+	}else {
+		if(data.goal==2){
+			$("#playerData").hide();
+			$("#palyer_div").hide();
+			$("#zone_div").show();
+			$("#condition_div").hide();
+		}else if(data.goal==3){
+			$("#playerData").hide();
+			$("#palyer_div").hide();
+			$("#zone_div").show();
+			$("#condition_div").show();
+		}
+	}
+	//道具
+	var itemData=[]
+	$.each(data.reward,function(itemId,amount){
+		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removeItem(\''+itemId+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
+		itemData.push({id:itemId,name:itemAll[itemId],amount:amount,remove:remove});
+	});
+	if(itemData.length>0){
+		$("#itemData").show();
+	}
+	table.bootstrapTable('load', itemData);
+	$("#addModal").modal("show");
+}
+function initPlayer(playerData){
+	data=[];
+	$.each(playerData,function(index,val){
+		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removePlayer(\''+val+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
+		data.push({id:val,name:val,remove:remove});
+	});
+	$("#playerTable").bootstrapTable("load", data);
+}
+function editZone(zoneList){
+	var data=loadZonePickList();
+	var zoneData=[];
+	var zoneNames={};
+	$.each(data,function(index,val){
+		zoneNames[val.id]=val.text;
+		if(!($.inArray(val.id, zoneList)>=0)){
+			zoneData.push(val);
+		}
+	});
+	$.each(zoneList,function(index,id){
+		var map={};
+		map["id"] = id;
+		map["text"] = zoneNames[id];
+		map["option"] = "selected";
+		zoneData.push(map);
+	}); 
+	$("#zonelist").empty();
+	$("#zonelist").pickList({data: zoneData,add:true});
+}
+function editDataTimePicker(data){
+	$("#sendDatetimepicker").val(data.sendTime);
+}
+function deleteData(id){
+	swal({
+		title : [[#{sys.confirm.title}]],
+		text : [[#{sys.confirm.text}]],
+		type : "warning",
+		showCancelButton : true,
+		confirmButtonColor : "#DD6B55",
+		confirmButtonText : [[#{sys.confirm.confirmtext}]],
+		cancelButtonText : [[#{sys.confirm.canceltext}]],
+		closeOnConfirm: false
+	}, function(isConfirm) {
+		if (isConfirm) {
+			gameAjax({
+				url : "/mailSend/delete",
+				data :"id="+id,
+				callback : function(data) {
+					swal([[#{sys.delete.success}]],"","success");
+					panelTable.bootstrapTable("refresh");
+				}
+			});
+		}
+	})
+}
+
+</script>
+</html>

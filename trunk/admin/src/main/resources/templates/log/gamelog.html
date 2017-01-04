@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+    <link th:href="@{/static/css/plugins/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+
+	<script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.js}"></script>
+	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<h5 th:text="#{sys.search.condition}">查询条件</h5>
+                <div class="ibox-tools">
+                	<button class="btn btn-primary btn-xs" onclick="search()"><i class="fa fa-search"></i>&nbsp;<span th:text="#{sys.select}">查询</span>&nbsp;</button>
+                </div>
+			</div>
+			<div class="ibox-content">
+				<div class="form-horizontal">
+					<div class="form-group">
+      					<label class="col-sm-1 control-label" th:text="#{sys.time}">日期</label>
+      					<div class="col-sm-5">
+							<div class="input-group m-b">
+								<input type="text" id="startTime" class="form-control"/>
+								<span class="input-group-addon">-</span>
+								<input type="text" id="endTime" class="form-control"/>
+                     		</div>
+      					</div>
+      					
+      					<!-- <label class="col-sm-1 control-label" th:text="#{gamelog.package}">应用包</label>
+      					<div class="col-sm-2">
+		          			<select id="package" class="form-control"/>
+      					</div> -->
+      					
+	      			</div>
+	      			
+	      			<div class="form-group">
+      					<label class="col-sm-1 control-label" th:text="#{gamelog.player}">玩家ID</label>
+      					<div class="col-sm-2">
+      						<input type="text" id="player" class="form-control"/>
+      					</div>
+      					
+      					<label class="col-sm-1 control-label" th:text="#{gamelog.gamezone}">区服</label>
+      					<div class="col-sm-2">
+          					<select id="gamezone" class="form-control"/>
+      					</div>
+      					
+      					<label class="col-sm-1 control-label" th:text="#{gamelog.action}">接口：</label>
+      					<div class="col-sm-2">
+          					<input type="text" id="action" class="form-control"/>
+      					</div>
+      					<label class="col-sm-1 control-label" th:text="#{gamelog.responsecode}">状态码：</label>
+      					<div class="col-sm-2">
+          					<input type="text" id="code" class="form-control"/>
+      					</div>
+	      			</div>
+				</div>
+			</div>
+		</div>
+	
+		<div class="ibox float-e-margins">
+			<div class="ibox-content">
+				<table id="table" class="table-striped"></table>
+			</div>
+		</div>
+	</div>
+	
+</body>
+<script type="text/javascript" th:inline="javascript">
+	var table = $("#table");
+	var zoneMap = loadZoneMap();
+	var pkgMap = loadPackageMap();
+	var platformMap = loadPlatformMap();
+	var physicalMap = loadPhysicalMap();
+	$(function() {
+		initTable();
+		loadZoneList("gamezone");
+		/* loadPackageList("package",true); */
+		
+		$("#startTime").datetimepicker({
+		    format : "yyyy-mm-dd hh:ii:ss",
+		    autoclose : true,
+		    todayBtn :true,
+		});
+		$("#endTime").datetimepicker({
+		    format : "yyyy-mm-dd hh:ii:ss",
+		    autoclose : true,
+		    todayBtn :true,
+		});
+		
+		$("#startTime").val(new Date().format("yyyy-MM-dd 00:00:00"));
+		$("#endTime").val(new Date().format("yyyy-MM-dd 23:59:59"));
+		
+	});
+	
+	function initTable(){
+		table.bootstrapTable({
+			queryParams : function(params) {
+				var query = {
+					limit : params.limit,
+					offset : params.offset,
+					search_zoneId_EQS : $("#gamezone").val(),
+					/* search_packageId_EQS : $("#package").val(), */
+					search_playerId_EQS : $("#player").val(),
+					search_uri_LIKES : $("#action").val(),
+					search_requestTime_GTEL : $("#startTime").val(),
+					search_requestTime_LTEL : $("#endTime").val(),
+					search_code_EQI: $("#code").val(),
+				};
+				return query;
+			},
+			detailView : true,
+			detailFormatter:function(index, row){
+				var detail = '<table class="table">';
+				detail += '<tr><td><b th:text="#{gamelog.param}">参数</b></td><td colspan="7">'+JSON.stringify(row.params)+'</td></tr>';
+				detail += '<tr><td><b th:text="#{gamelog.result}">返回值</b></td><td>'+JSON.stringify(row.result)+'</td></tr>';
+				detail += '<tr><td><b th:text="#{gamelog.gold}">金币</b></td><td>'+row.preGold+'->'+row.postGold+'</td>';
+				detail += '<td><b th:text="#{gamelog.diamond}">钻石</b></td><td>'+row.preDiamond+'->'+row.postDiamond+'</td>';
+				detail += '<td><b th:text="#{gamelog.level}">等级</b></td><td>'+row.preLevel+'->'+row.postLevel+'</td>';
+				detail += '<td><b th:text="#{gamelog.vip}">vip积分</b></td><td>'+row.preVipscore+'->'+row.postVipscore+'</td></tr>';
+				detail += '<tr><td><b>ssoId</b></td><td colspan="3">'+row.ssoId+'</td>';
+				detail += '<td><b>sessionId</b></td><td colspan="3">'+row.sessionId+'</td></tr>';
+				detail += '<tr><td><b th:text="#{gamelog.clientversion}">客户端版本号</b></td><td colspan="3">'+row.clientVersion+'</td>';
+				detail += '<td><b th:text="#{gamelog.physical}">物理服</b></td><td colspan="3">'+physicalMap[row.physicalserverId]+'</td></tr>';
+				detail += '</table>';
+				return detail;
+			},
+			pagination : true,
+			singleSelect : false,
+			sidePagination : "server",
+			columns : [
+				{
+					title : [[#{gamelog.player}]],
+					field : "playerId",
+					align : "center",
+				},
+				{
+					title : [[#{sys.platform}]],
+					field : "platformId",
+					align : "center",
+					formatter : function(value){
+						return platformMap[value];
+					}
+				},
+				{
+					title : [[#{gamelog.gamezone}]],
+					field : "zoneId",
+					align : "center",
+					formatter : function(value) {
+						return zoneMap[value];
+					},
+				},
+				{
+					title : [[#{gamelog.package}]],
+					field : "packageId",
+					align : "center",
+					formatter : function(value){
+						return pkgMap[value];
+					}
+				},
+				{
+					title : [[#{gamelog.action}]],
+					field : "uri",
+					align : "center",
+				},
+				{
+					title : [[#{gamelog.responsecode}]],
+					field : "code",
+					align : "center",
+					formatter : function(value) {
+						if(value == 0){
+							return '<span th:text="#{gamelog.success}" class="text-success">成功</span>';
+						}else{
+							/* return "<span>失败</span>|" + value; */
+							return '<span class="text-danger">' + value + '</span>';
+						}
+					},
+				},
+				{
+					title : [[#{gamelog.cost}]],
+					field : "cost",
+					align : "center",
+				},
+				{
+					title : [[#{gamelog.ip}]],
+					field : "ip",
+					align : "center",
+				},
+				{
+					title : [[#{gamelog.requesttime}]],
+					field : "requestTime",
+					align : "center",
+					formatter : function(value) {
+						return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+					},
+				},
+			]
+		});
+	}
+	
+	function search(){
+		table.bootstrapTable("refreshOptions", {
+			ajax : function(params) {
+				gameBootstrapTable("/gamelog/list", params);
+			}
+		});
+		
+	}
+</script>
+</html>

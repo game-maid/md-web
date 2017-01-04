@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+    <link th:href="@{/static/css/plugins/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+
+	<script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<div class="btn-group hidden-xs" th:replace="fragments/include::toolbar(true,false)">
+				</div>
+				
+				<table id="table" class="table-striped"></table>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="addModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form class="form-horizontal" id="addForm">
+					<input type="hidden" name="id" id="id" value=""/>
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h3 class="modal-title" th:text="#{sys.menu.physical}">服务器管理</h3>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+	      					<label class="col-sm-3 control-label" th:text="#{sys.physical.name}">服务器名称：</label>
+	      					<div class="col-sm-7">
+	          					<input type="text" name="name" id="name" class="form-control" required="required"/>
+	      					</div>
+		      			</div>
+		      			
+						<div class="form-group">
+	      					<label class="col-sm-3 control-label" th:text="#{sys.physical.host}">host：</label>
+	      					<div class="col-sm-7">
+                                <input type="text" name="host" id="host" class="form-control" required="required"/>
+	      					</div>
+		      			</div>
+		      					
+						<div class="form-group">
+	      					<label class="col-sm-3 control-label" th:text="#{sys.physical.port}">端口：</label>
+	      					<div class="col-sm-7">
+	          					<input type="text" name="port" id="port" class="form-control" required="required" digits="true"/>
+	      					</div>
+		      			</div>
+		      			
+		      			<div class="form-group">
+	      					<label class="col-sm-3 control-label" th:text="#{sys.physical.context}">上下文：</label>
+	      					<div class="col-sm-7">
+	          					<input type="text" name="context" id="context" class="form-control"/>
+	      					</div>
+		      			</div>
+		      			
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary" th:text="#{sys.save}" id="submit">保存</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" th:inline="javascript">
+	var table = $("#table");
+	var validate = $("#addForm").validate();
+	$(function() {
+		load();
+	});
+	
+	function add(){
+		$("#id").val("");
+		validate.resetForm();
+		$("#addForm")[0].reset();
+		$("#submit").attr("onclick","onSave()");
+		$("#addModal").modal("show");
+	}
+	
+	function onSave(){
+		if(!validate.form()){
+			return;
+		}
+		gameAjax({
+			url : "/physical/save",
+			data : $("#addForm").serialize(),
+			callback : function(data) {
+				table.bootstrapTable("destroy");
+				load();
+				$("#addModal").modal("hide");
+			}
+		});
+	}
+	
+	function load(){
+		gameAjax({
+			url : "/physical/list",
+			callback : function(data) {
+				table.bootstrapTable({
+					data : data,
+					uniqueId : "id",
+					toolbar : "#toolbar",
+					columns : [
+						{
+							title : [[#{sys.physical.name}]],
+							field : "name",
+							align : "center",
+						},
+						{
+							title : [[#{sys.physical.host}]],
+							field : "host",
+							align : "center",
+						},
+						{
+							title : [[#{sys.physical.port}]],
+							field : "port",
+							align : "center",
+						},
+						{
+							title : [[#{sys.physical.context}]],
+							field : "context",
+							align : "center",
+						},
+						{
+							title : [[#{sys.createdate}]],
+							field : "createDate",
+							align : "center",
+						},
+						{
+							title : [[#{sys.operate}]],
+							field : "id",
+							align : "center",
+							formatter : function(value) {
+								var formatter = '<div class="btn-group hidden-xs"><button type="button" class="btn btn-xs btn-primary" onclick="edit(\'' + value + '\')" th:text="#{sys.edit}">编辑</button>';
+								formatter += '<button type="button" class="btn btn-xs btn-danger" onclick="del(\'' + value + '\')"  th:text="#{sys.delete}">删除</button></div>';
+								return formatter;
+							},
+						}
+					]
+				});
+			}
+		});
+	}
+	
+	function edit(id){
+		var data = table.bootstrapTable("getRowByUniqueId", id);
+		validate.resetForm();
+		$("#id").val(data.id);
+		$("#name").val(data.name);
+		$("#host").val(data.host);
+		$("#port").val(data.port);
+		$("#context").val(data.context);
+		$("#submit").attr("onclick","onEdit()");
+		$("#addModal").modal("show");
+	}
+	
+	function onEdit(){
+		if(!validate.form()){
+			return;
+		}
+		gameAjax({
+			url : "/physical/update",
+			data : $("#addForm").serialize(),
+			async : false,
+			callback : function(data) {
+				table.bootstrapTable("destroy");
+				load();
+				$("#addModal").modal("hide");
+			}
+		});
+	}
+	
+	function del(id){
+		swal({
+			title : [[#{sys.confirm.title}]],
+			text : [[#{sys.confirm.text}]],
+			type : "warning",
+			showCancelButton : true,
+			confirmButtonColor : "#DD6B55",
+			confirmButtonText : [[#{sys.confirm.confirmtext}]],
+			cancelButtonText : [[#{sys.confirm.canceltext}]],
+			closeOnConfirm: false
+		}, function(isConfirm) {
+			if (isConfirm) {
+				gameAjax({
+					url : "/physical/delete",
+					data : "id=" + id,
+					callback : function(data, message) {
+						swal([[#{sys.delete.success}]],"","success");
+						table.bootstrapTable("destroy");
+						load();
+					}
+				});
+			}
+		})
+	}
+</script>
+</html>

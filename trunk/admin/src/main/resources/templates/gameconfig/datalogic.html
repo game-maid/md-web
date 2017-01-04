@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+    <link th:href="@{/static/css/plugins/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/treegrid/jquery.treegrid.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/pickList/pickList.css}" rel="stylesheet"/>
+
+    <script th:src="@{/static/js/plugins/treegrid/jquery.treegrid.min.js}"></script>
+	<script th:src="@{/static/js/plugins/treegrid/jquery.treegrid.bootstrap3.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/pickList/pickList.js}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<div class="btn-group hidden-xs" id="toolbar">
+					<button type="button" class="btn btn-sm btn-info" onclick="add()">
+				        <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>&nbsp;<span th:text="#{sys.add}">添加</span>
+				    </button>
+				    <button type="button" class="btn btn-sm btn-defalut" onclick="show()">
+				        <i class="glyphicon glyphicon-th-list" aria-hidden="true"></i>&nbsp;<span th:text="#{sys.view}">查看</span>
+				    </button>
+				</div>
+				
+				<table id="table" class="table-striped"></table>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="addModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form class="form-horizontal" id="addForm">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h3 class="modal-title" th:text="#{sys.datalogic.title}">数据服管理</h3>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+	      					<label class="col-sm-3 control-label" th:text="#{sys.datalogic.id}">数据服ID：</label>
+	      					<div class="col-sm-7">
+	          					<input type="text" name="id" id="id" class="form-control" required="required"/>
+	      					</div>
+		      			</div>
+		      					
+						<div class="form-group">
+	      					<label class="col-sm-3 control-label" th:text="#{sys.datalogic.name}">数据服名称：</label>
+	      					<div class="col-sm-7">
+	          					<input type="text" name="name" id="name" class="form-control" required="required"/>
+	      					</div>
+		      			</div>
+		      			
+	      				<div class="form-group">
+	      					<label class="col-sm-3 control-label" th:text="#{sys.isenable}">是否启用：</label>
+		       				<div class="col-sm-7">
+		           				<select class="form-control" name="isEnable" id="isEnable">
+						      		<option value="true" selected="selected" th:text="#{sys.true}">是</option>
+						      		<option value="false" th:text="#{sys.false}">否</option>
+						      	</select>
+		       				</div>
+		  				</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary" th:text="#{sys.save}" id="submit">保存</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="showModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h3 class="modal-title" th:text="#{sys.view}">查看</h3>
+				</div>
+				<div class="modal-body">
+					<table id="treeTable" class="table">
+						<tbody id="tbody"></tbody>		
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="zoneModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h3 class="modal-title">调整区服</h3>
+				</div>
+				<div class="modal-body">
+					<div id="zonelist"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary" th:text="#{sys.save}" id="changeBtn">保存</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" th:inline="javascript">
+	var table = $("#table");
+	var validate = $("#addForm").validate();
+	$(function() {
+		load();
+	});
+	
+	function add(){
+		validate.resetForm();
+		$("#addForm")[0].reset();
+		$("#id").removeAttr("readonly");
+		$("#submit").attr("onclick","onSave()");
+		$("#addModal").modal("show");
+	}
+	
+	function onSave(){
+		if(!validate.form()){
+			return;
+		}
+		gameAjax({
+			url : "/datalogic/add",
+			data : $("#addForm").serialize(),
+			callback : function(data) {
+				table.bootstrapTable("destroy");
+				load();
+				$("#addModal").modal("hide");
+			}
+		});
+	}
+	
+	function load(){
+		gameAjax({
+			url : "/datalogic/list",
+			callback : function(data) {
+				table.bootstrapTable({
+					data : data,
+					uniqueId : "id",
+					toolbar : "#toolbar",
+					columns : [
+						{
+							title : [[#{sys.datalogic.id}]],
+							field : "id",
+							align : "center",
+						},
+						{
+							title : [[#{sys.datalogic.name}]],
+							field : "name",
+							align : "center",
+						},
+						{
+							title : [[#{sys.isenable}]],
+							field : "isEnable",
+							align : "center",
+							formatter : function(value) {
+								if (value) {
+									return '<span class="label label-success" th:text="#{sys.enable}">已启用</span>';
+								} else {
+									return '<span class="label" th:text="#{sys.unenable}">未启用</span>';
+								}
+							},
+						},
+						{
+							title : [[#{sys.createdate}]],
+							field : "createDate",
+							align : "center",
+						},
+						{
+							title : [[#{sys.operate}]],
+							field : "id",
+							align : "center",
+							formatter : function(value) {
+								var formatter = '<div class="btn-group hidden-xs"><button type="button" class="btn btn-xs btn-primary" onclick="edit(\'' + value + '\')" th:text="#{sys.edit}">编辑</button>';
+								formatter += '<button type="button" class="btn btn-xs btn-info" onclick="changeZone(\'' + value + '\')" th:text="#{sys.datalogic.adjust}">调整区服</button>'
+								formatter += '<button type="button" class="btn btn-xs btn-danger" onclick="del(\'' + value + '\')"  th:text="#{sys.delete}">删除</button></div>';
+								return formatter;
+							},
+						}
+					]
+				});
+			}
+		});
+	}
+	
+	function edit(id){
+		var data = table.bootstrapTable("getRowByUniqueId", id);
+		validate.resetForm();
+		$("#id").val(data.id);
+		$("#id").attr("readonly","readonly");
+		$("#name").val(data.name);
+		$("#isEnable").val(data.isEnable.toString());
+		$("#createDate").val(data.createDate);
+		$("#submit").attr("onclick","onEdit()");
+		$("#addModal").modal("show");
+	}
+	
+	function onEdit(){
+		if(!validate.form()){
+			return;
+		}
+		gameAjax({
+			url : "/datalogic/update",
+			data : $("#addForm").serialize(),
+			async : false,
+			callback : function(data) {
+				table.bootstrapTable("destroy");
+				load();
+				$("#addModal").modal("hide");
+			}
+		});
+	}
+	
+	function show(){
+		gameAjax({
+			url : "/datalogic/view",
+			async : false,
+			callback : function(data) {
+				var html = "";
+				$.each(data, function(n, logic) {
+					html += '<tr class="treegrid-'+logic.id+'"><td>'+logic.name+'</td></tr>';
+					if(logic.zoneList != ""){
+						$.each(logic.zoneList, function(i, zone){
+							html += '<tr class="treegrid-'+zone.id+' treegrid-parent-'+logic.id+'"><td>'+zone.name+'</td></tr>';
+						});
+					}
+				});
+				$("#tbody").html(html);
+			}
+		});
+		$("#showModal").modal("show");
+		$("#treeTable").treegrid({
+	        expanderExpandedClass: "glyphicon glyphicon-minus",
+	        expanderCollapsedClass: "glyphicon glyphicon-plus",
+	    });
+	}
+	
+	function changeZone(id){
+		gameAjax({
+			url : "/datalogic/zone",
+			data : "id=" + id,
+			callback : function(data){
+				$("#zonelist").pickList.defaults = {add:true};
+				var pick = $("#zonelist").pickList({data: data,add:true});
+				$("#changeBtn").click(function () {
+					saveZone(id,pick.getValues());
+				}); 
+			}
+		});
+		$("#zoneModal").modal("show");
+	}
+	
+	function saveZone(logicId,zoneIds){
+		gameAjax({
+			url : "/datalogic/adjust",
+			data : {
+				logicId : logicId,
+				zoneIds : zoneIds,
+			},
+			callback : function(data){
+				$("#zoneModal").modal("hide");
+			}
+		});
+	}
+	
+	$("#zoneModal").on("hide.bs.modal", function() {
+		$("#changeBtn").unbind('click');
+ 		$("#zonelist").empty();
+	});
+	
+	function del(id){
+		swal({
+			title : [[#{sys.confirm.title}]],
+			text : [[#{sys.confirm.text}]],
+			type : "warning",
+			showCancelButton : true,
+			confirmButtonColor : "#DD6B55",
+			confirmButtonText : [[#{sys.confirm.confirmtext}]],
+			cancelButtonText : [[#{sys.confirm.canceltext}]],
+			closeOnConfirm: false
+		}, function() {
+			gameAjax({
+				url : "/datalogic/delete",
+				data : "id=" + id,
+				callback : function(data, message) {
+					swal([[#{sys.delete.success}]],"","success");
+					table.bootstrapTable("destroy");
+					load();
+				}
+			});
+		})
+	}
+</script>
+</html>
