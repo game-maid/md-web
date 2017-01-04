@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+	<link th:href="@{/static/css/plugins/bootstrap-table/bootstrap-table.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/autocompleter/jquery.autocompleter.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/pickList/pickList.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/bootstrap-table/extensions/editable/bootstrap-editable.css}" rel="stylesheet"/>
+	
+    <script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.js}"></script>
+	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/autocompleter/jquery.autocompleter.min.js}"></script>
+	<script th:src="@{/static/js/plugins/datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+	<script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/pickList/pickList.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/extensions/editable/bootstrap-table-editable.min.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/extensions/editable/bootstrap-editable.min.js}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<button type="button" class="btn btn-sm btn-info" onclick="showModel()">
+				        <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>&nbsp;<span th:text="#{gmtool.cdk.make}">生成CDKey</span>
+				</button>
+			</div>
+			<div class="ibox-content">
+				<div class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-1" style="float: left;">
+							<label style="margin-top: 10px;" th:text="#{gmtool.cdk.batch.select}">选择批次</label>
+						</div>
+						<div class="col-sm-2" style="float: left;">
+							<select class="form-control" id="select_batch">
+								
+							</select>
+						</div>
+						<div class="col-sm-1" style="float: left;">
+							<label style="margin-top: 10px;" th:text="#{gmtool.cdk.id}">CDKeyID</label>
+						</div>
+						<div class="col-sm-2" style="float: left;">
+							<input id="select_cdk_id" class="form-control" />
+						</div>
+						<div class="col-sm-1" style="float: left;">
+							<button class="btn btn-primary" id="select">
+								<i class="fa fa-search"></i>&nbsp;<span th:text="#{sys.select}">查询</span>&nbsp;
+							</button>
+						</div>
+						<div class="col-sm-1" style="float: right;">
+							<button class="btn btn-success" onclick="exportCDKey()" >
+								<i class="fa fa-download"></i>&nbsp;<span th:text="#{gmtool.cdk.export}">导出</span>&nbsp;
+							</button>
+						</div>
+						<div class="col-sm-1" style="float: right;">
+							<button class="btn btn-danger" onclick="trashCDKey()" >
+								<i class="fa fa-trash"></i>&nbsp;<span th:text="#{gmtool.cdk.trash}">作废</span>&nbsp;
+							</button>
+						</div>
+					</div>
+					<table id="panelTable" class="table-striped" data-mobile-responsive="true"></table>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="addModal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form class="form-horizontal" id="addForm">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h3 class="modal-title" th:text="#{gmtool.cdk.make}">生成CDKey</h3>
+					</div>
+					
+					<div class="modal-body">
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{gmtool.cdk.batch}">批次</label>
+							<div class="col-sm-7">
+								<select id="id" name="id" class="form-control batchList" onchange="batchChange()" >
+								</select>
+							</div>							
+						</div>
+						
+							<div class="form-group" id="batch_name_div">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.cdk.batch.name}" >批次名称</label>
+								<div class="col-sm-7">
+									<input type="text" id="name" name="name" class="form-control" required="required" />
+								</div>
+							</div>
+							<div class="form-group" id="package_div">
+								<label class="col-sm-3 control-label" th:text="#{sys.package.select}">选择包</label>
+								<div class="col-sm-7">
+									<div id="packagelist"></div>
+								</div>
+							</div>
+							<div class="form-group" id="zone_div">
+								<label class="col-sm-3 control-label" th:text="#{sys.zone.select}">选择区服</label>
+								<div class="col-sm-7">
+									<div id="zonelist"></div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{sys.time}">时间：</label>
+								<div class="col-sm-7" id="datepicker">
+									<div class="input-daterange input-group">
+										<input type="text" name="startDate" class="form-control" id="startDatetimepicker" />
+										<span class="input-group-addon">-</span> 
+										<input type="text" name="endDate" class="form-control" id="endDatetimepicker" />
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label"  th:text="#{gmtool.cdk.reward.rank}">奖励品级</label>
+								<div class="col-sm-7">
+									<input type="text" id="rank" name="rank" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label"  th:text="#{gmtool.cdk.level}">使用等级</label>
+								<div class="col-sm-7">
+									<input type="text" id="level" name="level" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label"  th:text="#{gmtool.cdk.number}">数量</label>
+								<div class="col-sm-7">
+									<input type="text" id="num" name="num" placeholder="不超过10000" onkeyup="this.value=this.value.replace(/\D/g,'')" th:placeholder="#{gmtool.cdk.number.limit}"  class="form-control" required="required" />
+								</div>
+							</div>
+	
+							<div class="hr-line-dashed"></div>
+							
+							<div class="form-group">
+									<label class="col-sm-3 control-label" th:text="#{gmtool.mail.sender}">发送人</label>
+									<div class="col-sm-7">
+										<input type="text" name="sender" id="sender" class="form-control" required="required" />
+									</div>
+								</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.sender.headicon}">发送者头像：</label>
+								<div class="col-sm-7">
+									<input type="text" name="senderHeadIcon" id="senderHeadIcon" class="form-control" required="required" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.valid.daytimes}">有效天数：</label>
+								<div class="col-sm-7">
+									<select class="form-control" id="validDay" name="validDay" required="required" >
+										<option value="0" th:text="#{gmtool.mail.valid.long}">永久有效</option>
+										<option value="7" th:text="7 + #{gmtool.mail.valid.day}">7天</option>
+										<option value="15" th:text="15 + #{gmtool.mail.valid.day}">15天</option>
+										<option value="30" th:text="30 + #{gmtool.mail.valid.day}">30天</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.show.title}">标题：</label>
+								<div class="col-sm-7">
+									<textarea rows="1" class="form-control" id="title" name="title" required="required" ></textarea>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.show.content}">详细</label>
+								<div class="col-sm-7">
+									<textarea rows="3" class="form-control" id="content" name="content" required="required" ></textarea>
+								</div>
+							</div>
+							<div class="form-group" id="reward_div">
+		                       	<label class="col-sm-3 control-label" th:text="#{gmtool.cdk.reward.item}">奖励配方</label>
+		      					<div class="col-sm-7" >
+		      						<div class="form-group">
+										<div class="col-sm-7" style="padding-right: 0px;">
+											<input placeholder="选择道具" class="form-control" id="itemId" name="itemId" th:placeholder="#{sys.item.select}"/> 
+										</div>
+										<div class="col-sm-5" style="padding-left: 0px;">
+		                           			<div class="input-group">
+		                               			<input type="text" placeholder="数量" class="form-control" id="amount" name="amount" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{sys.item.amount}"/> 
+		                               			<span class="input-group-btn">
+		                               				<button type="button" class="btn btn-info" onclick="addItem()" th:text="#{sys.add}">添加</button> 
+		                               			</span>
+		                           			</div>
+		                           		</div>
+		                           	</div>
+		                       	</div>
+		      				</div>
+		      				<div class="form-group" style="display:none;" id="itemData">
+		      					<label class="col-sm-3"></label>
+		      					<div class="col-sm-7">
+									<table id="itemTable" class="table-striped" data-toggle="table" data-unique-id="id" data-mobile-responsive="true">
+										<thead>
+											<tr>
+												<th data-field="id">ID</th>
+												<th data-field="name" th:text="#{sys.item.name}">Name</th>
+												<th data-field="amount" th:text="#{sys.item.amount}">amount</th>
+												<th data-field="remove" th:text="#{sys.operate}">操作</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+							</div>
+							<div class="form-group" style="display:none;" id="showItem">
+		      					<label class="col-sm-3 control-label" th:text="#{gmtool.cdk.reward.item}">奖励配方</label>
+		      					<div class="col-sm-7">
+									<table id="showItemTable" class="table-striped" data-toggle="table" data-unique-id="id" data-mobile-responsive="true">
+										<thead>
+											<tr>
+												<th data-field="id">ID</th>
+												<th data-field="name" th:text="#{sys.item.name}">Name</th>
+												<th data-field="amount" th:text="#{sys.item.amount}">amount</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+							</div>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary"
+							th:text="#{sys.save}">保存</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript" th:inline="javascript">
+$(".modal-dialog").css({
+	width:"900px",
+}); 
+
+$(function(){
+	table=$("#itemTable");
+	panelTable=$("#panelTable");
+	initItemInput($("#itemId"));
+	initBootstrapTable();
+	//初始化批次
+	initBatch();
+	zoneMap = loadZoneMap();
+	packageMap=loadPackageMap();
+});
+
+
+function addItem(){
+	var id = $("#itemId").val();
+	var amount = $("#amount").val();
+	if(!window.itemAll.hasOwnProperty(id)){
+		$("#itemId").val("").focus();
+		return;
+	};
+	if(id.length==0||amount==0||amount.length==0){
+		$("#amount").focus();
+		return;
+	};
+	var reg= new RegExp("^[0-9]*$");//正整数正则
+	if(!reg.test(amount)){
+		$("#amount").val("").focus();
+		return ;
+	};
+	amount = parseInt(amount);
+	$("#itemData").show();
+	//清空文本框
+	$("#itemId").val("");
+	$("#amount").val("");
+	
+	var tableData=table.bootstrapTable('getData');
+	var isAdd=true; //true id重复只增加数量
+	$.each(tableData,function(index,val){
+		if(val.id==id){
+			amount+=parseInt(val.amount);
+			tableData[index]["amount"]=amount;
+			isAdd=false;
+		}
+	});
+	if(isAdd){
+		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removeItem(\''+id+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
+		var name = window.itemAll[id];
+		data=[];
+		data.push({id:id,name:name,amount:amount,remove:remove});
+		table.bootstrapTable("append", data);
+	}else{
+		table.bootstrapTable('load', tableData);
+	}
+}
+
+
+function showModel(){
+	$("#addForm")[0].reset();
+	$("#addForm").validate({
+		submitHandler:function(form){
+			onSave();
+        }
+	}).resetForm();
+	//清空itemTable
+	table.bootstrapTable("load", []);
+	//初始化批次
+	initBatch();
+	//初始化区服	
+	initZone();
+	//初始化包
+	initPackage();
+	initDataTimePicker();
+	$("#batch_name_div").show();
+	$("#package_div").show();
+	$("#zone_div").show();
+	$("#startDatetimepicker").val("");
+	$("#endDatetimepicker").val("");
+	$("#startDatetimepicker").attr('disabled',false);
+	$("#endDatetimepicker").attr('disabled',false);
+	$("#rank").val("").attr('disabled',false);
+	$("#level").val("").attr('disabled',false);
+	$("#sender").val("").attr('disabled',false);
+	$("#senderHeadIcon").val("").attr("disabled",false);
+	$("#sender").val("").attr('disabled',false);
+	$("#senderHeadIcon").val("").attr("disabled",false);
+	$("#validDay").val(0).attr("disabled",false);
+	$("#title").val("").attr("disabled",false);
+	$("#content").val("").attr("disabled",false);
+	$("#reward_div").show();
+	$("#showItem").hide();
+	$("#showItemTable").bootstrapTable("load",[]);
+	$("#addModal").modal("show");
+}
+function removeItem(itemId){
+	table.bootstrapTable('removeByUniqueId', itemId);
+	 var tableData=table.bootstrapTable('getData');
+}
+
+function onSave(){
+	var data={};
+	if($("#id").val()==0){
+		//校验区服
+		var zonelist=$("#zonelist").getValues();
+		if(zonelist.length==0){
+			swal("", [[#{activity.zone.null}]], "warning");
+			return;
+		}
+		//校验包
+		var packagelist =$("#packagelist").getValues();
+		if(packagelist.length==0){
+			swal("",[[#{activity.package.null}]],"warning");
+			return ;
+		}
+		//校验时间
+		var startDate=$("#startDatetimepicker").val();
+		var endDate=$("#endDatetimepicker").val();
+		if(startDate.length==0||endDate==0){
+			swal("", [[#{activity.time.not.null}]], "warning");
+			return ;
+		}
+		//道具
+		var itemTable = $("#itemTable").bootstrapTable("getData");
+		if(itemTable.length==0){
+			swal("",[[#{sys.item.swal.item.null}]],"warning");
+			return ;
+		}
+		var rewards ={};
+		$.each(itemTable,function(index,val){
+			rewards[val.id]=val.amount;
+		});
+		/*<![CDATA[*/
+			data=$("#addForm").serialize()+"&zoneIds="+$("#zonelist").getValues()+"&packageIds="+$("#packagelist").getValues();
+			data+="&rewards="+JSON.stringify(rewards);
+		/*]]>*/
+	}else{
+		/*<![CDATA[*/
+			data="&id="+$("#id").val()+"&num="+$("#num").val();
+		/*]]>*/
+	}
+	gameAjax({
+		url:"/cDKeyBatch/add",
+		data:data,
+		callback:function(data){
+			$("#addModal").modal("hide");
+			 //初始化批次
+			initBatch(); 
+			panelTable.bootstrapTable("refresh");
+		}
+	});
+	
+}
+function initBatch(){
+	batchList={};
+	$("#id").empty();
+	var text='<option value="0" th:text="#{gmtool.cdk.batch.add}" >新增批次</option>';
+	batchList = loadBatchList();
+	var select ='<option value="" selected="selected" th:text="#{gmtool.cdk.batch.all}">所有批次</option>';
+	$.each(batchList,function(index,batch){
+		text +='<option value="'+batch.id+'">'+batch.name+'</option>';
+		select+='<option value="'+batch.id+'">'+batch.name+'</option>';
+	});
+	$("#select_batch").empty().append(select);
+	$("#id").append(text);
+}
+
+function initZone(){
+	var data=loadZonePickList();
+	$("#zonelist").empty();
+	$("#zonelist").pickList({data: data,add:"Add1",remove:"remove1"});
+};
+function initPackage(){
+	var list=[];
+	$.each(packageMap,function(id,text){
+		var map ={};
+		map["id"]=id;
+		map["text"] =text;
+		list.push(map);
+	});
+	$("#packagelist").empty();
+	$("#packagelist").pickList({data:list,add:"Add2",remove:"remove2"});
+}
+
+function initBootstrapTable(){
+	var condition={};
+	panelTable.bootstrapTable({
+		ajax : function(params) {
+			gameBootstrapTable("/cdk/list", params);
+		},
+		queryParams : function(params) {
+			var query = {
+				limit : params.limit,
+				offset : params.offset,
+				search_id_EQS:$("#select_cdk_id").val(),
+				batchId:$("#select_batch").val(),
+			};
+			return query;
+		},
+		pagination : true,
+		singleSelect : false,
+		uniqueId : "id",
+		sidePagination : "server",
+		detailView:true,
+		detailFormatter:function(index, cdk){
+			var text='<table class="table">';
+			//区服
+			var zone="";
+			$.each(cdk.batch.zoneIds,function(index,zoneId){
+				zone+=zoneId+"-"+zoneMap[zoneId]+"&nbsp;,&nbsp;";
+			});
+			text+='<tr><td><b>'+[[#{gamelog.gamezone}]]+'</b></td><td>'+zone+'</td></tr>';
+			//包
+			var packages ="";
+			$.each(cdk.batch.packageIds,function(index,packageId){
+				packages+=packageId+"-"+packageMap[packageId]+"&nbsp;,&nbsp;";
+			});
+			
+			text+='<tr><td><b>'+[[#{gamelog.package}]]+'</b></td><td >'+packages+'</td></tr>';
+			//奖励道具
+			text+='<tr><td colspan="8"><b>'+[[#{gmtool.cdk.reward.item}]]+'</b></td></tr>'
+			text+='<tr><td colspan="8"><table class="table">';
+			text+='<thead><tr><td>ID</td><td>'+[[#{sys.item.name}]]+'</td><td>'+[[#{sys.item.amount}]]+'</td></tr></thead>'
+			$.each(cdk.batch.reward,function(id,num){
+				var name = itemAll[id];
+				text+='<tr><td>'+id+'</td><td>'+name+'</td><td>'+num+'</td></tr>';
+			});
+			text+='</table></td></tr>';
+			if(cdk.status==1){
+				var userTime = new Date(cdk.useTime).format("yyyy-MM-dd hh:mm:ss");
+				text+='<tr><td>'+[[#{gmtool.cdk.user}]]+'</td><td>'+cdk.useId+'</td><td>'+
+						[[#{gmtool.cdk.user.time}]]+'</td><td>'+userTime+'</td></tr>';
+			}
+			text+='</table>';
+			return text;
+		},
+		columns : [
+					{
+						title : "CDKey",
+						field : "id",
+						align : "center",
+					},
+					{
+						title : [[#{gmtool.cdk.batch}]],
+						field : "batch",
+						align : "center",
+						formatter : function(value){
+							return value.name;
+						},
+					},
+					{
+						title : [[#{gmtool.cdk.level}]],
+						field : "batch",
+						align : "center",
+						formatter : function(value){
+							return value.level;
+						},
+					},
+					{
+						title : [[#{gmtool.cdk.reward.rank}]],
+						field : "batch",
+						align : "center",
+						formatter : function(value){
+							return value.rank;
+						},
+					},
+					{
+						title : [[#{gmtool.cdk.status}]],
+						field : "status",
+						align : "center",
+						formatter:function(value){
+							if(value==0){
+								return '<b style="color:green">'+[[#{gmtool.cdk.status.using}]]+'</b>';
+							}else if(value==1){
+								return '<b style="color:gray">'+[[#{gmtool.cdk.status.used}]]+'</b>';
+							}else{
+								return '<b style="color:red">'+[[#{gmtool.cdk.status.cancellation}]]+'</b>';
+							}
+						}
+					},
+					{
+						title : [[#{sys.create.time}]],
+						field : "batch",
+						align : "center",
+						formatter : function(value){
+							return new Date(value.startTime).format("yyyy-MM-dd hh:mm:ss");
+						},
+					},{
+						title : [[#{sys.end.time}]],
+						field : "batch",
+						align : "center",
+						formatter : function(value){
+							return new Date(value.endTime).format("yyyy-MM-dd hh:mm:ss");
+						},
+					},{
+						title : [[#{sys.operate}]],
+						field : "status",
+						align : "center",
+						formatter : function(value){
+							var text ="";
+							if(value==2){
+								text+='<span th:text="#{gmtool.cdk.cancelled}">已作废</span>';								
+							}else{
+								text = '<button class="btn btn-xs btn-danger" onclick="cancellation(this)" >'+
+										'<i class="fa fa-trash"></i>&nbsp;'+'<span th:text="#{gmtool.cdk.trash}">作废</span></button>';
+							}
+							return text;
+						},
+					}
+				]
+	});
+}
+function initDataTimePicker(){
+	$("#startDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
+	    autoclose : true,
+	    todayBtn :true,
+	    endDate : new Date()
+	});
+	$("#endDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
+	    autoclose : true,
+	    todayBtn :true,
+	});
+}
+$("#select").click(function(){
+	panelTable.bootstrapTable("refresh");
+});
+//初始化批次列表
+var loadBatchList= function(){
+	var list=[];
+	gameAjax({
+		url:"/cDKeyBatch/list",
+		async:false,
+		callback:function(data){
+			list=data;			
+		}
+	});
+	return list;
+};
+//批次改变
+function batchChange(){
+	table.bootstrapTable("load", []);
+	$("#showItemTable").bootstrapTable("load", []);
+	var id = $("#id").val();
+	if(id!=0){
+		$("#batch_name_div").hide();
+		$("#package_div").hide();
+		$("#zone_div").hide();
+		var batchMes={};
+		$.each(batchList,function(index,val){
+			if(val.id==id){
+				batchMes=batchList[index];
+			}
+		});
+		$("#startDatetimepicker").val(new Date(batchMes.startTime).format("yyyy-MM-dd hh:mm:ss"));
+		$("#endDatetimepicker").val(new Date(batchMes.endTime).format("yyyy-MM-dd hh:mm:ss"));
+		$("#startDatetimepicker").attr('disabled',true);
+		$("#endDatetimepicker").attr('disabled',true);
+		$("#rank").val(batchMes.rank).attr('disabled',true);
+		$("#level").val(batchMes.level).attr('disabled',true);
+		$("#sender").val(batchMes.sender).attr('disabled',true);
+		$("#senderHeadIcon").val(batchMes.senderHeadIcon).attr("disabled",true);
+		$("#validDay").val(batchMes.validDay).attr("disabled",true);
+		$("#title").val(batchMes.title).attr("disabled",true);
+		$("#content").val(batchMes.content).attr("disabled",true);
+		$("#reward_div").hide();
+		var showItems=[];
+		var i=1;
+		$.each(batchMes.reward,function(item,amount){
+			var name = window.itemAll[item];
+			showItems.push({id:item,name:name,amount:amount})
+		});
+		$("#showItemTable").bootstrapTable("append",showItems);		
+		$("#showItem").show();
+		$("#itemData").hide();
+	}else{
+		$("#batch_name_div").show();
+		$("#package_div").show();
+		$("#zone_div").show();
+		$("#startDatetimepicker").val("");
+		$("#endDatetimepicker").val("");
+		$("#startDatetimepicker").attr('disabled',false);
+		$("#endDatetimepicker").attr('disabled',false);
+		$("#rank").val("").attr('disabled',false);
+		$("#level").val("").attr('disabled',false);
+		$("#sender").val("").attr('disabled',false);
+		$("#senderHeadIcon").val("").attr("disabled",false);
+		$("#sender").val("").attr('disabled',false);
+		$("#senderHeadIcon").val("").attr("disabled",false);
+		$("#validDay").val(0).attr("disabled",false);
+		$("#title").val("").attr("disabled",false);
+		$("#content").val("").attr("disabled",false);
+		$("#reward_div").show();
+		$("#showItem").hide();
+		$("#showItemTable").bootstrapTable("load",[]);
+	}
+}
+//作废一个CDKey
+function cancellation(val){
+	var td =val.parentNode.parentNode.childNodes[1];
+	var cdkId = $(td).text();
+	swal({
+		title : [[#{sys.cancellation.title}]],
+		text : [[#{sys.cancellation.text}]],
+		type : "warning",
+		showCancelButton : true,
+		confirmButtonColor : "#DD6B55",
+		confirmButtonText : [[#{sys.confirm.confirmtext}]],
+		cancelButtonText : [[#{sys.confirm.canceltext}]],
+		closeOnConfirm: false
+	}, function(isConfirm) {
+		if (isConfirm) {
+			gameAjax({
+				url:"/cdk/cancellationOne",
+				data:"id="+cdkId,
+				callback:function(data){
+					swal([[#{sys.cancellation.success}]],"","success");
+					panelTable.bootstrapTable("refresh");
+				}
+			});
+		}
+	}) 
+	
+}
+//批量作废
+function trashCDKey(){
+	/*<![CDATA[*/
+	var data="batchId="+$("#select_batch").val()+"&cdkId="+$("#select_cdk_id").val();
+	/*]]>*/
+	swal({
+		title : [[#{sys.cancellation.title}]],
+		text : [[#{sys.cancellation.text}]],
+		type : "warning",
+		showCancelButton : true,
+		confirmButtonColor : "#DD6B55",
+		confirmButtonText : [[#{sys.confirm.confirmtext}]],
+		cancelButtonText : [[#{sys.confirm.canceltext}]],
+		closeOnConfirm: false
+	}, function(isConfirm) {
+		if (isConfirm) {
+			gameAjax({
+				url:"/cdk/cancellationAll",
+				data:data,
+				callback:function(data){
+					swal([[#{sys.cancellation.success}]],"","success");
+					panelTable.bootstrapTable("refresh");
+				}
+			});
+		}
+	}) 
+}
+//导出
+function exportCDKey(){
+	/*<![CDATA[*/
+	var url ='/cDKeyBatch/exportCDKey?batchId='+$("#select_batch").val()+'&cdkId='+$("#select_cdk_id").val();
+	/*]]>*/
+	window.location.href=url;
+	
+}
+
+
+
+</script>
+</html>

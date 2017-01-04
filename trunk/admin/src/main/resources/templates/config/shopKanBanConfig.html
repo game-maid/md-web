@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+	<link th:href="@{/static/css/plugins/bootstrap-table/bootstrap-table.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/autocompleter/jquery.autocompleter.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/pickList/pickList.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/bootstrap-table/extensions/editable/bootstrap-editable.css}" rel="stylesheet"/>
+	
+    <script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.js}"></script>
+	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/autocompleter/jquery.autocompleter.min.js}"></script>
+	<script th:src="@{/static/js/plugins/datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+	<script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/pickList/pickList.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/extensions/editable/bootstrap-table-editable.min.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/extensions/editable/bootstrap-editable.min.js}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<div class="btn-group hidden-xs"
+					th:replace="fragments/include::toolbar(true,false)"></div>
+			</div>
+			<div class="ibox-content">
+				<table id="panelTable" class="table-striped"
+					data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="addModal" >
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form class="form-horizontal" id="addForm">
+					<input type="hidden" name="activityId" id="activityId" value="" />
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h3 class="modal-title" th:text="#{sys.add}+#{activity.shop.kan.ban}">添加看板娘</h3>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.zone.select}">区服：</label>
+							<div class="col-sm-7">
+								<div id="zonelist"></div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{activity.name}">名称：</label>
+							<div class="col-sm-7">
+								<input type="text" name="name" id="name" class="form-control" required="required" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{activity.describe}">描述：</label>
+							<div class="col-sm-7">
+								<textarea rows="2" cols="" class="form-control" id="explain" name="explain" required="required" ></textarea>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.time}">时间：</label>
+							<div class="col-sm-7" id="datepicker">
+								<div class="input-daterange input-group">
+									<input type="text" name="startDate" class="form-control" id="startDatetimepicker" />
+									<span class="input-group-addon">-</span> 
+									<input type="text" name="endDate" class="form-control" id="endDatetimepicker" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label"  th:text="#{activity.shop.number}">商店序号：</label>
+							<div class="col-sm-7">
+								<input type="text" id="putrush" name="putrush" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
+							</div>
+						</div>
+
+						<div class="hr-line-dashed"></div>
+
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{activity.shop.kan.ban.item}">兑换看板娘</label>
+							<div class="col-sm-8" >
+	      						<div class="form-group">
+									<div class="col-sm-3" style="padding-right: 0px;">
+										<input placeholder="选择看板娘"  class="form-control itemList" id="id" th:placeholder="#{activity.shop.lan.ban.select}"/> 
+									</div>
+									<div class="col-sm-4" style="padding-left: 0px;padding-right: 0px;">
+                            			<div class="input-group">
+                                			<input type="text" readonly="readonly" placeholder="需求道具"  class="form-control" id="requestItem" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{activity.shop.request.item}"/> 
+                            			</div>
+                            		</div>
+									<div class="col-sm-2" style="padding-left: 0px;padding-right: 0px;">
+                            			<div class="input-group">
+                                			<input type="text" readonly="readonly" placeholder="需求数量" class="form-control" id="requestAmount" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{activity.shop.request.amount}"/>
+                            			</div>
+                            		</div>
+                            		<div class="col-sm-2" style="padding-left: 0px;padding-right: 0px;padding-left:0px">
+                               			 <select id="discount" name="discount" class="form-control">
+                           					<option value="10" selected="selected">无折扣</option>
+                           					<option value="9">9折</option>
+                           					<option value="8">8折</option>
+                           					<option value="7">7折</option>
+                           					<option value="6">6折</option>
+                           					<option value="5">5折</option>
+                           				</select>
+                            		</div>
+                            		<div class="col-sm-1" style="padding-rigth:0px">
+                            			<div class="input-group">
+                                			<span class="input-group-btn">
+                                				<button type="button" class="btn btn-info" onclick="addItem()" th:text="#{sys.add}">添加</button> 
+                                			</span>
+                            			</div>
+                            		</div>
+                            	</div>
+                        	</div>
+						</div>
+						
+						<div class="form-group">
+							<label class="col-sm-3 control-label"></label>
+							<div class="col-sm-8">
+								<table id="itemtable" class="table-striped" data-toggle="table" data-unique-id="itemId" data-mobile-responsive="true">
+									<thead>
+										<tr>
+											<th data-field="itemId">ID</th>
+											<th data-field="name" th:text="#{activity.shop.kan.ban}+#{sys.item.name}">看板娘名称</th>
+											<th data-field="requestItem" th:text="#{activity.shop.request.item}+#{sys.item.name}">需求道具名称</th>
+											<th  data-field="requestAmount" th:text="#{activity.shop.discount.amount}">折后需求数量</th>
+											<th data-field="discount" th:text="#{activity.shop.discount}">折扣</th>
+											<th data-field="remove" th:text="#{sys.operate}">操作</th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary"
+							th:text="#{sys.save}">保存</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" th:inline="javascript">
+$(".modal-dialog").css({
+	width:"900px",
+}); 
+
+$(function(){
+	table=$("#panelTable");
+	initTable();
+	itemtable=$("#itemtable");
+	itemNames();
+	initKanBanInput($(".itemList"));
+	itemName=window.itemAll;
+	zoneMap=loadZoneMap();
+});
+function add() {
+	$("#addForm")[0].reset();
+	$("#addForm").validate({
+		submitHandler:function(form){
+			onSave();
+        }
+	}).resetForm();
+	$("#activityId").val("");
+	itemtable.bootstrapTable("load", []);
+	//初始化区服
+	initZone();
+	initDataTimePicker();
+	//初始化看板娘input下拉菜单
+	initKanBanInput($("#id"));
+	
+	$("#addModal").modal("show");
+	
+}
+
+function initZone(){
+	var data=loadZonePickList();
+	$("#zonelist").empty();
+	$("#zonelist").pickList({data: data,add:true});
+}
+function initDataTimePicker(){
+	$("#startDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
+	    autoclose : true,
+	    todayBtn :true,
+	    endDate : new Date()
+	});
+	$("#endDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
+	    autoclose : true,
+	    todayBtn :true,
+	});
+}
+function addItem(){
+	var itemId=$("#id").val();
+	var requestItem = $("#requestItem").val();
+	var requestAmount=$("#requestAmount").val();
+	var discount=$("#discount").val();
+	if(itemId.length==0||discount==0||discount.length==0){
+		return;
+	}
+	
+	if(!window.itemAll.hasOwnProperty(itemId)){
+		$("#id").val("").focus();
+		return;
+	}
+	
+	var tableData=itemtable.bootstrapTable('getData');
+	var isAdd=true; //true 表示改看板娘活动不存在，添加看板娘
+	$.each(tableData,function(index,val){//看板娘活动存在，修改折扣
+		if(val.itemId==itemId){
+			requestAmount = Math.ceil(requestAmount*discount/10);
+			tableData[index]["requestAmount"]=requestAmount;
+			if(discount==10){
+				discount="无折扣"
+			}else{
+				discount=discount+"折";
+			}
+			
+			tableData[index]["discount"] = discount;
+			isAdd=false;
+		}
+	});
+	
+	if(isAdd){
+		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removeItem(\''+itemId+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
+		
+		var name = itemAll[itemId];
+		data=[];
+		data.push({itemId:itemId,name:name,requestItem:requestItem,requestAmount:Math.ceil(requestAmount*discount/10),discount:discount==10?"无折扣":discount+"折",remove:remove});
+		itemtable.bootstrapTable("append", data);
+	}else{
+		itemtable.bootstrapTable('load', tableData);
+	}
+	//清空文本框
+	$("#id").val("");
+	$("#requestItem").val("");
+	$("#requestAmount").val("");
+}
+
+function removeItem(itemId){
+	itemtable.bootstrapTable('removeByUniqueId', itemId);
+	 var tableData=itemtable.bootstrapTable('getData');
+}
+
+function onSave(){
+	var id=$("#activityId").val();
+	//时间校验
+	var startDate=$("#startDatetimepicker").val();
+	var endDate=$("#endDatetimepicker").val();
+	if(startDate.length==0||endDate==0){
+		swal("", [[#{activity.time.not.null}]], "warning");
+		return;
+	}
+	
+	var zonelist=$("#zonelist").getValues();
+	if(zonelist.length==0){
+		swal("", [[#{activity.zone.null}]], "warning");
+		return;
+	}
+	
+	var putrush =$("#putrush").val();
+	var reg = new RegExp("^[0-9]*$");
+	if(!reg.test(putrush)){
+		$("#putrush").val("").focus();
+		//swal("",[[#{activity.putrush.num}]],"warning")
+		return ;
+	}
+	 
+	
+	 var tableData=itemtable.bootstrapTable('getData');
+	 if(tableData.length==0){
+		 swal("", [[#{activity.shop.select.kanban}]], "warning");
+		 return;
+	 }
+	 var good={};
+	 $.each(tableData,function(index,val){
+		 var itemId = val.itemId;
+		 var discount = val.discount;
+		 switch(discount){
+			 case "无折扣" : discount=10;break;
+			 case "9折" : discount=9;break;
+			 case "8折" : discount=8;break;
+		 	 case "7折" : discount=7;break;
+		 	 case "6折" : discount=6;break;
+		 	 case "5折" : discount=5;break;
+		 }
+		 good[itemId] =discount;
+	 });
+	 /*<![CDATA[*/
+		var data=$("#addForm").serialize()+"&zoneList="+$("#zonelist").getValues()+"&goods="+JSON.stringify(good);
+		if(id!=null&&id!=""&&id!=undefined){
+			data+="&id="+id;
+		}
+	/*]]>*/
+		$("#zonelist").getValues();
+	 	gameAjax({
+			url : "/kanBan/add",
+			data:data,
+			callback : function(val) {
+				$("#addModal").modal("hide");
+				table.bootstrapTable("refresh");
+			}
+		}) 
+}
+function initTable() {
+	table.bootstrapTable({
+		ajax : function(params) {
+			gameBootstrapTable("/kanBan/list", params);
+		},
+		queryParams : function(params) {
+			var query = {
+				limit : params.limit,
+				offset : params.offset,
+				order :params.order,
+				sort :params.sort,
+				condition : params.search
+			};
+			return query;
+		},
+		pagination : true,
+		singleSelect : false,
+		detailView:true,
+		detailFormatter:function(index, row){
+			var text='<table class="table">';
+			//区服
+			var zone="";
+			$.each(row.zoneList,function(index,zoneId){
+				zone+=zoneId+"-"+zoneMap[zoneId]+"&nbsp;,&nbsp;";
+			});
+			text+='<tr><td><b>'+[[#{sys.zone.select}]]+'</b></td><td>'+zone+'</td></tr>';
+			text+='<tr><td><b>'+[[#{activity.describe}]]+'</b></td><td >'+row.explain+'</td></tr>';
+			//出售道具
+			text+='<tr><td colspan="8"><b>'+[[#{activity.shop.kan.ban}]]+'</b></td></tr>'
+			text+='<tr><td colspan="8"><table class="table">';
+			text+='<thead><tr><td>ID</td><td>'+[[#{activity.shop.kan.ban}]]+[[#{sys.menu.name}]]+'</td><td>'+[[#{activity.shop.request.item}]]+[[#{sys.menu.name}]]+'</td><td>'+[[#{activity.shop.discount.amount}]]+'</td><td>'+[[#{activity.shop.discount}]]+'</td></tr></thead>'
+			$.each(row.good,function(id,discountNum){
+				var name = itemAll[id];//看板娘名称
+				var item =itemAll[kanbanRequest[id]];//需求道具名称
+				var num =Math.ceil(kanbanRequest[kanbanRequest[id]]*discountNum/10);//折后需求数量
+				var disc = discountNum==10?"无折扣":discountNum+"折";
+				text+='<tr><td>'+id+'</td><td>'+name+'</td><td>'+item+'</td><td>'+num+'</td><td>'+disc+'</td></tr>';
+			});
+			text+='</table></td></tr>';
+			text+='</table>';
+			return text;
+		},
+		uniqueId : "id",
+		idField : "id",
+		sidePagination : "server",
+		sortName : "endTime",
+		sortOrder : "asc",
+		columns : [
+			{
+				title : "活动ID",
+				field : "id",
+			},
+			{
+				title : [[#{activity.name}]],
+				field : "name",
+				align : "center",
+			},
+			{
+				title : [[#{activity.start.time}]],
+				field : "startTime",
+				sortable: true,
+				formatter : function(value) {
+					return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+				},
+			},
+			{
+				title : [[#{activity.end.time}]],
+				field : "endTime",
+				sortable: true,
+				formatter : function(value) {
+					return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+				},
+			},
+			{
+				title : [[#{activity.shop.number}]],
+				field : "putrush",
+				sortable: true,
+				editable : {
+					url : "/kanBan/update",
+					validate : function(value) {
+						if(value == ""){
+							return "not null!";
+						}
+					},
+					error : function(response, newValue) {
+					    alert("error:" + newValue);
+					}
+				}
+			},
+			{
+				title : [[#{sys.operate}]],
+				field : "id",
+				align : "center",
+				formatter : function(value) {
+					var	formatter = '<div class="btn-group hidden-xs"><button type="button" class="btn btn-xs btn-primary" onclick="edit(\''
+										+ value + '\')" th:text="#{sys.edit}">编辑</button>';
+						formatter += '<button type="button" class="btn btn-xs btn-danger" onclick="deleteData(\''
+										+ value + '\')"  th:text="#{sys.delete}">删除</button></div>';
+					return formatter;
+					},
+				} 
+			]
+	});
+}
+function edit(activityId){
+	$("#addForm")[0].reset();
+	$("#addForm").validate({
+		submitHandler:function(form){
+			onSave();
+        }
+	}).resetForm();
+	$("#activityId").val(activityId);
+	initDataTimePicker();
+	initKanBanInput($(".itemList"));
+	var data = table.bootstrapTable("getRowByUniqueId", activityId);
+	editZone(data.zoneList);
+	editDataTimePicker(data);
+	
+	$("#name").val(data.name);
+	$("#explain").val(data.explain);
+	
+	$("#putrush").val(data.putrush);
+	//出售道具数据
+	var a=[]
+	$.each(data.good,function(id,discountNum){
+		var name = itemAll[id];
+		var item =itemAll[kanbanRequest[id]];//需求道具名称
+		var num =Math.ceil(kanbanRequest[kanbanRequest[id]]*discountNum/10);//折后需求数量
+		var disc = discountNum==10?"无折扣":discountNum+"折";
+		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removeItem(\''+id+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
+		a.push({itemId:id,name:name,requestItem:item,requestAmount:num,discount:disc,remove:remove});
+	});
+	itemtable.bootstrapTable('load', a);
+	$("#addModal").modal("show");
+}
+function removeItem(itemId){
+	itemtable.bootstrapTable('removeByUniqueId', itemId);
+}
+function editZone(zoneList){
+	var data=loadZonePickList();
+	var zoneData=[];
+	var zoneNames={};
+	$.each(data,function(index,val){
+		zoneNames[val.id]=val.text;
+		if(!($.inArray(val.id, zoneList)>=0)){
+			zoneData.push(val);
+		}
+	});
+	$.each(zoneList,function(index,id){
+		var map={};
+		map["id"] = id;
+		map["text"] = zoneNames[id];
+		map["option"] = "selected";
+		zoneData.push(map);
+	}); 
+	$("#zonelist").empty();
+	$("#zonelist").pickList({data: zoneData,add:true});
+}
+function editDataTimePicker(data){
+	$("#startDatetimepicker").val(new Date(data.startTime).format("yyyy-MM-dd hh:mm:ss"));
+	$("#endDatetimepicker").val(new Date(data.endTime).format("yyyy-MM-dd hh:mm:ss"));
+}
+function deleteData(itemId){
+	swal({
+		title : [[#{sys.confirm.title}]],
+		text : [[#{sys.confirm.text}]],
+		type : "warning",
+		showCancelButton : true,
+		confirmButtonColor : "#DD6B55",
+		confirmButtonText : [[#{sys.confirm.confirmtext}]],
+		cancelButtonText : [[#{sys.confirm.canceltext}]],
+		closeOnConfirm: false
+	}, function(isConfirm) {
+		if (isConfirm) {
+			gameAjax({
+				url : "/kanBan/delete",
+				data:"id="+itemId,
+				callback : function(val) {
+					swal([[#{sys.delete.success}]],"","success");
+					table.bootstrapTable("refresh");
+				}
+			});
+		}
+	})
+}
+</script>
+</html>

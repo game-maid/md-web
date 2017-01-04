@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+    <script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<h5 th:text="#{sys.changepass.title}">修改密码</h5>
+			</div>
+			
+			<div class="ibox-content">
+				<form class="form-horizontal" id="userForm">
+				    <div class="form-group">
+       					<label class="col-sm-2 control-label" th:text="#{sys.username}">用户名：</label>
+       					<div class="col-sm-4">
+           					<input type="text" name="username" class="form-control" th:value="${user.username}" readonly="readonly"/>
+       					</div>
+       				</div>
+       					
+       				<div class="form-group">
+       					<label class="col-sm-2 control-label" th:text="#{sys.changepass.oldpass}">原密码：</label>
+       					<div class="col-sm-4">
+           					<input type="password" name="oldpass" class="form-control"/>
+       					</div>
+       				</div>
+       				
+       				<div class="form-group">
+       					<label class="col-sm-2 control-label" th:text="#{sys.changepass.newpass}">新密码：</label>
+       					<div class="col-sm-4">
+           					<input type="password" name="password" id="password" class="form-control"/>
+       					</div>
+       				</div>
+       				
+       				<div class="form-group">
+       					<label class="col-sm-2 control-label" th:text="#{sys.changepass.confirmpass}">确认密码：</label>
+       					<div class="col-sm-4">
+           					<input type="password" name="confirmPassword" class="form-control"/>
+       					</div>
+       				</div>
+       				
+       				<div class="form-group">
+                        <div class="col-sm-4 col-sm-offset-2">
+                            <button class="btn btn-primary" th:text="#{sys.changepass.confirm}">确认修改</button>
+                        </div>
+                    </div>
+   				</form>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	$(function() {
+		$("#userForm").validate({
+			rules : {
+				oldpass : "required",
+				password : "required",
+				confirmPassword : {
+					required : true,
+					equalTo : "#password"
+				}
+			},
+			submitHandler : function(form) {
+				onSubmit();
+			}
+		});
+	});
+
+	function onSubmit() {
+		gameAjax({
+			url : "/user/changePass",
+			data : $("#userForm").serialize(),
+			callback : function(data) {
+				swal("修改成功！", "", "success");
+			}
+		});
+	}
+</script>
+</html>

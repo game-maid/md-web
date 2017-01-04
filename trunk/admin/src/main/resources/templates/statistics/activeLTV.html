@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+	<link th:href="@{/static/css/plugins/bootstrap-table/bootstrap-table.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/autocompleter/jquery.autocompleter.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/pickList/pickList.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/bootstrap-table/extensions/editable/bootstrap-editable.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/jsTree/style.min.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/webuploader/webuploader.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
+	
+	
+    <script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.js}"></script>
+	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/autocompleter/jquery.autocompleter.min.js}"></script>
+	<script th:src="@{/static/js/plugins/datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+	<script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/pickList/pickList.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/extensions/editable/bootstrap-table-editable.min.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/extensions/editable/bootstrap-editable.min.js}"></script>
+	<script th:src="@{/static/js/plugins/jsTree/jstree.min.js}"></script>
+	<script th:src="@{/static/js/plugins/webuploader/webuploader.min.js}"></script>
+	<script th:src="@{/static/js/plugins/iCheck/icheck.min.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-waitingfor/bootstrap-waitingfor.min.js}"></script>
+	<script th:src="@{/static/js/plugins/highcharts/highcharts.js}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<!-- 查询条件 -->
+				<div class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-1" style="float: left;">
+							<label style="margin-top: 10px;" th:text="#{statistics.active.date.type}">日期类型</label>
+						</div>
+						<div class="col-sm-1" style="float: left;">
+							<select class="form-control" id="date-type">
+								<option value="day" th:text="#{statistics.active.day.data}"></option>
+								<option value="week" th:text="#{statistics.active.week.data}"></option>
+								<option value="month" th:text="#{statistics.active.month.data}"></option>
+							</select>
+						</div>
+						<div class="col-sm-1" style="float: left;">
+							<label style="margin-top: 10px;" th:text="#{statistics.active.date}">日期</label>
+						</div>
+						<div id="day-date-div" class="col-sm-2 date-div" style="float: left;">
+							<input id="day-date-input" class="form-control" />
+						</div>
+						<div  id="week-date-div" class="col-sm-2 date-div" style="float: left;">
+							<select id="week-date-input" class="form-control" >
+							</select>
+						</div>
+						<div  id="month-date-div" class="col-sm-2 date-div" style="float: left;">
+							<select id="month-date-input" class="form-control" >
+							</select>
+						</div>
+						<div class="col-sm-1" style="float: left;">
+							<label style="margin-top: 10px;" th:text="#{statistics.active.is.detail}">是否显示明细</label>
+						</div>
+						<div class="col-sm-2" style="float: left;">
+							<select class="form-control" id="is-detail">
+								<option value="0" th:text="#{statistics.active.show.total}"></option>
+								<option value="1" th:text="#{statistics.active.show.zone.total}"></option>
+								<option value="2" th:text="#{statistics.active.show.total.data}"></option>
+							</select>
+						</div>
+						<div class="col-sm-1" style="float: left;">
+							<button class="btn btn-primary" id="select">
+								<i class="fa fa-search"></i>&nbsp;<span th:text="#{sys.select}">查询</span>&nbsp;
+							</button>
+						</div>
+						<div class="col-sm-1" style="float: right;">
+							<button class="btn btn-success" onclick="exportCDKey()" >
+								<i class="fa fa-download"></i>&nbsp;<span th:text="#{gmtool.cdk.export}">导出</span>&nbsp;
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-1" style="float: left;">
+							<label style="margin-top: 10px;" th:text="#{statistics.active.graph.show}">曲线图展示</label>
+						</div>
+						<div class="col-sm-1" style="float: left;">
+			                <label id="data-all-label" class="checkbox-inline i-checks">
+			                    <input id="data-all-input" type="checkbox" value="0" th:text="#{statistics.active.data.all}" /></label>
+						</div>
+					</div>
+				</div>
+				<div>
+					<label id="second-ltv-label" class="checkbox-inline i-checks">
+				                    <input name="data-all" type="checkbox" value="secondLtv" th:text="#{statistics.active.second.LTV}" /></label>
+					<label id="thirdly-ltv-label" class="checkbox-inline i-checks">
+				                    <input name="data-all" type="checkbox" value="thirdlyLtv" th:text="#{statistics.active.thirdly.LTV}" /></label>
+					<label id="seventh-ltv-label" class="checkbox-inline i-checks">
+				                    <input name="data-all" type="checkbox" value="seventhLtv" th:text="#{statistics.active.seventh.LTV}" /></label>
+					<label class="checkbox-inline i-checks">
+				                    <input name="data-all" type="checkbox" value="fourteenthLtv" th:text="#{statistics.active.fourteenth.LTV}" /></label>
+					<label class="checkbox-inline i-checks">
+				                    <input name="data-all" type="checkbox" value="twentyFirstLtv" th:text="#{statistics.active.twenty.first.LTV}" /></label>
+					<label class="checkbox-inline i-checks">
+				                    <input name="data-all" type="checkbox" value="twentyEighthLtv" th:text="#{statistics.active.twenty.eighth.LTV}" /></label>
+					<label class="checkbox-inline i-checks">
+				                    <input name="data-all" type="checkbox" value="thirtyFifthLtv" th:text="#{statistics.active.thirty.fifth.LTV}" /></label>
+					<label class="checkbox-inline i-checks">
+				                    <input name="data-all" type="checkbox" value="fortyNinthLtv" th:text="#{statistics.active.forty.ninth.LTV}" /></label>
+					<label class="checkbox-inline i-checks">
+				                    <input name="data-all" type="checkbox" value="fiftySixthLtv" th:text="#{statistics.active.fifty.sixth.LTV}" /></label>
+				</div>
+				
+				<div class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-1" style="float: left;">
+							<label style="margin-top: 10px;" th:text="#{statistics.active.zone}">区服</label>
+						</div>
+						<div class="col-sm-1" style="float: left;">
+			                <label id="zone-all-label" class="checkbox-inline i-checks">
+			                    <input id="zone-all-input" type="checkbox" value="0" th:text="#{statistics.active.zone.all}" /></label>
+						</div>
+					</div>
+				</div>
+				<div id="zone-list-div" >
+					<!-- 区服复选框 -->
+				</div>
+			</div>
+			<div class="ibox-content">
+				<!-- 曲线图 -->
+				<div id="graph-div"></div>
+				<!-- 统计表格 -->
+				<div id="data-table-div">
+					<table  class="table bordered" id="data-table">
+						<thead>
+							<tr>
+							<th width="5.2%" th:text="#{statistics.active.date}"></th>
+							<th width="5.2%" th:text="#{statistics.active.zone}"></th>
+							<th width="5.2%" th:text="#{statistics.active.pacakge}"></th>
+							<th width="5.2%" th:text="#{statistics.active.second.LTV}"></th>
+							<th width="5.2%" th:text="#{statistics.active.thirdly.LTV}"></th>
+							<th width="5.2%" th:text="#{statistics.active.seventh.LTV}"></th>
+							<th width="5.2%" th:text="#{statistics.active.fourteenth.LTV}"></th>
+							<th width="5.2%" th:text="#{statistics.active.twenty.first.LTV}"></th>
+							<th width="5.2%" th:text="#{statistics.active.twenty.eighth.LTV}"></th>
+							<th width="5.2%" th:text="#{statistics.active.thirty.fifth.LTV}"></th>
+							<th width="5.2%" th:text="#{statistics.active.forty.ninth.LTV}"></th>
+							<th width="5.2%" th:text="#{statistics.active.fifty.sixth.LTV}"></th>
+							</tr>
+						</thead>
+						<tbody id="data-table-body">
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+</body>
+
+<script type="text/javascript" th:inline="javascript">
+$(function(){
+	//初始化复选框样式
+	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
+	//初始化曲线图展示复选框默认选中
+	$("#second-ltv-label").iCheck("check");
+	$("#thirdly-ltv-label").iCheck("check");
+	$("#seventh-ltv-label").iCheck("check");
+	//曲线图展示全部数据点击事件
+	$("#data-all-label").on("ifChecked",function(event){
+		$("[name='data-all']").iCheck("check");
+	});
+	$("#data-all-label").on("ifUnchecked",function(event){
+		$("[name='data-all']").iCheck("uncheck");
+	});
+	//初始化区服信息
+	zoneMap=loadZoneMap();
+	initZone();
+	//隐藏曲线图和数据表
+	$("#graph-div").hide();
+	$("#data-table-div").hide();
+	//隐藏周、月查询
+	$("#week-date-div").hide();
+	$("#month-date-div").hide();
+	//初始化时间
+	initDate();
+	
+})
+
+//初始化时间(日/周/月)
+function initDate(){
+	//日
+	$("#day-date-input").datetimepicker({
+	    format : "yyyy/mm/dd",
+	    autoclose : true,
+	    todayBtn :true,
+	    endDate : new Date(),
+	    minView:"month",
+	});
+	$("#day-date-input").val(new Date().format("yyyy/MM/dd"));
+	
+	var date = new Date();
+	//周
+	var weekDate = new Date("2016-11-28 00:00:00");
+	var weekNum=1;
+	var weekText='';
+	while(date>weekDate){
+		var weekDateStart = weekDate.format("yyyy/MM/dd");
+		weekDate.setDate(weekDate.getDate()+6);
+		var weekDateEnd = weekDate.format("yyyy/MM/dd");
+		
+		if(weekDate>date){
+			weekText+='<option selected="selected" value="'+weekDateStart+'">第'+weekNum+'周('+weekDateStart+'-';
+		 	weekText+=weekDateEnd+')</option>';
+		}else{
+			weekText+='<option value="'+weekDateStart+'">第'+weekNum+'周('+weekDateStart+'-';
+		 	weekText+=weekDateEnd+')</option>';
+		}
+		weekDate.setDate(weekDate.getDate()+1);
+		weekNum++;
+	}
+	$("#week-date-input").append(weekText);
+	//月
+	var monthDate = new Date("2016-12-01 00:00:00");
+	var monthNum=1;
+	var monthText="";
+	while(date>monthDate){
+		var monthDateStart = monthDate.format("yyyy/MM/dd");
+		monthDate.setMonth(monthDate.getMonth()+1);
+		monthDate.setDate(monthDate.getDate()-1);
+		var monthDateEnd = monthDate.format("yyyy/MM/dd");
+		monthDate.setDate(monthDate.getDate()+1);
+		if(monthDate>date){
+			monthText+='<option selected="selected" value="'+monthDateStart+'">第'+monthNum+'月('+monthDateStart+'-';
+			monthText+=monthDateEnd+')</option>';
+		}else{
+			monthText+='<option value="'+monthDateStart+'">第'+monthNum+'月('+monthDateStart+'-';
+			monthText+=monthDateEnd+')</option>';
+		}
+		monthNum++;
+	}
+	
+	$("#month-date-input").append(monthText);
+	
+}
+
+//初始化区服复选框
+function initZone(){
+	var text ="";
+	$.each(zoneMap,function(zoneId,zoneName){
+		text+='<label class="checkbox-inline i-checks ">';
+		text+='<input name="zone-all" type="checkbox" value="'+zoneId+'" >'+zoneId+'-'+zoneName+'</input></label>';
+	});
+	$("#zone-list-div").append(text);
+	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
+	$("#zone-all-label").on("ifChecked",function(event){
+		$("[name='zone-all']").iCheck("check");
+	});
+	$("#zone-all-label").on("ifUnchecked",function(event){
+		$("[name='zone-all']").iCheck("uncheck");
+	});
+}
+
+//选择日期类型
+$("#date-type").change(function(){
+	var dateType = $("#date-type").val();
+	$(".date-div").hide();
+	if(dateType=='day'){
+		$("#day-date-div").show();		
+	}else if(dateType=='week'){
+		$("#week-date-div").show();
+	}else if(dateType=='month'){
+		$("#month-date-div").show();
+	}
+});
+
+
+//查询
+$("#select").click(function(){
+	var data="";
+	var dateType=$("#date-type").val();
+	dateType=="day"?$("#graph-div").hide():$("#graph-div").show();
+	$("#data-table-div").show();
+	var date={};
+	if(dateType=="day"){
+		date=$("#day-date-input").val();
+	}else if(dateType=="week"){
+		date=$("#week-date-input").val();
+	}else if(dateType=="month"){
+		date=$("#month-date-input").val();
+	}
+	
+	
+	var dataArr = [];
+	$(".checked input[name='data-all']").each(function(){ 
+		dataArr.push($(this).val());
+    });
+	//是否查询全部区服
+	var zoneAll =false;
+	if($("#zone-all-input").is(':checked')){
+		zoneAll=true;
+	}
+	
+    var zoneArr=[];
+	$(".checked input[name='zone-all']").each(function(){
+		zoneArr.push($(this).val());
+	});
+	if(zoneArr.length==0){
+		swal("",[[#{statistics.active.zone.null}]],"warning");
+		return;
+	}
+	
+	/*<![CDATA[*/
+        var isDetail=$("#is-detail").val();
+		data+="dateType="+dateType+"&date="+date+"&isDetail="+isDetail+"&zoneArr="+zoneArr;	           
+	/*]]>*/
+	gameAjax({
+		url:"/active/ltv/select",
+		data:data,
+		callback:function(val){
+			callback(val,dataArr,isDetail);
+		},
+	}); 
+});
+
+function callback(val,dataArr,isDetail){
+	var text='';
+	var categories =[];
+	var series=[];
+	var secondLtvData={};
+	secondLtvData.name=[[#{statistics.active.num}]];
+	var secondLtvDataData=[];
+	secondLtvData.data=secondLtvDataData;
+	
+	var thirdlyLtvData={};
+	thirdlyLtvData.name=[[#{statistics.active.new.user.num}]];
+	var thirdlyLtvDataData=[];
+	thirdlyLtvData.data=thirdlyLtvDataData;
+	
+	var seventhLtvData={};
+	seventhLtvData.name=[[#{statistics.active.new.payer.num}]];
+	var seventhLtvDataData=[];
+	seventhLtvData.data=seventhLtvDataData;
+	
+	var fourteenthLtvData={};
+	fourteenthLtvData.name=[[#{statistics.active.payer.num}]];
+	var fourteenthLtvDataData=[];
+	fourteenthLtvData.data=fourteenthLtvDataData;
+	
+	var twentyFirstLtvData={};
+	twentyFirstLtvData.name=[[#{statistics.active.income.num}]];
+	var twentyFirstLtvDataData =[];
+	twentyFirstLtvData.data=twentyFirstLtvDataData;
+	
+	var twentyEighthLtvData={};
+	twentyEighthLtvData.name=[[#{statistics.active.income.times}]];
+	var twentyEighthLtvDataData=[];
+	twentyEighthLtvData.data=twentyEighthLtvDataData;
+	
+	var  thirtyFifthLtvData={};
+	thirtyFifthLtvData.name=[[#{statistics.active.new.pay.rate}]];
+	var thirtyFifthLtvDataData=[];
+	thirtyFifthLtvData.data=thirtyFifthLtvDataData;
+	
+	var fortyNinthLtvData ={};
+	fortyNinthLtvData.name=[[#{statistics.active.active.pay.rate}]];
+	var fortyNinthLtvDataData=[];
+	fortyNinthLtvData.data=fortyNinthLtvDataData;
+	
+	var fiftySixthLtvData={};
+	fiftySixthLtvData.name=[[#{statistics.active.ARPU}]];
+	var fiftySixthLtvDataData=[];
+	fiftySixthLtvData.data=fiftySixthLtvDataData;
+	/*<![CDATA[*/
+	$.each(val ,function(index,dayData){
+		if(dayData==null)return true;
+		var date = dayData.date;
+		categories.push(date);
+		$.each(dayData.zoneData,function(zoneId,zoneData){
+			$.each(zoneData,function(packageId,packageData){
+				var secondLtv=divide(packageData.preOneIncomeNum,packageData.preOneNewUserNum);
+				var thirdlyLtv=divide(packageData.preTwoIncomeNum,packageData.preTwoNewUserNum);
+				var seventhLtv=divide(packageData.preSixIncomeNum,packageData.preSixNewUserNum);
+				var fourteenthLtv=divide(packageData.preThirteenIncomeNum,packageData.preThirteenNewUserNum);
+				var twentyFirstLtv=divide(packageData.preTwentyIncomeNum,packageData.preTwentyNewUserNum);
+				var twentyEighthLtv=divide(packageData.preTwentySevenIncomeNum,packageData.preTwentySevenNewUserNum);
+				var thirtyFifthLtv=divide(packageData.preThirtyFourIncomeNum,packageData.preThirtyFourNewUserNum);
+				var fortyNinthLtv=divide(packageData.preFortyEightIncomeNum,packageData.preFortyEightNewUserNum);
+				var fiftySixthLtv=divide(packageData.preFiftyFiveIncomeNum,packageData.preFiftyFiveNewUserNum);
+				//初始化曲线图数据
+				if(packageId=='zzzdayTotal'){
+					$.each(dataArr,function(index,data){
+						switch(data){
+							case 'secondLtv':secondLtvDataData.push(secondLtv);break;
+							case 'thirdlyLtv':thirdlyLtvDataData.push(thirdlyLtv);break;
+							case 'seventhLtv':seventhLtvDataData.push(seventhLtv);break;
+							case 'fourteenthLtv':fourteenthLtvDataData.push(fourteenthLtv);;break;
+							case 'twentyFirstLtv':twentyFirstLtvDataData.push(twentyFirstLtv);break;
+							case 'twentyEighthLtv':twentyEighthLtvDataData.push(twentyEighthLtv);break;
+							case 'thirtyFifthLtv':thirtyFifthLtvDataData.push(thirtyFifthLtv);break;
+							case 'fortyNinthLtv':fortyNinthLtvDataData.push(fortyNinthLtv);break;
+							case 'fiftySixthLtv':fiftySixthLtvDataData.push(fiftySixthLtv);break;
+						}
+					});
+				}
+				
+				//初始化表单数据
+				if(isDetail==0&&packageId!='zzzdayTotal')return true;
+				if(isDetail==1&&packageId!='zoneTotal'&&packageId!='zzzdayTotal')return true; 
+				if(packageId=='zoneTotal'){
+					text+='<tr style="color:#0000FF" ><td>'+date+'</td><td>'+zoneId+'</td><td>'+[[#{statistics.zone.total}]]+'</td> '
+				}else if(packageId=='zzzdayTotal'){
+					text+='<tr style="color:#FF0000" ><td>'+date+'</td><td>'+[[#{statistics.total}]]+'</td><td>'+[[#{statistics.total}]]+'</td> '
+				}else{
+					text+='<tr><td>'+date+'</td><td>'+zoneId+'</td><td>'+packageId+'</td> '
+				}
+				text+='</td><td>'+secondLtv+'%'+'</td><td>'+thirdlyLtv+'%'+'</td><td>'+seventhLtv+'%';
+				text+='</td><td>'+fourteenthLtv+'%'+'</td><td>'+twentyFirstLtv+'%'+'</td><td>'+twentyEighthLtv+'%';
+				text+='</td><td>'+thirtyFifthLtv+'%'+'</td><td>'+thirtyFifthLtv+'%'+'</td><td>'+fiftySixthLtv+'%';
+				text+='</td></tr>';
+			});
+		});
+	});
+	$("#data-table-body").empty();
+	$("#data-table-body").append(text);
+	/*]]>*/
+	$.each(dataArr,function(index,data){
+		switch(data){
+		case 'secondLtv':series.push(secondLtvData);break;
+		case 'thirdlyLtv':series.push(thirdlyLtvData);break;
+		case 'seventhLtv':series.push(seventhLtvData);break;
+		case 'fourteenthLtv':series.push(fourteenthLtvData);;break;
+		case 'twentyFirstLtv':series.push(twentyFirstLtvData);break;
+		case 'twentyEighthLtv':series.push(twentyEighthLtvData);break;
+		case 'thirtyFifthLtv':series.push(thirtyFifthLtvData);break;
+		case 'fortyNinthLtv':series.push(fortyNinthLtvData);break;
+		case 'fiftySixthLtv':series.push(fiftySixthLtvData);break;
+		}
+	});
+	//初始化曲线图
+	initGraph(categories,series);
+}
+//检查参数是否为null,如果为null返回o
+function checkNull(val){
+	if(val==null||val==0)
+		return 0;
+	return val;
+}
+//两数相除 两位小数
+function divide(element,denominator){
+	if(element==null || element==0 || denominator==null ||denominator==0){
+		return 0;
+	}
+	var divide = element/denominator;
+	return Math.round(divide*100)/100;
+}
+
+//初始化曲线图
+function initGraph(categories,series){
+	$('#graph-div').highcharts({
+        title: {
+            text: [[#{statistics.active.graph.title}]],
+            x: -20 //center
+        },
+        xAxis: {
+            categories: categories
+        },
+        yAxis: {
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle',
+            borderWidth: 0
+        },
+        series:  series
+    });
+}
+//导出
+function exportCDKey(){
+	var data="";
+	var dateType=$("#date-type").val();
+	dateType=="day"?$("#graph-div").hide():$("#graph-div").show();
+	$("#data-table-div").show();
+	var date={};
+	if(dateType=="day"){
+		date=$("#day-date-input").val();
+	}else if(dateType=="week"){
+		date=$("#week-date-input").val();
+	}else if(dateType=="month"){
+		date=$("#month-date-input").val();
+	}
+    var zoneArr=[];
+	$(".checked input[name='zone-all']").each(function(){
+		zoneArr.push($(this).val());
+	});
+	if(zoneArr.length==0){
+		swal("",[[#{statistics.active.zone.null}]],"warning");
+		return;
+	}
+	/*<![CDATA[*/
+		data+="/active/ltv/export?dateType="+dateType+"&date="+date+"&zoneArr="+zoneArr+"&isDetail="+$("#is-detail").val();	           
+	/*]]>*/
+	window.location.href=data;
+}
+
+</script>
+</html>
