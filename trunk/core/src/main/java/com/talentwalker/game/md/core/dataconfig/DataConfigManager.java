@@ -124,6 +124,7 @@ public class DataConfigManager implements IDataConfigManager {
     }
 
     private DataConfig update(String path, String versionName, boolean isIncVersion) {
+        logger.info("**********配置文件管理器加载属性文件[" + path + "]");
         DataConfig config = DataConfig.fromFilePath(path);
         Long version = null;
         if (isIncVersion) {
