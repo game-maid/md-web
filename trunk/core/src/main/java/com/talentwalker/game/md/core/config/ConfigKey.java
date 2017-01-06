@@ -53,6 +53,10 @@ public class ConfigKey {
      * params 参数
      */
     public static final String ITEM_PARAMS = "params";
+    /**
+     * type 道具类型
+     */
+    public static final String ITEM_TYPE = "type";
     /********************guide_other*****************************/
     /**
      * guide_other 新手引导 战斗奖励
@@ -72,5 +76,8 @@ public class ConfigKey {
      * 充值金额
      */
     public static final String CASH_SHOP_CONFIG_PRICE = "price";
-
+    /**
+     * 类型 1：钻石充值  2和3 代表月卡
+     */
+    public static final String CASH_SHOP_CONFIG_TYPE = "type";
 }

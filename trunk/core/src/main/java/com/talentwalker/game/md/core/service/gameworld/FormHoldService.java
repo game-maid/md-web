@@ -85,6 +85,8 @@ public class FormHoldService extends GameSupport {
      */
     public void changeHero(int index, String heroUid) {
         Lord lord = this.getLord();
+        // 新手引导记录步数
+        guide(lord);
         checkHeroUid(lord, heroUid);
         FormHold formHold = new FormHold();
         formHold.setHeroUid(heroUid);
@@ -117,6 +119,18 @@ public class FormHoldService extends GameSupport {
         }
         lordRepository.save(lord);
         this.gameModel.addObject(ResponseKey.FORM, forms);
+    }
+
+    /**
+     * @Description:新手引导记录步数
+     * @param lord
+     * @throws
+     */
+    private void guide(Lord lord) {
+        int step = lord.getGuidanceStep();
+        if (step < 999) {
+            lord.setGuidanceStep(++step);
+        }
     }
 
     /**
@@ -314,6 +328,8 @@ public class FormHoldService extends GameSupport {
         formHolds.set(heroIndex, formHold);
         forms.set(0, formHolds);
         lord.setForm(forms);
+        // 新手引导记录步数
+        guide(lord);
         lordRepository.save(lord);
         this.gameModel.addObject(ResponseKey.FORM, forms);
     }
@@ -359,6 +375,7 @@ public class FormHoldService extends GameSupport {
         formHolds.set(heroIndex, formHold);
         forms.set(0, formHolds);
         lord.setForm(forms);
+        // 新手引导记录步数
         Integer step = lord.getGuidanceStep();
         if (step < 999) {
             lord.setGuidanceStep(++step);

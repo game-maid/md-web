@@ -181,7 +181,8 @@ public class BagService extends GameSupport {
         Lord lord = this.getLord();
         Integer step = lord.getGuidanceStep();
         if (step < 999) {
-            lord.setGuidanceStep(999);
+            // lord.setGuidanceStep(999);
+            lord.setGuidanceStep(++step);
         }
         this.openBox(lord, itemId, 1);
         lordRepository.save(lord);
@@ -330,6 +331,11 @@ public class BagService extends GameSupport {
         }
         gainPayService.pay(lord, soulId, config.getInteger("num"));
         gainPayService.gain(lord, config.getString("heroID"), 1);
+        // 记录新手引导
+        int step = lord.getGuidanceStep();
+        if (step < 999) {
+            lord.setGuidanceStep(++step);
+        }
         lordRepository.save(lord);
     }
 

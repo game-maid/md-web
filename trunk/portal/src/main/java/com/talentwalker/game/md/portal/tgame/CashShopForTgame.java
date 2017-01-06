@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.talentwalker.game.md.core.config.ConfigKey;
-import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.dataconfig.IDataConfigManager;
 import com.talentwalker.game.md.core.domain.GameUser;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
@@ -85,40 +83,40 @@ public class CashShopForTgame {
     @RequestMapping(value = "tgame/orderAsyn", method = RequestMethod.POST)
     @ResponseBody
     public String addOrderAsyn(PushOrderTgame order) {
-        GameUser gameUser = gameUserRepository.findDistinctBySsoIdAndPlatformIdAndGameZoneId(order.getUserId(),
-                PushOrderTgame.PLATFORM_ID, order.getExtInfo());
+        String orderId = order.getExtInfo();
+        Order orderRecord = orderRepository.findOne(orderId);
+        GameUser gameUser = orderRecord.getGameUser();
+        Lord lord = orderRecord.getLord();
         if (checkSign(order, appKey.get(gameUser.getPackageId()))) {
-            Order orderRecord = orderRepository.findOne(order.getOrderId());
-            if (orderRecord == null) {
-                DataConfig config = configManager.getTest();
-                Double price = config.get(ConfigKey.CASH_SHOP_CONFIG).get(order.getProductId())
-                        .getDouble(ConfigKey.CASH_SHOP_CONFIG_PRICE);
-                Lord lord = lordRepository.findOne(gameUser.getId());
+            if (orderRecord.getState() == Order.STATE_NO) {
                 topUpCardService.topUp(lord, order.getProductId(), gameUser);
-                orderRecord = new Order();
-                orderRecord.setId(order.getOrderId());
-                orderRecord.setGameUser(gameUser);
-                orderRecord.setLord(lord);
-                orderRecord.setProductId(order.getProductId());
-                orderRecord.setQuantity(order.getProductNum());
-                orderRecord.setCustomId(order.getExtInfo());
-                orderRecord.setZoneId(gameUser.getGameZoneId());
-                orderRecord.setPackageId(gameUser.getPackageId());
-                orderRecord.setPrice(price);
-                orderRecord.setLordId(lord.getId());
+                orderRecord.setState(Order.STATE_YES);
+                orderRecord.setOrderId(order.getOrderId());
+                orderRecord.setPayTime(System.currentTimeMillis());
                 orderRepository.save(orderRecord);
                 // 后台统计
                 statistics(gameUser, lord);
-            } else {// 已经处理过了
+            } else {
+                // 处理过了
             }
         }
+
         /*
-         * GameUser gameUser =
-         * gameUserRepository.findDistinctBySsoIdAndPlatformIdAndGameZoneId("zhangft1","tgame","zone2"); Lord lord =
-         * lordRepository.findOne(gameUser.getId()); topUpCardService.topUp(lord,"com_tgame_oltw_90" , gameUser);
-         * statistics("com_tgame_oltw_90", gameUser, lord);
+         * GameUser gameUser = gameUserRepository.findDistinctBySsoIdAndPlatformIdAndGameZoneId(order.getUserId(),
+         * PushOrderTgame.PLATFORM_ID, order.getExtInfo()); if (checkSign(order, appKey.get(gameUser.getPackageId()))) {
+         * Order orderRecord = orderRepository.findOne(order.getOrderId()); if (orderRecord == null) { DataConfig config
+         * = configManager.getTest(); Double price = config.get(ConfigKey.CASH_SHOP_CONFIG).get(order.getProductId())
+         * .getDouble(ConfigKey.CASH_SHOP_CONFIG_PRICE); Lord lord = lordRepository.findOne(gameUser.getId());
+         * topUpCardService.topUp(lord, order.getProductId(), gameUser); orderRecord = new Order();
+         * orderRecord.setId(order.getOrderId()); orderRecord.setGameUser(gameUser); orderRecord.setLord(lord);
+         * orderRecord.setProductId(order.getProductId()); orderRecord.setQuantity(order.getProductNum());
+         * orderRecord.setCustomId(extInfo); orderRecord.setZoneId(gameUser.getGameZoneId());
+         * orderRecord.setPackageId(gameUser.getPackageId()); orderRecord.setPrice(price);
+         * orderRecord.setLordId(lord.getId()); orderRepository.save(orderRecord); // 后台统计 statistics(gameUser, lord); }
+         * else {// 已经处理过了 } }
          */
         return "success";
+
     }
 
     /**

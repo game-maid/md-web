@@ -86,6 +86,7 @@ public class EquipService extends GameSupport {
         equip.setLevel(equip.getLevel() + up);
         equips.put(equipUid, equip);
         lord.setEquips(equips);
+        // 新手引导记录步数
         Integer step = lord.getGuidanceStep();
         if (step < 999) {
             lord.setGuidanceStep(++step);

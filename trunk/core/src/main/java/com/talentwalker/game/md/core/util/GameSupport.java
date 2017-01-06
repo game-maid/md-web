@@ -59,7 +59,6 @@ public class GameSupport extends BaseGameSupport {
     protected GameUser getGameUser() {
         HttpServletRequest request = ServletUtils.getRequest();
         Lord currentLord = (Lord) request.getAttribute("currentLord_admin");// 后台操作的主公
-        System.out.println("session验证：" + request.getHeader("sessionId"));
         if (currentLord == null) {
             String sessionId = request.getHeader("sessionId");
             return gameUserServiceRemote.findGameUserCache(sessionId);

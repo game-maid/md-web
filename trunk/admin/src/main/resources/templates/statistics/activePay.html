@@ -337,7 +337,7 @@ function callback(val,dataArr,isDetail){
 			$.each(zoneData,function(packageId,packageData){
 				var newUserPayer= checkNull(packageData.newUserPayer);
 				var oldUserPayer = checkNull(packageData.newPayerNum)-checkNull(packageData.newUserPayer);
-				var continuePayer=checkNull(packageData.payerNum)-newUserPayer-oldUserPayer;
+				var continuePayer=checkNull(packageData.payerNum)-checkNull(packageData.newPayerNum);
 				var newUserPayerRate =divide(newUserPayer,packageData.newUserNum) ;
 				//初始化曲线图数据
 				if(packageId=='zzzdayTotal'){
@@ -381,8 +381,6 @@ function callback(val,dataArr,isDetail){
 }
 
 
-
-
 //检查参数是否为null,如果为null返回o
 function checkNull(val){
 	if(val==null||val==0)
@@ -401,6 +399,10 @@ function divide(element,denominator){
 //初始化曲线图
 function initGraph(categories,series){
 	$('#graph-div').highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
         title: {
             text: [[#{statistics.active.graph.title}]],
             x: -20 //center
