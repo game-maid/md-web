@@ -12,7 +12,7 @@ import com.talentwalker.game.md.core.domain.BaseDomain;
  * @Description: 兑换码
  * @author <a href="mailto:zhangfutao@talentwalker.com">张福涛</a> 于 2016年11月28日 下午6:25:38
  */
-@Document(collection = "cd_key")
+@Document(collection = "admin_cd_key")
 public class CDKey extends BaseDomain {
 
     public static final int USING = 0;// 可用

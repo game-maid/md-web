@@ -15,7 +15,7 @@ import com.talentwalker.game.md.core.domain.BaseDomain;
  * @Description: 兑换码的批次
  * @author <a href="mailto:zhangfutao@talentwalker.com">张福涛</a> 于 2016年11月28日 下午7:38:57
  */
-@Document(collection = "cd_key_batch")
+@Document(collection = "admin_cd_key_batch")
 public class CDKeyBatch extends BaseDomain {
 
     /**

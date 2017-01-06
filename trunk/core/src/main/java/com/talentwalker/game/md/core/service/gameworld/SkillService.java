@@ -12,9 +12,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.talentwalker.game.md.core.config.ConfigKey;
+import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.domain.gameworld.Hero;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
@@ -74,6 +77,11 @@ public class SkillService extends GameSupport {
      */
     public void addExp(String skillUid, List<String> cost) {
         Lord lord = this.getLord();
+        // 新手引导记录步数
+        int step = lord.getGuidanceStep();
+        if (step < 999) {
+            lord.setGuidanceStep(++step);
+        }
         Map<String, Skill> skills = lord.getSkills();
         if (skills.containsKey(skillUid)) {
             this.addSkillExp(skillUid, cost, lord);
@@ -152,8 +160,13 @@ public class SkillService extends GameSupport {
         DataConfig expSkillConfig = this.getDataConfig().get("expSkill");
 
         for (String uid : cost) {
-            this.isHave(lord, uid);
-            exp += this.getExpAll(lord, uid, skillConfig, expSkillConfig);
+            if (StringUtils.startsWith(uid, ItemID.SKILL)) {// 消耗技能
+                this.isHave(lord, uid);
+                exp += this.getExpAll(lord, uid, skillConfig, expSkillConfig);
+            } else {// 消耗经验道具
+                this.isHaveItem(lord, uid);
+                exp += this.getItemExp(lord, uid);
+            }
         }
         for (String uid : cost) {
             gainPayService.pay(lord, uid, 1);
@@ -180,6 +193,41 @@ public class SkillService extends GameSupport {
         map.put("postLevel", postLevel);
         map.put("exp", exp);
         return map;
+    }
+
+    /**
+     * @Description:计算该经验道具增加的经验值
+     * @param lord
+     * @param uid
+     * @return
+     * @throws
+     */
+    private int getItemExp(Lord lord, String item) {
+        DataConfig configItems = getDataConfig().get(ConfigKey.ITEM);
+        if (configItems.getJsonObject().containsKey(item)) {
+            DataConfig configItem = configItems.get(item);
+            if (ItemID.SKILL_TYPE.equals(configItem.getString(ConfigKey.ITEM_TYPE))) {
+                return configItem.getInteger(ConfigKey.ITEM_PARAMS);
+            } else {
+                GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24016, "道具不是技能经验道具不能使用");
+            }
+        } else {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_21005, "道具id不存在");
+        }
+        return 0;
+    }
+
+    /**
+     * @Description:
+     * @param lord
+     * @param uid
+     * @throws
+     */
+    private void isHaveItem(Lord lord, String item) {
+        Map<String, Integer> items = lord.getItems();
+        if (!items.containsKey(item)) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_28001, "没有该道具");
+        }
     }
 
     /**

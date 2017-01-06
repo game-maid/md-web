@@ -113,6 +113,11 @@ public class HeroService extends GameSupport {
         // 计算经验值升级等级
         this.addExp(lord, hero, exp);
 
+        // 新手引导记录步数
+        int step = lord.getGuidanceStep();
+        if (step < 999) {
+            lord.setGuidanceStep(++step);
+        }
         lordRepository.save(lord);
 
         Object obj = this.gameModel.getModel(ResponseKey.HEROES);

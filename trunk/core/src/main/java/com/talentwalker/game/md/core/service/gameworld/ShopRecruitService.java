@@ -220,6 +220,8 @@ public class ShopRecruitService extends GameSupport {
      */
     private void singleExtract(String recruitKey, DataConfig config) {
         Lord lord = this.getLord();
+        // 剧情引导记录步数
+        guide(lord);
         ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
         Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
         Recruit recruit = recruitMap.get(recruitKey);
@@ -249,6 +251,18 @@ public class ShopRecruitService extends GameSupport {
         lordRepository.save(lord);
         this.gameModel.addObject(ResponseKey.SHOP, map);
         missionService.trigerMissionOnceForRecruit(resultHeroId);
+    }
+
+    /**
+     * @Description:剧情引导记录步数
+     * @param lord
+     * @throws
+     */
+    private void guide(Lord lord) {
+        int step = lord.getGuidanceStep();
+        if (step < 999) {
+            lord.setGuidanceStep(++step);
+        }
     }
 
     /**

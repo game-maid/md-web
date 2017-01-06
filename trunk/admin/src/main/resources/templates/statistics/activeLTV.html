@@ -461,6 +461,10 @@ function divide(element,denominator){
 //初始化曲线图
 function initGraph(categories,series){
 	$('#graph-div').highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
         title: {
             text: [[#{statistics.active.graph.title}]],
             x: -20 //center

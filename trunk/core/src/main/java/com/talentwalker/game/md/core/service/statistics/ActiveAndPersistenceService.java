@@ -224,8 +224,7 @@ public class ActiveAndPersistenceService {
                 matchNewPayerNum);
         // 付费人数
         String matchPayerNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
-        getNum(startDate, tableData, "statistics_payer", "setPayerNum", Integer.class, group, matchZoneStr,
-                matchPayerNum);
+        getNum(startDate, tableData, "game_payer", "setPayerNum", Integer.class, group, matchZoneStr, matchPayerNum);
         // 新增用户数
         String matchNewUserNum = "{$match:{$and:[{register_time:{$gt:" + startDate + "}},{register_time:{$lt:" + endDate
                 + "}}]}}";
@@ -365,7 +364,7 @@ public class ActiveAndPersistenceService {
                 matchNewPayerNum);
         // 付费人数
         String matchPayerNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
-        getNum(startDate, tableData, "statistics_payer", "setPayerNum", Integer.class, group, matchPayerNum);
+        getNum(startDate, tableData, "game_payer", "setPayerNum", Integer.class, group, matchPayerNum);
         // 收入金额
         String groupPrice = "{$group:{_id:{zone_id:'$zone_id',package_id:'$package_id'},total:{$sum:'$price'}}}";
         String matchIncomeNum = "{$match:{$and:[{time:{$gt:" + startDate + "}},{time:{$lt:" + endDate + "}}]}}";
@@ -526,8 +525,7 @@ public class ActiveAndPersistenceService {
                 matchNewPayerNum);
         // 付费人数
         String matchPayerNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
-        getNum(startDate, tableData, "statistics_payer", "setPayerNum", Integer.class, group, matchZoneStr,
-                matchPayerNum);
+        getNum(startDate, tableData, "game_payer", "setPayerNum", Integer.class, group, matchZoneStr, matchPayerNum);
         // 收入金额
         String groupPrice = "{$group:{_id:{zone_id:'$zone_id',package_id:'$package_id'},total:{$sum:'$price'}}}";
         String matchIncomeNum = "{$match:{$and:[{time:{$gt:" + startDate + "}},{time:{$lt:" + endDate + "}}]}}";
@@ -960,7 +958,6 @@ public class ActiveAndPersistenceService {
             String zoneId = keyValues.getString("zone_id");
             String packageId = keyValues.getString("package_id");
             int total = dbo.getInt("total");
-
             Map<String, ActiveBasePackage> zoneMap = zoneData.get(zoneId);
 
             if (zoneMap == null) {

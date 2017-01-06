@@ -11,7 +11,7 @@ import com.talentwalker.game.md.core.domain.BaseDomain;
  * @Description: 每日每个玩家支付的时间（用于后台统计）
  * @author <a href="mailto:zhangfutao@talentwalker.com">张福涛</a> 于 2016年12月23日 下午7:35:18
  */
-@Document(collection = "statistics_payer")
+@Document(collection = "game_payer")
 public class StatisticsPayer extends BaseDomain {
     @Field("zone_id")
     private String zoneId;

@@ -35,40 +35,60 @@
 				<!-- 查询条件 -->
 				<div class="form-horizontal">
 					<div class="form-group">
-						<div class="col-sm-1" style="float: left;">
-							<label style="margin-top: 10px;" th:text="#{statistics.active.date.type}">日期类型</label>
+						<div class="col-sm-0" style="float:left;">
+							<label  style="margin-top: 10px;margin-left:10px;" th:text="#{statistics.active.date}">日期</label>
 						</div>
-						<div class="col-sm-1" style="float: left;">
-							<select class="form-control" id="date-type">
-								<option value="day" th:text="#{statistics.active.day.data}"></option>
-								<option value="week" th:text="#{statistics.active.week.data}"></option>
-								<option value="month" th:text="#{statistics.active.month.data}"></option>
+						<div class="col-sm-3 input-daterange input-group" id="date-picker" style="float:left;">
+                        	<input type="text" name="startTime" class="form-control" required="required" id="startDatetimepicker" />
+                            <span class="input-group-addon">-</span>
+                            <input type="text" name="endTime" class="form-control" required="required" id="endDatetimepicker" />
+                        </div>
+                        <div class="col-sm-0" style="float:left">
+                        	<label style="margin-top:10px;margin-left:10px;" th:text="#{statistics.active.pacakge}">包</label>
+                        </div>
+                        <div class="col-sm-2" style="float:left;">
+                        	<select class="form-control" id="package-select">
+                        		<option value="" selected="selected" th:text="#{gmtool.cdk.package.all}">所有包</option>
 							</select>
+                        </div>
+                        <div class="col-sm-0" style="float:left">
+                        	<label style="margin-top:10px;margin-left:10px;" th:text="#{statistics.top.up.order.state}">订单状态</label>
+                        </div>
+                        <div class="col-sm-1" style="float:left;">
+                        	<select class="form-control" id="order-state-select">
+                        		<option value="" selected="selected" th:text="#{statistics.top.up.all}">所有</option>
+                        		<option value="0" th:text="#{statistics.top.up.order.state.success}">支付成功</option>
+                        		<option value="1" th:text="#{statistics.top.up.order.state.ing}">未支付</option>
+							</select>
+                        </div>
+                        <div class="col-sm-0" style="float:left">
+                        	<label style="margin-top:10px;margin-left:10px;" th:text="#{statistics.top.up.item.type}">道具类型</label>
+                        </div>
+                        <div class="col-sm-1" style="float:left;">
+                        	<select class="form-control" id="item-type-select">
+                        		<option value="" selected="selected" th:text="#{statistics.top.up.all}">所有</option>
+                        		<option value="1" th:text="#{statistics.top.up.item.type.diamond}">钻石</option>
+                        		<option value="2" th:text="#{statistics.top.up.item.type.month.card}">月卡</option>
+							</select>
+                        </div>
+					</div>
+				</div>
+				<div class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-0" style="float: left;">
+							<label style="margin-top:10px;margin-left:10px;" th:text="#{statistics.active.zone}">区服</label>
 						</div>
 						<div class="col-sm-1" style="float: left;">
-							<label style="margin-top: 10px;" th:text="#{statistics.active.date}">日期</label>
+			                <label id="zone-all-label" class="checkbox-inline i-checks">
+			                    <input id="zone-all-input" type="checkbox" value="0" th:text="#{statistics.active.zone.all}" /></label>
 						</div>
-						<div id="day-date-div" class="col-sm-2 date-div" style="float: left;">
-							<input id="day-date-input" class="form-control" />
-						</div>
-						<div  id="week-date-div" class="col-sm-2 date-div" style="float: left;">
-							<select id="week-date-input" class="form-control" >
-							</select>
-						</div>
-						<div  id="month-date-div" class="col-sm-2 date-div" style="float: left;">
-							<select id="month-date-input" class="form-control" >
-							</select>
-						</div>
-						<div class="col-sm-1" style="float: left;">
-							<label style="margin-top: 10px;" th:text="#{statistics.active.is.detail}">是否显示明细</label>
-						</div>
-						<div class="col-sm-2" style="float: left;">
-							<select class="form-control" id="is-detail">
-								<option value="0" th:text="#{statistics.active.show.total}"></option>
-								<option value="1" th:text="#{statistics.active.show.zone.total}"></option>
-								<option value="2" th:text="#{statistics.active.show.total.data}"></option>
-							</select>
-						</div>
+					</div>
+				</div>
+				<div id="zone-list-div" >
+					<!-- 区服复选框 -->
+				</div>
+				<div class="form-horizontal">
+					<div class="form-group">
 						<div class="col-sm-1" style="float: left;">
 							<button class="btn btn-primary" id="select">
 								<i class="fa fa-search"></i>&nbsp;<span th:text="#{sys.select}">查询</span>&nbsp;
@@ -81,68 +101,22 @@
 						</div>
 					</div>
 				</div>
-				<div class="form-horizontal">
-					<div class="form-group">
-						<div class="col-sm-1" style="float: left;">
-							<label style="margin-top: 10px;" th:text="#{statistics.active.graph.show}">曲线图展示</label>
-						</div>
-						<div class="col-sm-1" style="float: left;">
-			                <label id="data-all-label" class="checkbox-inline i-checks">
-			                    <input id="data-all-input" type="checkbox" value="0" th:text="#{statistics.active.data.all}" /></label>
-						</div>
-					</div>
-				</div>
-				<div>
-					<label id="active-num-label" class="checkbox-inline i-checks ">
-			                    <input name="data-all" type="checkbox" value="activeNum" th:text="#{statistics.active.num}" /></label>
-					<label id="new-user-num-label" class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="userNum" th:text="#{statistics.active.new.user.num}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="newPayerNum" th:text="#{statistics.active.new.payer.num}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="payerNum" th:text="#{statistics.active.payer.num}" /></label>
-					<label id="income-num-label" class="checkbox-inline i-checks">
-				                    <input name="data-all"  type="checkbox" value="icomeNum" th:text="#{statistics.active.income.num}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="incomeTimes" th:text="#{statistics.active.income.times}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="newPayRate" th:text="#{statistics.active.new.pay.rate}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="payRate" th:text="#{statistics.active.active.pay.rate}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="arpu" th:text="#{statistics.active.ARPU}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="arppu" th:text="#{statistics.active.ARPPU}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="secondPersistenceRate" th:text="#{statistics.active.second.persistence.rate}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="thirdlyPersistenceRate" th:text="#{statistics.active.thirdly.persistence.rate}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="seventhPersistenceRate" th:text="#{statistics.active.seventh.persistence.rate}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="secondLtv" th:text="#{statistics.active.second.LTV}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="thirdlyLtv" th:text="#{statistics.active.thirdly.LTV}" /></label>
-					<label class="checkbox-inline i-checks">
-				                    <input name="data-all" type="checkbox" value="seventhLtv" th:text="#{statistics.active.seventh.LTV}" /></label>
-				</div>
-				
-				<div class="form-horizontal">
-					<div class="form-group">
-						<div class="col-sm-1" style="float: left;">
-							<label style="margin-top: 10px;" th:text="#{statistics.active.zone}">区服</label>
-						</div>
-						<div class="col-sm-1" style="float: left;">
-			                <label id="zone-all-label" class="checkbox-inline i-checks">
-			                    <input id="zone-all-input" type="checkbox" value="0" th:text="#{statistics.active.zone.all}" /></label>
-						</div>
-					</div>
-				</div>
-				<div id="zone-list-div" >
-					<!-- 区服复选框 -->
-				</div>
 			</div>
 			<div class="ibox-content">
+				<div class="form-horizontal">
+					<div class="form-group">
+					<!-- ARPU占比 -->
+						<div id="arpu-graph-div" class="col-sm-4" style="float: left;">
+						</div>
+						<!-- 渠道充值人员占比 -->
+						<div id="num-graph-div" class="col-sm-4" style="float: left;">
+						</div>
+						<!-- 渠道充值总额占比 -->
+						<div id="total-graph-div" class="col-sm-4" style="float: left;">
+						</div>
+					</div>
+				</div>
+				
 				<!-- 曲线图 -->
 				<div id="graph-div"></div>
 				<!-- 统计表格 -->
@@ -175,6 +149,10 @@
 						</tbody>
 					</table>
 				</div>
+				<!-- 统计分页表格 -->
+				<div>
+					<table id="panelTable" class="table-striped" data-mobile-responsive="true"></table>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -186,26 +164,14 @@
 $(function(){
 	//初始化复选框样式
 	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
-	//初始化曲线图展示复选框默认选中
-	$("#active-num-label").iCheck("check");
-	$("#new-user-num-label").iCheck("check");
-	$("#income-num-label").iCheck("check");
-	//曲线图展示全部数据点击事件
-	$("#data-all-label").on("ifChecked",function(event){
-		$("[name='data-all']").iCheck("check");
-	});
-	$("#data-all-label").on("ifUnchecked",function(event){
-		$("[name='data-all']").iCheck("uncheck");
-	});
 	//初始化区服信息
 	zoneMap=loadZoneMap();
+	packageMap=loadPackageMap();
 	initZone();
+	initPackage();
 	//隐藏曲线图和数据表
 	$("#graph-div").hide();
 	$("#data-table-div").hide();
-	//隐藏周、月查询
-	$("#week-date-div").hide();
-	$("#month-date-div").hide();
 	//初始化时间
 	initDate();
 	
@@ -214,58 +180,30 @@ $(function(){
 //初始化时间(日/周/月)
 function initDate(){
 	//日
-	$("#day-date-input").datetimepicker({
-	    format : "yyyy/mm/dd",
+	$("#startDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
 	    autoclose : true,
 	    todayBtn :true,
-	    endDate : new Date(),
-	    minView:"month",
+	    endDate : new Date()
 	});
-	$("#day-date-input").val(new Date().format("yyyy/MM/dd"));
-	
+	$("#endDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
+	    autoclose : true,
+	    todayBtn :true,
+	    endDate : new Date()
+	});
 	var date = new Date();
-	//周
-	var weekDate = new Date("2016-11-28 00:00:00");
-	var weekNum=1;
-	var weekText='';
-	while(date>weekDate){
-		var weekDateStart = weekDate.format("yyyy/MM/dd");
-		weekDate.setDate(weekDate.getDate()+6);
-		var weekDateEnd = weekDate.format("yyyy/MM/dd");
-		
-		if(weekDate>date){
-			weekText+='<option selected="selected" value="'+weekDateStart+'">第'+weekNum+'周('+weekDateStart+'-';
-		 	weekText+=weekDateEnd+')</option>';
-		}else{
-			weekText+='<option value="'+weekDateStart+'">第'+weekNum+'周('+weekDateStart+'-';
-		 	weekText+=weekDateEnd+')</option>';
-		}
-		weekDate.setDate(weekDate.getDate()+1);
-		weekNum++;
-	}
-	$("#week-date-input").append(weekText);
-	//月
-	var monthDate = new Date("2016-12-01 00:00:00");
-	var monthNum=1;
-	var monthText="";
-	while(date>monthDate){
-		var monthDateStart = monthDate.format("yyyy/MM/dd");
-		monthDate.setMonth(monthDate.getMonth()+1);
-		monthDate.setDate(monthDate.getDate()-1);
-		var monthDateEnd = monthDate.format("yyyy/MM/dd");
-		monthDate.setDate(monthDate.getDate()+1);
-		if(monthDate>date){
-			monthText+='<option selected="selected" value="'+monthDateStart+'">第'+monthNum+'月('+monthDateStart+'-';
-			monthText+=monthDateEnd+')</option>';
-		}else{
-			monthText+='<option value="'+monthDateStart+'">第'+monthNum+'月('+monthDateStart+'-';
-			monthText+=monthDateEnd+')</option>';
-		}
-		monthNum++;
-	}
-	
-	$("#month-date-input").append(monthText);
-	
+	$("#endDatetimepicker").val(date.format("yyyy-MM-dd hh:mm:ss"));
+	date.setDate(date.getDate()-7);
+	$("#startDatetimepicker").val(date.format("yyyy-MM-dd 00:00:00"));
+}
+//初始化包
+function initPackage(){
+	var text ='';
+	$.each(packageMap,function(packageId,name){
+		text+='<option value="'+packageId+'" >'+name+'</option>';		
+	});
+	$("#package-select").append(text);
 }
 
 //初始化区服复选框
@@ -338,13 +276,21 @@ $("#select").click(function(){
         var isDetail=$("#is-detail").val();
 		data+="dateType="+dateType+"&date="+date+"&isDetail="+isDetail+"&zoneArr="+zoneArr;	           
 	/*]]>*/
-	gameAjax({
+	/* gameAjax({
 		url:"/active/base/select",
 		data:data,
 		callback:function(val){
 			callback(val,dataArr,isDetail);
 		},
-	}); 
+	});  */
+	//初始化分页表格
+	var flag=0;
+	if(flag==0){
+		initPanelTable();
+		flag++;
+	}else{
+		$("#panelTable").bootstrapTable("refresh");
+	}
 });
 
 function callback(val,dataArr,isDetail){
@@ -554,8 +500,316 @@ function initGraph(categories,series){
         },
         series:  series
     });
+	//arpu柱状图
+	$("#arpu-graph-div").highcharts({
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Monthly Average Rainfall'
+        },
+        subtitle: {
+            text: 'Source: WorldClimate.com'
+        },
+        xAxis: {
+            categories: [
+                'Jan',
+                'Feb',
+                'Mar',
+                'Apr',
+                'May',
+                'Jun',
+                'Jul',
+                'Aug',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dec'
+            ],
+            crosshair: true
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Rainfall (mm)'
+            }
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+            '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        series: [{
+            name: 'Tokyo',
+            data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
+        }, {
+            name: 'New York',
+            data: [83.6, 78.8, 98.5, 93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3]
+        }, {
+            name: 'London',
+            data: [48.9, 38.8, 39.3, 41.4, 47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2]
+        }, {
+            name: 'Berlin',
+            data: [42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1]
+        }]
+    });
+	//包充值人数占比扇形图
+	$("#num-graph-div").highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: 'Browser market shares at a specific website, 2014'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Browser share',
+            data: [
+                ['Firefox',   45.0],
+                ['IE',       26.8],
+                {
+                    name: 'Chrome',
+                    y: 12.8,
+                    sliced: true,
+                    selected: true
+                },
+                ['Safari',    8.5],
+                ['Opera',     6.2],
+                ['Others',   0.7]
+            ]
+        }]
+    });
+	//包充值总额占比扇形图
+	$("#total-graph-div").highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: 'Browser market shares at a specific website, 2014'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Browser share',
+            data: [
+                ['Firefox',   45.0],
+                ['IE',       26.8],
+                {
+                    name: 'Chrome',
+                    y: 12.8,
+                    sliced: true,
+                    selected: true
+                },
+                ['Safari',    8.5],
+                ['Opera',     6.2],
+                ['Others',   0.7]
+            ]
+        }]
+    });
 }
 
+function initPanelTable(zoneArr){
+	var condition={};
+	$("#panelTable").bootstrapTable({
+		ajax : function(params) {
+			gameBootstrapTable("/statistics/topUp/order/list", params);
+		},
+		queryParams : function(params) {
+			var startStr=$("#startDatetimepicker").val().replace(/-/g,"/");
+			var startLong = new Date(startStr).getTime();
+			var endStr =$("#endDatetimepicker").val().replace(/-/g,"/");
+			var endLong = new Date(endStr).getTime();
+			var zoneArr=[];
+			$(".checked input[name='zone-all']").each(function(){
+				zoneArr.push($(this).val());
+			});
+			var query = {
+				limit : params.limit,
+				offset : params.offset,
+				search_createTime_GTEL:startLong,
+				search_createTime_LTEL:endLong,
+				packageId:$("#package-select").val(),
+				orderState:$("#order-state-select").val(),
+				itemType:$("#item-type-select").val(),
+				zoneList:zoneArr,
+			};
+			console.log(zoneArr)
+			return query;
+		},
+		pagination : true,
+		singleSelect : false,
+		uniqueId : "id",
+		sidePagination : "server",
+		detailView:true,
+		columns : [
+					{
+						title : [[#{statistics.top.up.order}]],
+						field : "id",
+						align : "center",
+					},
+					{
+						title : [[#{statistics.top.up.item.desc}]],
+						field : "productId",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},
+					{
+						title : [[#{statistics.top.up.item.ID}]],
+						field : "productId",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},
+					{
+						title : [[#{statistics.top.up.num}]],
+						field : "quantity",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},
+					{
+						title : [[#{statistics.top.up.lord.id}]],
+						field : "lordId",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},
+					{
+						title : [[#{statistics.top.up.platform.id}]],
+						field : "platformId",
+						align : "center",
+						formatter:function(value){
+							return value;
+						}
+					},
+					{
+						title : [[#{statistics.top.up.zone}]],
+						field : "zoneId",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},{
+						title : [[#{statistics.top.up.package}]],
+						field : "packageId",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},{
+						title : [[#{statistics.top.up.price}]],
+						field : "price",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},{
+						title : [[#{statistics.top.up.order.state}]],
+						field : "state",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},{
+						title : [[#{statistics.top.up.create.time}]],
+						field : "createTime",
+						align : "center",
+						width : 100 ,
+						formatter : function(value){
+							return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+						},
+					},{
+						title : [[#{statistics.top.up.pay.time}]],
+						field : "payTime",
+						align : "center",
+						width : 100 ,
+						formatter : function(value){
+							if(value==0)
+								return null;
+							return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+						},
+					},{
+						title : [[#{statistics.top.up.current.level}]],
+						field : "lordLevel",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},{
+						title : [[#{statistics.top.up.current.vip.level}]],
+						field : "lordVipLevel",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},{
+						title : [[#{statistics.top.up.item.type}]],
+						field : "productType",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},{
+						title : [[#{statistics.top.up.current.vip.score}]],
+						field : "lordVipScore",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},{
+						title : [[#{statistics.top.up.another.order.id}]],
+						field : "orderId",
+						align : "center",
+						formatter : function(value){
+							return value;
+						},
+					},
+				]
+	});
+}
 
 //导出
 function exportCDKey(){

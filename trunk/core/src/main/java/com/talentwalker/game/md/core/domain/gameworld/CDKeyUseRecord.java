@@ -12,7 +12,7 @@ import com.talentwalker.game.md.core.domain.BaseDomain;
  * @Description: CDK 玩家领奖记录
  * @author <a href="mailto:zhangfutao@talentwalker.com">张福涛</a> 于 2016年11月29日 上午9:51:45
  */
-@Document(collection = "cd_key_use_record")
+@Document(collection = "admin_cd_key_use_record")
 public class CDKeyUseRecord extends BaseDomain {
 
     /**

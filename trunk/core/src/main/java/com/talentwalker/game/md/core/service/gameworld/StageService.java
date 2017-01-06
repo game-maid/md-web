@@ -96,18 +96,8 @@ public class StageService extends GameSupport {
         Stage stage = sc.getStage(stageId);
         int heroExp = this.getDataConfig().get("stage_stage").get(stageId).getInteger("exp");
         if (star > 0) { // 战斗胜利，计算掉落，添加武将经验等
-            // 新手引导战斗成功，自动记录新手步数
-            if (stageId.equals("stage_1_1_1") || stageId.equals("stage_1_1_2")) {
-                Integer step = lord.getGuidanceStep();
-                lord.setGuidanceStep(++step);
-            }
-            // 新手引导战斗增加额外固定奖励
-            if (stageId.equals(GUIDE_STAGE_ID)) {
-
-                String itemId = getDataConfig().get(ConfigKey.GUIDE_OTHER).get(lord.getGuidanceHeroId())
-                        .getString(ConfigKey.GUIDE_OTHER_EQUIP_ID);
-                gainPayService.gain(lord, itemId, 1);
-            }
+            // 新手引导
+            guide(stageId, lord);
 
             int strength = this.getDataConfig().get("stage_stage").get(stageId).get("strength").getInteger("end");
             gainPayService.pay(lord, ItemID.STRENGTH, strength);
@@ -162,6 +152,25 @@ public class StageService extends GameSupport {
         }
         model.put("guidanceStep", lord.getGuidanceStep());
         this.gameModel.addObject(ResponseKey.STAGE, map);
+    }
+
+    /**
+     * @Description:新手引导 自动增加步数，增加特定奖励
+     * @throws
+     */
+    private void guide(String stageId, Lord lord) {
+        // 新手引导战斗成功，自动记录新手步数
+        if (stageId.equals("stage_1_1_1") || stageId.equals("stage_1_1_2") || stageId.equals("stage_1_1_3")
+                || stageId.equals("stage_1_1_4") || stageId.equals("stage_1_1_5")) {
+            Integer step = lord.getGuidanceStep();
+            lord.setGuidanceStep(++step);
+        }
+        // 新手引导战斗增加额外固定奖励
+        if (stageId.equals(GUIDE_STAGE_ID)) {
+            String itemId = getDataConfig().get(ConfigKey.GUIDE_OTHER).get(lord.getGuidanceHeroId())
+                    .getString(ConfigKey.GUIDE_OTHER_EQUIP_ID);
+            gainPayService.gain(lord, itemId, 1);
+        }
     }
 
     private void addHeroExp(Lord lord, int exp) {

@@ -944,7 +944,11 @@ public class LordService extends GameSupport {
         }
         map.put("lvupRecord", lvupRecord);
         this.gameModel.addObject(ResponseKey.LORD, map);
-
+        // 新手引导记录步数
+        int step = lord.getGuidanceStep();
+        if (step < 999) {
+            lord.setGuidanceStep(++step);
+        }
         lordRepository.save(lord);
     }
 

@@ -54,5 +54,9 @@ public class ItemID {
      * 魂币
      */
     public final static String SOUL_GOLD = "soulGold";
+    /**
+     * 技能经验道具类型
+     */
+    public final static String SKILL_TYPE = "expSkill";
 
 }

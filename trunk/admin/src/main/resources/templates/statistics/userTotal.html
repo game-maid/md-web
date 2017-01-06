@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+	<link th:href="@{/static/css/plugins/bootstrap-table/bootstrap-table.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/autocompleter/jquery.autocompleter.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/pickList/pickList.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/bootstrap-table/extensions/editable/bootstrap-editable.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/jsTree/style.min.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/webuploader/webuploader.css}" rel="stylesheet"/>
+    <link th:href="@{/static/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
+	
+	
+    <script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.js}"></script>
+	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/autocompleter/jquery.autocompleter.min.js}"></script>
+	<script th:src="@{/static/js/plugins/datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+	<script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/pickList/pickList.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/extensions/editable/bootstrap-table-editable.min.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/extensions/editable/bootstrap-editable.min.js}"></script>
+	<script th:src="@{/static/js/plugins/jsTree/jstree.min.js}"></script>
+	<script th:src="@{/static/js/plugins/webuploader/webuploader.min.js}"></script>
+	<script th:src="@{/static/js/plugins/iCheck/icheck.min.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-waitingfor/bootstrap-waitingfor.min.js}"></script>
+	<script th:src="@{/static/js/plugins/highcharts/highcharts.js}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<!-- 查询条件 -->
+				<div class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-1" style="float: left;">
+							<label style="margin-top: 10px;" th:text="#{statistics.active.zone}">区服</label>
+						</div>
+						<div class="col-sm-1" style="float: left;">
+			                <label id="zone-all-label" class="checkbox-inline i-checks">
+			                    <input id="zone-all-input" type="checkbox" value="0" th:text="#{statistics.active.zone.all}" /></label>
+						</div>
+						<div class="col-sm-1" style="float: left;">
+							<button class="btn btn-primary" id="select">
+								<i class="fa fa-search"></i>&nbsp;<span th:text="#{sys.select}">查询</span>&nbsp;
+							</button>
+						</div>
+						<div class="col-sm-1" style="float: right;">
+							<button class="btn btn-success" onclick="exportCDKey()" >
+								<i class="fa fa-download"></i>&nbsp;<span th:text="#{gmtool.cdk.export}">导出</span>&nbsp;
+							</button>
+						</div>
+					</div>
+				</div>
+				<div id="zone-list-div" >
+					<!-- 区服复选框 -->
+				</div>
+			</div>
+			<div class="ibox-content">
+				<!-- 统计表格 -->
+				<div id="data-table-div">
+					<table  class="table bordered" id="data-table">
+						<thead>
+							<tr>
+							<th width="5.2%" th:text="#{statistics.user.zone.id}"></th>
+							<th width="5.2%" th:text="#{statistics.user.zone.name}"></th>
+							<th width="5.2%" th:text="#{statistics.user.zone.total.num}"></th>
+							<th width="5.2%" th:text="#{statistics.user.package.id}"></th>
+							<th width="5.2%" th:text="#{statistics.user.package.name}"></th>
+							<th width="5.2%" th:text="#{statistics.user.package.num}"></th>
+							</tr>
+						</thead>
+						<tbody id="data-table-body">
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+</body>
+
+<script type="text/javascript" th:inline="javascript">
+$(function(){
+	//初始化复选框样式
+	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
+	//初始化区服信息
+	zoneMap=loadZoneMap();
+	packageMap=loadPackageMap();
+	initZone();
+	//隐藏数据表
+	$("#data-table-div").hide();
+})
+
+//初始化区服复选框
+function initZone(){
+	var text ="";
+	$.each(zoneMap,function(zoneId,zoneName){
+		text+='<label class="checkbox-inline i-checks ">';
+		text+='<input name="zone-all" type="checkbox" value="'+zoneId+'" >'+zoneId+'-'+zoneName+'</input></label>';
+	});
+	$("#zone-list-div").append(text);
+	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
+	$("#zone-all-label").on("ifChecked",function(event){
+		$("[name='zone-all']").iCheck("check");
+	});
+	$("#zone-all-label").on("ifUnchecked",function(event){
+		$("[name='zone-all']").iCheck("uncheck");
+	});
+}
+
+
+//查询
+$("#select").click(function(){
+    var zoneArr=[];
+	$(".checked input[name='zone-all']").each(function(){
+		zoneArr.push($(this).val());
+	});
+	if(zoneArr.length==0){
+		swal("",[[#{statistics.active.zone.null}]],"warning");
+		return;
+	}
+	
+	/*<![CDATA[*/
+		var data="zoneArr="+zoneArr;	           
+	/*]]>*/
+	gameAjax({
+		url:"/statistics/user/total/select",
+		data:data,
+		callback:function(val){
+			$("#data-table-div").show();
+			callback(val);
+		},
+	}); 
+});
+
+function callback(val){
+	var text ='';
+	$.each(val,function(index,zoneData){
+		var zoneId = zoneData.zoneId;
+		/*<![CDATA[*/
+		text+='<tr><td>'+zoneId+'</td><td>'+zoneMap[zoneId]+'</td><td>'+zoneData.zoneTotal+'</td>';
+		var packageIdText='';
+		var packageNameText='';
+		var packageTotalText='';
+		$.each(zoneData.package,function(packageId,total){
+			packageIdText+='</br>'+packageId+'</br>';
+			packageNameText+='</br>'+packageMap[packageId]+'</br>';
+			packageTotalText+='</br>'+total+'</br>';
+		});	
+		text+='<td>'+packageIdText+'</td><td>'+packageNameText+'</td><td>'+packageTotalText+'</td></tr>';
+		/*]]>*/
+	});
+	$("#data-table-body").empty();
+	$("#data-table-body").append(text);
+}
+
+//导出
+function exportCDKey(){
+	var zoneArr=[];
+	$(".checked input[name='zone-all']").each(function(){
+		zoneArr.push($(this).val());
+	});
+	if(zoneArr.length==0){
+		swal("",[[#{statistics.active.zone.null}]],"warning");
+		return;
+	}
+	/*<![CDATA[*/
+		var data="/statistics/user/total/export?zoneArr="+zoneArr;	           
+	/*]]>*/
+	window.location.href=data;
+	
+}
+
+</script>
+</html>
