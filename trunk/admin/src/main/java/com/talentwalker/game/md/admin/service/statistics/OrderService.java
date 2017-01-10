@@ -55,6 +55,7 @@ public class OrderService extends BaseService {
         } else if ("2".equals(itemType)) {// 月卡
             searchFilter.addCriteria(Criteria.where("product_type").ne(1));
         }
+
         Page<Order> findAll = orderRepository.findAll(searchFilter);
         return findAll;
     }

@@ -989,7 +989,9 @@ public class LordService extends GameSupport {
         Map<Integer, SignInRecord> signInRecords = lord.getSignInRecords();
         SignInRecord signInRecord = null;
         Date curDate = cal.getTime();
-        String key = cal.get(Calendar.MONTH) + 1 + "_" + times;
+        String month = cal.get(Calendar.MONTH) + 1 + "";
+
+        String key = month.length() == 1 ? "0" + month + "_" + times : cal.get(Calendar.MONTH) + 1 + "_" + times;
         DataConfig rewardConfig = getDataConfig().get(LordService.SIGN_IN_REWARD).get(key);
         int multiple = rewardConfig.getInteger("VIP" + lord.getVipLevel());// 奖励倍数
         String itemId = rewardConfig.getString("rewardsID");
