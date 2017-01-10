@@ -9,6 +9,9 @@
 package com.talentwalker.game.md.core.service.gameworld;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.talentwalker.game.md.core.config.ConfigKey;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
+import com.talentwalker.game.md.core.dataconfig.IDataConfigManager;
 import com.talentwalker.game.md.core.domain.GameUser;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.gameworld.Order;
@@ -32,6 +36,9 @@ import com.talentwalker.game.md.core.util.GameSupport;
 public class CashShopService extends GameSupport {
     @Resource
     private OrderRepository orderRepository;
+
+    @Resource
+    IDataConfigManager iDataConfigManager;
 
     /**
      * @Description:记录订单，生成订单
@@ -56,6 +63,7 @@ public class CashShopService extends GameSupport {
         order.setZoneId(gameUser.getGameZoneId());
         order.setPackageId(gameUser.getPackageId());
         order.setLordId(lord.getId());
+        order.setLordLevel(lord.getLevel());
         order.setLordVipLevel(lord.getVipLevel());
         order.setLordVipScore(lord.getVipScore());
         order.setPrice(dataConfig.getDouble(ConfigKey.CASH_SHOP_CONFIG_PRICE));
@@ -66,4 +74,21 @@ public class CashShopService extends GameSupport {
         this.gameModel.addObject("orderId", orderId);
     }
 
+    /**
+     * @Description:获取cashShop_config配置信息(道具描述)
+     * @return
+     * @throws
+     */
+    public Map<String, Map<String, Object>> cashShopConfig() {
+        Map<String, Map<String, Object>> result = new HashMap<>();
+        DataConfig cashShop = iDataConfigManager.getTest().get(ConfigKey.CASH_SHOP_CONFIG);
+        Iterator<String> keys = cashShop.getJsonObject().keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            Map<String, Object> map = new HashMap<>();
+            map.put("desp", cashShop.get(key).getString(ConfigKey.CASH_SHOP_CONFIG_DESP));
+            result.put(key, map);
+        }
+        return result;
+    }
 }

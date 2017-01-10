@@ -36,7 +36,7 @@ public class Recruit extends BaseDomain {
      */
     protected int tenTimes;
     /**
-     * 招募类型1：普通，2：触发，3活动
+     * 招募类型1：普通，2：触发，3活动,4新手池
      */
     protected int type;
     /**

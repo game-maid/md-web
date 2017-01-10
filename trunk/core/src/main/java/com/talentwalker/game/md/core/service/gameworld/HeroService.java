@@ -132,7 +132,7 @@ public class HeroService extends GameSupport {
     private void addExp(Lord lord, Hero hero, int exp) {
         // 根据武将好感度增加武将经验值
         int loveLevel = hero.getLoveLevel();
-        DataConfig dataConfig = getDataConfig().get("haoganup").get(hero.getHeroId()).get("haogan").get(loveLevel + "");
+        DataConfig dataConfig = getDataConfig().get("loveup").get(hero.getHeroId()).get("love").get(loveLevel + "");
         if (dataConfig != null) {
             DataConfig attrConfig = dataConfig.get("attr");
             if (attrConfig != null) {

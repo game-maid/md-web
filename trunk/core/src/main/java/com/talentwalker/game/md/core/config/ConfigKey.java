@@ -80,4 +80,24 @@ public class ConfigKey {
      * 类型 1：钻石充值  2和3 代表月卡
      */
     public static final String CASH_SHOP_CONFIG_TYPE = "type";
+    /**
+     * 描述
+     */
+    public static final String CASH_SHOP_CONFIG_DESP = "desp";
+
+    /**********************英雄招募*****************************/
+    public static final String SHOP_HERO_RECRUIT = "shop_heroRecruit";
+    /**
+     * 新手招募第一次key
+     */
+    public static final String SHOP_HERO_RECRUIT_FIRST = "recruit_0001";
+    /**
+     * 新手招募第二次key
+     */
+    public static final String SHOP_HERO_RECRUIT_SECOND = "recruit_0002";
+    /**
+     * 新手招募招募类型
+     */
+    public static final String SHOP_HERO_RECRUIT_TYPE = "type";
+
 }
