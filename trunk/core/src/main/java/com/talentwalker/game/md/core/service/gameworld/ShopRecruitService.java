@@ -20,6 +20,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.talentwalker.game.md.core.config.ConfigKey;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.domain.config.ShopRecruitConfig;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
@@ -92,36 +93,63 @@ public class ShopRecruitService extends GameSupport {
      * @throws
      */
     private List<Recruit> getShopRecruit(ShopRecruit shopRecruit, Lord lord) {
-        DataConfig config = this.getDataConfig().get("shop_heroRecruit");
-        if (shopRecruit == null) {
+        List<Recruit> activityRecruit = new ArrayList<>();
+        DataConfig config = this.getDataConfig().get(ConfigKey.SHOP_HERO_RECRUIT);
+        int guidanceRcruit = lord.getGuidanceRcruit();
+        if (guidanceRcruit == 0 && shopRecruit == null) {
             shopRecruit = new ShopRecruit();
             shopRecruit.setId(lord.getId());
             Map<String, Recruit> mapRecruit = new HashMap<String, Recruit>();
-            Iterator it = config.getJsonObject().keys();
-            while (it.hasNext()) {
-                String recruitId = it.next().toString();
-                int type = config.get(recruitId).getInteger("type");
-                if (type == 1) {// 基础招募
-                    Recruit recuit = initRecruit();
-                    recuit.setId(recruitId);
-                    recuit.setType(1);
-                    mapRecruit.put(recruitId, recuit);
-                }
-            }
+            Recruit recruit = initRecruit();
+            recruit.setId(ConfigKey.SHOP_HERO_RECRUIT_FIRST);
+            recruit.setType(4);
+            mapRecruit.put(ConfigKey.SHOP_HERO_RECRUIT_FIRST, recruit);
             shopRecruit.setRecruit(mapRecruit);
+        } else if (guidanceRcruit == 1) {
+            Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
+            recruitMap.remove(ConfigKey.SHOP_HERO_RECRUIT_FIRST);
+            Recruit recruit = initRecruit();
+            recruit.setId(ConfigKey.SHOP_HERO_RECRUIT_SECOND);
+            recruit.setType(4);
+            recruitMap.put(ConfigKey.SHOP_HERO_RECRUIT_SECOND, recruit);
+        } else if (guidanceRcruit >= 2) {
+            Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
+            recruitMap.remove(ConfigKey.SHOP_HERO_RECRUIT_SECOND);
+            commonRecruit(config, recruitMap, lord, shopRecruit, activityRecruit);
         }
-        // 当前存在的活动招募
-        List<Recruit> activityRecruit = getActivityRecruit(lord, shopRecruit);
         // 常驻招募和触发招募
         List<Recruit> recruit = getResidentRecruit(shopRecruit);
-        if (activityRecruit != null) {
-            activityRecruit.addAll(recruit);
-        } else {
-            activityRecruit = recruit;
-        }
+
+        activityRecruit.addAll(recruit);
         this.setRecruit(shopRecruit, activityRecruit);
         shopRecruitRepository.save(shopRecruit);
         return activityRecruit;
+    }
+
+    /**
+     * @Description:日常和活动招募
+     * @param config
+     * @param recruitMap
+     * @param lord
+     * @param shopRecruit
+     * @param activityRecruit
+     * @throws
+     */
+    private void commonRecruit(DataConfig config, Map<String, Recruit> recruitMap, Lord lord, ShopRecruit shopRecruit,
+            List<Recruit> activityRecruit) {
+        Iterator<String> it = config.getJsonObject().keys();
+        while (it.hasNext()) {
+            String recruitId = it.next();
+            Integer type = config.get(recruitId).getInteger(ConfigKey.SHOP_HERO_RECRUIT_TYPE);
+            if (type == 1 && !recruitMap.containsKey(recruitId)) {// 基础招募
+                Recruit recruit = initRecruit();
+                recruit.setId(recruitId);
+                recruit.setType(1);
+                recruitMap.put(recruitId, recruit);
+            }
+        }
+        // 当前存在的活动招募
+        activityRecruit = getActivityRecruit(lord, shopRecruit);
     }
 
     public void textTriggeringRecruit(String recruitId) {
@@ -239,7 +267,9 @@ public class ShopRecruitService extends GameSupport {
         } else {
             costAmount = config.getInteger("single_1");
         }
-        gainPayService.pay(lord, cost, costAmount);
+        if (costAmount != 0) {
+            gainPayService.pay(lord, cost, costAmount);
+        }
         gainPayService.gain(lord, resultHeroId, 1);
 
         recruitMap.put(recruitKey, recruit);
@@ -248,6 +278,8 @@ public class ShopRecruitService extends GameSupport {
         Map<String, List<Recruit>> map = new HashMap<String, List<Recruit>>();
         map.put("recruit", recruitList);
         shopRecruitRepository.save(shopRecruit);
+
+        lord.setGuidanceRcruit(lord.getGuidanceRcruit() + 1);
         lordRepository.save(lord);
         this.gameModel.addObject(ResponseKey.SHOP, map);
         missionService.trigerMissionOnceForRecruit(resultHeroId);
