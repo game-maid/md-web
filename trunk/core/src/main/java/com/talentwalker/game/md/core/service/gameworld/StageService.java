@@ -21,7 +21,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.talentwalker.game.md.core.config.ConfigKey;
 import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.domain.gameworld.FormHold;
@@ -160,17 +159,16 @@ public class StageService extends GameSupport {
      */
     private void guide(String stageId, Lord lord) {
         // 新手引导战斗成功，自动记录新手步数
-        if (stageId.equals("stage_1_1_1") || stageId.equals("stage_1_1_2") || stageId.equals("stage_1_1_3")
-                || stageId.equals("stage_1_1_4") || stageId.equals("stage_1_1_5")) {
-            Integer step = lord.getGuidanceStep();
+        Integer step = lord.getGuidanceStep();
+        if (step < 999) {
             lord.setGuidanceStep(++step);
         }
         // 新手引导战斗增加额外固定奖励
-        if (stageId.equals(GUIDE_STAGE_ID)) {
-            String itemId = getDataConfig().get(ConfigKey.GUIDE_OTHER).get(lord.getGuidanceHeroId())
-                    .getString(ConfigKey.GUIDE_OTHER_EQUIP_ID);
-            gainPayService.gain(lord, itemId, 1);
-        }
+        /*
+         * if (stageId.equals(GUIDE_STAGE_ID)) { String itemId =
+         * getDataConfig().get(ConfigKey.GUIDE_OTHER).get(lord.getGuidanceHeroId())
+         * .getString(ConfigKey.GUIDE_OTHER_EQUIP_ID); gainPayService.gain(lord, itemId, 1); }
+         */
     }
 
     private void addHeroExp(Lord lord, int exp) {

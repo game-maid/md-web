@@ -273,6 +273,11 @@ public class Lord extends BaseDomain {
      * 赠送奖励时间
      */
     protected long givesStrengthTime;
+    /**
+     * 新手招募第步了
+     */
+    @Field("guidance_recruit")
+    protected int guidanceRcruit;
 
     /**
      * 每天第一次免费体力开始领取的时间
@@ -857,7 +862,7 @@ public class Lord extends BaseDomain {
         return guidanceStep;
     }
 
-    public void setGuidanceStep(Integer guidanceStep) {
+    public void setGuidanceStep(int guidanceStep) {
         this.guidanceStep = guidanceStep;
     }
 
@@ -927,6 +932,20 @@ public class Lord extends BaseDomain {
 
     public void setDailySecondFreeStrenthEndTime(Long dailySecondFreeStrenthEndTime) {
         this.dailySecondFreeStrenthEndTime = dailySecondFreeStrenthEndTime;
+    }
+
+    /**
+     * @return guidanceRcruit
+     */
+    public int getGuidanceRcruit() {
+        return guidanceRcruit;
+    }
+
+    /**
+     * @param guidanceRcruit 要设置的 guidanceRcruit
+     */
+    public void setGuidanceRcruit(int guidanceRcruit) {
+        this.guidanceRcruit = guidanceRcruit;
     }
 
 }
