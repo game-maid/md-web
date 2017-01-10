@@ -156,8 +156,6 @@
 			</div>
 		</div>
 	</div>
-	
-	
 </body>
 
 <script type="text/javascript" th:inline="javascript">
@@ -175,6 +173,16 @@ $(function(){
 	//初始化时间
 	initDate();
 	
+	//获取cashShop_config配置信息
+	simpleGameAjax({
+		'url':'/statistics/topUp/config',
+		'callback':function(val){
+			window.cashShop={};
+			$.each(val,function(key,data){
+				cashShop[key]=data.desp;
+			});
+		},
+	});
 })
 
 //初始化时间(日/周/月)
@@ -239,30 +247,6 @@ $("#date-type").change(function(){
 
 //查询
 $("#select").click(function(){
-	var data="";
-	var dateType=$("#date-type").val();
-	dateType=="day"?$("#graph-div").hide():$("#graph-div").show();
-	$("#data-table-div").show();
-	var date={};
-	if(dateType=="day"){
-		date=$("#day-date-input").val();
-	}else if(dateType=="week"){
-		date=$("#week-date-input").val();
-	}else if(dateType=="month"){
-		date=$("#month-date-input").val();
-	}
-	
-	
-	var dataArr = [];
-	$(".checked input[name='data-all']").each(function(){ 
-		dataArr.push($(this).val());
-    });
-	//是否查询全部区服
-	var zoneAll =false;
-	if($("#zone-all-input").is(':checked')){
-		zoneAll=true;
-	}
-	
     var zoneArr=[];
 	$(".checked input[name='zone-all']").each(function(){
 		zoneArr.push($(this).val());
@@ -271,26 +255,29 @@ $("#select").click(function(){
 		swal("",[[#{statistics.active.zone.null}]],"warning");
 		return;
 	}
-	
+	var zoneArr=[];
+	$(".checked input[name='zone-all']").each(function(){
+		zoneArr.push($(this).val());
+	});
 	/*<![CDATA[*/
-        var isDetail=$("#is-detail").val();
-		data+="dateType="+dateType+"&date="+date+"&isDetail="+isDetail+"&zoneArr="+zoneArr;	           
-	/*]]>*/
-	/* gameAjax({
-		url:"/active/base/select",
-		data:data,
-		callback:function(val){
-			callback(val,dataArr,isDetail);
-		},
-	});  */
+		var data="packageId="+$("#package-select").val()+"&orderState="+$("#order-state-select").val()+
+				"&itemType="+$("#item-type-select").val()+"&zoneList[]="+zoneArr+"&startStr="+$("#startDatetimepicker").val()+
+				"&endStr="+$("#endDatetimepicker").val();
+    /*]]>*/
 	//初始化分页表格
-	var flag=0;
-	if(flag==0){
-		initPanelTable();
-		flag++;
-	}else{
-		$("#panelTable").bootstrapTable("refresh");
-	}
+	initPanelTable();
+	$("#panelTable").bootstrapTable("refresh");
+	//arpu
+	var arppu={};
+	gameAjax({
+		url:"/statistics/topUp/arpu",
+		data:data,
+		async:false,
+		callback:function(val){
+			arppu=val;
+		},
+	});
+	initGraph(arppu);
 });
 
 function callback(val,dataArr,isDetail){
@@ -472,7 +459,7 @@ function divide(element,denominator){
 }
 
 //初始化曲线图
-function initGraph(categories,series){
+function initGraph(arppu,categories,series){
 	$('#graph-div').highcharts({
 		credits:{
 			href:"",
@@ -506,10 +493,7 @@ function initGraph(categories,series){
             type: 'column'
         },
         title: {
-            text: 'Monthly Average Rainfall'
-        },
-        subtitle: {
-            text: 'Source: WorldClimate.com'
+            text: [[#{statistics.top.up.arppu.proportion}]]
         },
         xAxis: {
             categories: [
@@ -562,6 +546,7 @@ function initGraph(categories,series){
             data: [42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1]
         }]
     });
+	$("#arpu-graph-div").show();
 	//包充值人数占比扇形图
 	$("#num-graph-div").highcharts({
         chart: {
@@ -661,6 +646,8 @@ function initPanelTable(zoneArr){
 			$(".checked input[name='zone-all']").each(function(){
 				zoneArr.push($(this).val());
 			});
+			console.log(startLong)
+			console.log(endLong);
 			var query = {
 				limit : params.limit,
 				offset : params.offset,
@@ -671,14 +658,13 @@ function initPanelTable(zoneArr){
 				itemType:$("#item-type-select").val(),
 				zoneList:zoneArr,
 			};
-			console.log(zoneArr)
 			return query;
 		},
 		pagination : true,
 		singleSelect : false,
 		uniqueId : "id",
 		sidePagination : "server",
-		detailView:true,
+		detailView:false,
 		columns : [
 					{
 						title : [[#{statistics.top.up.order}]],
@@ -690,7 +676,7 @@ function initPanelTable(zoneArr){
 						field : "productId",
 						align : "center",
 						formatter : function(value){
-							return value;
+							return cashShop[value];
 						},
 					},
 					{
@@ -730,14 +716,14 @@ function initPanelTable(zoneArr){
 						field : "zoneId",
 						align : "center",
 						formatter : function(value){
-							return value;
+							return zoneMap[value];
 						},
 					},{
 						title : [[#{statistics.top.up.package}]],
 						field : "packageId",
 						align : "center",
 						formatter : function(value){
-							return value;
+							return packageMap[value];
 						},
 					},{
 						title : [[#{statistics.top.up.price}]],
@@ -751,7 +737,7 @@ function initPanelTable(zoneArr){
 						field : "state",
 						align : "center",
 						formatter : function(value){
-							return value;
+							return value==0?[[#{statistics.top.up.order.state.success}]]:[[#{statistics.top.up.order.state.ing}]];
 						},
 					},{
 						title : [[#{statistics.top.up.create.time}]],
@@ -790,7 +776,7 @@ function initPanelTable(zoneArr){
 						field : "productType",
 						align : "center",
 						formatter : function(value){
-							return value;
+							return value==1?[[#{statistics.top.up.item.type.diamond}]]:[[#{statistics.top.up.item.type.month.card}]];
 						},
 					},{
 						title : [[#{statistics.top.up.current.vip.score}]],
