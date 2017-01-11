@@ -90,4 +90,42 @@ public class TopUpStatisticsController extends BaseController {
         return topUpStatisticsService.arpu(packageId, orderState, itemType, zoneArr, startStr, endStr);
     }
 
+    /**
+     * @Description:每日充值金额
+     * @param packageId
+     * @param orderState
+     * @param itemType
+     * @param zoneArr
+     * @param startStr
+     * @param endStr
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping(value = "dailyIncome", method = RequestMethod.POST)
+    public Object dailyIncome(@RequestParam("packageId") String packageId,
+            @RequestParam("orderState") String orderState, @RequestParam("itemType") String itemType,
+            @RequestParam("zoneList[]") String[] zoneArr, @RequestParam("startStr") String startStr,
+            @RequestParam("endStr") String endStr) {
+        return topUpStatisticsService.dailyIncome(packageId, orderState, itemType, zoneArr, startStr, endStr);
+    }
+
+    /**
+     * @Description:区服充值统计
+     * @param packageId
+     * @param orderState
+     * @param itemType
+     * @param zoneArr
+     * @param startStr
+     * @param endStr
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping(value = "zone/topUp", method = RequestMethod.POST)
+    public Object zoneTopUp(@RequestParam("packageId") String packageId, @RequestParam("orderState") String orderState,
+            @RequestParam("itemType") String itemType, @RequestParam("zoneList[]") String[] zoneArr,
+            @RequestParam("startStr") String startStr, @RequestParam("endStr") String endStr) {
+        return topUpStatisticsService.zoneTopUp(packageId, orderState, itemType, zoneArr, startStr, endStr);
+    }
 }

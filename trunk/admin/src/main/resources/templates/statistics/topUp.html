@@ -118,31 +118,16 @@
 				</div>
 				
 				<!-- 曲线图 -->
-				<div id="graph-div"></div>
+				<div id="graph-div" style="width:90%"></div>
 				<!-- 统计表格 -->
 				<div id="data-table-div">
 					<table  class="table bordered" id="data-table">
 						<thead>
 							<tr>
-							<th width="5.2%" th:text="#{statistics.active.date}"></th>
-							<th width="5.2%" th:text="#{statistics.active.zone}"></th>
-							<th width="5.2%" th:text="#{statistics.active.pacakge}"></th>
-							<th width="5.2%" th:text="#{statistics.active.num}"></th>
-							<th width="5.2%" th:text="#{statistics.active.new.user.num}"></th>
-							<th width="5.2%" th:text="#{statistics.active.new.payer.num}"></th>
-							<th width="5.2%" th:text="#{statistics.active.payer.num}"></th>
-							<th width="5.2%" th:text="#{statistics.active.income.num}"></th>
-							<th width="5.2%" th:text="#{statistics.active.income.times}"></th>
-							<th width="5.2%" th:text="#{statistics.active.new.pay.rate}"></th>
-							<th width="5.2%" th:text="#{statistics.active.active.pay.rate}"></th>
-							<th width="5.2%" th:text="#{statistics.active.ARPU}"></th>
-							<th width="5.2%" th:text="#{statistics.active.ARPPU}"></th>
-							<th width="5.2%" th:text="#{statistics.active.second.persistence.rate}"></th>
-							<th width="5.2%" th:text="#{statistics.active.thirdly.persistence.rate}"></th>
-							<th width="5.2%" th:text="#{statistics.active.seventh.persistence.rate}"></th>
-							<th width="5.2%" th:text="#{statistics.active.second.LTV}"></th>
-							<th width="5.2%" th:text="#{statistics.active.thirdly.LTV}"></th>
-							<th width="5.2%" th:text="#{statistics.active.seventh.LTV}"></th>
+							<th width="25%" th:text="#{statistics.top.up.zone}"></th>
+							<th width="25%" th:text="#{statistics.active.income.times}"></th>
+							<th width="25%" th:text="#{statistics.active.payer.num}"></th>
+							<th width="25%" th:text="#{statistics.top.up.pay.income.total}"></th>
 							</tr>
 						</thead>
 						<tbody id="data-table-body">
@@ -202,7 +187,7 @@ function initDate(){
 	});
 	var date = new Date();
 	$("#endDatetimepicker").val(date.format("yyyy-MM-dd hh:mm:ss"));
-	date.setDate(date.getDate()-7);
+	date.setDate(date.getDate()-6);
 	$("#startDatetimepicker").val(date.format("yyyy-MM-dd 00:00:00"));
 }
 //初始化包
@@ -277,178 +262,30 @@ $("#select").click(function(){
 			arppu=val;
 		},
 	});
-	initGraph(arppu);
+	//折线图
+	var graph={};
+	gameAjax({
+		url:"/statistics/topUp/dailyIncome",
+		data:data,
+		async:false,
+		callback:function(val){
+			graph=val;
+		},
+	});
+	initGraph(arppu,graph);
+	//区服充值统计
+	
+	gameAjax({
+		url:"/statistics/topUp/zone/topUp",
+		data:data,
+		async:false,
+		callback:function(val){
+			console.log(val);
+		},
+	});
+	$("#data-table-div").show();
 });
 
-function callback(val,dataArr,isDetail){
-	var text='';
-	var categories =[];
-	var series=[];
-	var activeNumData={};
-	activeNumData.name=[[#{statistics.active.num}]];
-	var actvieNumDataData=[];
-	activeNumData.data=actvieNumDataData;
-	var newUserNumData={};
-	newUserNumData.name=[[#{statistics.active.new.user.num}]];
-	var newUserNumDataData=[];
-	newUserNumData.data=newUserNumDataData;
-	var newPayerNumData={};
-	newPayerNumData.name=[[#{statistics.active.new.payer.num}]];
-	var newPayerNumDataData=[];
-	newPayerNumData.data=newPayerNumDataData;
-	var payerNumData={};
-	payerNumData.name=[[#{statistics.active.payer.num}]];
-	var payerNumDataData=[];
-	payerNumData.data=payerNumDataData;
-	var icomeNumData={};
-	icomeNumData.name=[[#{statistics.active.income.num}]];
-	var icomeNumDataData =[];
-	icomeNumData.data=icomeNumDataData;
-	var incomeTimesData={};
-	incomeTimesData.name=[[#{statistics.active.income.times}]];
-	var incomeTimesDataData=[];
-	incomeTimesData.data=incomeTimesDataData;
-	var  newPayRateData={};
-	newPayRateData.name=[[#{statistics.active.new.pay.rate}]];
-	var newPayRateDataData=[];
-	newPayRateData.data=newPayRateDataData;
-	var payRateData ={};
-	payRateData.name=[[#{statistics.active.active.pay.rate}]];
-	var payRateDataData=[];
-	payRateData.data=payRateDataData;
-	var arpuData={};
-	arpuData.name=[[#{statistics.active.ARPU}]];
-	var arpuDataData=[];
-	arpuData.data=arpuDataData;
-	var arppuData={};
-	arppuData.name=[[#{statistics.active.ARPPU}]];
-	var arppuDataData=[];
-	arppuData.data=arppuDataData;
-	var secondPersistenceRateData={};
-	secondPersistenceRateData.name=[[#{statistics.active.second.persistence.rate}]];
-	var secondPersistenceRateDataData=[];
-	secondPersistenceRateData.data=secondPersistenceRateDataData;
-	var thirdlyPersistenceRateData={};
-	thirdlyPersistenceRateData.name=[[#{statistics.active.thirdly.persistence.rate}]];
-	var thirdlyPersistenceRateDataData=[];
-	thirdlyPersistenceRateData.data=thirdlyPersistenceRateDataData;
-	var seventhPersistenceRateData={};
-	seventhPersistenceRateData.name=[[#{statistics.active.seventh.persistence.rate}]];
-	var seventhPersistenceRateDataData=[];
-	seventhPersistenceRateData.data=seventhPersistenceRateDataData;
-	var secondLtvData={};
-	secondLtvData.name=[[#{statistics.active.second.LTV}]];
-	var secondLtvDataData= [];
-	secondLtvData.data=secondLtvDataData;
-	var thirdlyLtvData={};
-	thirdlyLtvData.name=[[#{statistics.active.thirdly.LTV}]];
-	var thirdlyLtvDataData=[];
-	thirdlyLtvData.data=thirdlyLtvDataData;
-	var seventhLtvData={};
-	seventhLtvData.name=[[#{statistics.active.seventh.LTV}]];
-	var seventhLtvDataData=[];
-	seventhLtvData.data=seventhLtvDataData;
-	/*<![CDATA[*/
-	$.each(val ,function(index,dayData){
-		if(dayData==null)return true;
-		var date = dayData.date;
-		categories.push(date);
-		$.each(dayData.zoneData,function(zoneId,zoneData){
-			$.each(zoneData,function(packageId,packageData){
-				var activeNum= checkNull(packageData.activeNum);
-				var newUserNum = checkNull(packageData.newUserNum);
-				var newPayerNum=checkNull(packageData.newPayerNum);
-				var payerNum = checkNull(packageData.payerNum);
-				var incomeNum =checkNull(packageData.incomeNum);
-				var incomeTimes = checkNull(packageData.incomeTimes);
-				var newPayerRate = divide(newPayerNum,newUserNum);
-				var activePayRate = divide(payerNum,activeNum);
-				var arpu = divide(incomeNum,activeNum);
-				var arppu = divide(incomeNum,payerNum);
-				var preOnePersistenceRate=divide(packageData.preOnePersistence,packageData.preOneNewUserNum);
-				var preTwoPersistenceRate = divide(packageData.preTwoPersistence,packageData.preTwoNewUserNum);
-				var preSixPersistenceRate = divide(packageData.preSixPersistence,packageData.preSixNewUserNum);
-				var preOneLTV=divide(packageData.preOneIncomeNum,packageData.preOneNewUserNum);
-				var preTwoLTV=divide(packageData.preTwoIncomeNum,packageData.preTwoNewUserNum);
-				var preSixLTV=divide(packageData.preSixIncomeNum,packageData.preSixNewUserNum);
-				//初始化曲线图数据
-				if(packageId=='zzzdayTotal'){
-					$.each(dataArr,function(index,data){
-						switch(data){
-							case 'activeNum':actvieNumDataData.push(activeNum);break;
-							case 'userNum':newUserNumDataData.push(newUserNum);break;
-							case 'newPayerNum':newPayerNumDataData.push(newPayerNum);break;
-							case 'payerNum':payerNumDataData.push(payerNum);;break;
-							case 'icomeNum':icomeNumDataData.push(incomeNum);break;
-							case 'incomeTimes':incomeTimesDataData.push(incomeTimes);break;
-							case 'newPayRate':newPayRateDataData.push(newPayerRate);break;
-							case 'payRate':payRateDataData.push(activePayRate);break;
-							case 'arpu':arpuDataData.push(arpu);break;
-							case 'arppu':arppuDataData.push(arppu);break;
-							case 'secondPersistenceRate':secondPersistenceRateDataData.push(preOnePersistenceRate);break;
-							case 'thirdlyPersistenceRate':thirdlyPersistenceRateDataData.push(preTwoPersistenceRate);break;
-							case 'seventhPersistenceRate':seventhPersistenceRateDataData.push(preSixPersistenceRate);break;
-							case 'secondLtv':secondLtvDataData.push(preOneLTV);break;
-							case 'thirdlyLtv':thirdlyLtvDataData.push(preTwoLTV);break;
-							case 'seventhLtv':seventhLtvDataData.push(preSixLTV);break;
-						}
-					});
-				}
-				
-				//初始化表单数据
-				if(isDetail==0&&packageId!='zzzdayTotal')return true;
-				if(isDetail==1&&packageId!='zoneTotal'&&packageId!='zzzdayTotal')return true; 
-				if(packageId=='zoneTotal'){
-					text+='<tr style="color:#0000FF" ><td>'+date+'</td><td>'+zoneId+'</td><td>'+[[#{statistics.zone.total}]]+'</td> '
-				}else if(packageId=='zzzdayTotal'){
-					text+='<tr style="color:#FF0000" ><td>'+date+'</td><td>'+[[#{statistics.total}]]+'</td><td>'+[[#{statistics.total}]]+'</td> '
-				}else{
-					text+='<tr><td>'+date+'</td><td>'+zoneId+'</td><td>'+packageId+'</td> '
-				}
-				text+='<td>'+activeNum+'</td><td>'+newUserNum+'</td><td>'+newPayerNum;
-				text+='</td><td>'+payerNum+'</td><td>'+incomeNum+'</td><td>'+incomeTimes+'</td><td>'+newPayerRate+'%';
-				text+='</td><td>'+activePayRate+'%'+'</td><td>'+arpu+'</td><td>'+arppu+'</td><td>'+preOnePersistenceRate+'%';
-				text+='</td><td>'+preTwoPersistenceRate+'%'+'</td><td>'+preSixPersistenceRate+'%'+'</td><td>'+preOneLTV+'%';
-				text+='</td><td>'+preTwoLTV+'%'+'</td><td>'+preSixLTV+'%'+'</td></tr>';
-			});
-		});
-	});
-	$("#data-table-body").empty();
-	$("#data-table-body").append(text);
-	/*]]>*/
-	$.each(dataArr,function(index,data){
-		switch(data){
-		case 'activeNum':series.push(activeNumData);break;
-		case 'userNum':series.push(newUserNumData);break;
-		case 'newPayerNum':series.push(newPayerNumData);break;
-		case 'payerNum':series.push(payerNumData);;break;
-		case 'icomeNum':series.push(icomeNumData);break;
-		case 'incomeTimes':series.push(incomeTimesData);break;
-		case 'newPayRate':series.push(newPayRateData);break;
-		case 'payRate':series.push(payRateData);break;
-		case 'arpu':series.push(arpuData);break;
-		case 'arppu':series.push(arppuData);break;
-		case 'secondPersistenceRate':series.push(secondPersistenceRateData);break;
-		case 'thirdlyPersistenceRate':series.push(thirdlyPersistenceRateData);break;
-		case 'seventhPersistenceRate':series.push(seventhPersistenceRateData);break;
-		case 'secondLtv':series.push(secondLtvData);break;
-		case 'thirdlyLtv':series.push(thirdlyLtvData);break;
-		case 'seventhLtv':series.push(seventhLtvData);break;
-		}
-	});
-	//初始化曲线图
-	//initGraph(categories,series);
-}
-
-
-
-
-//检查参数是否为null,如果为null返回o
-function checkNull(val){
-	if(val==null||val==0)
-		return 0;
-	return val;
-}
 //两数相除 两位小数
 function divide(element,denominator){
 	if(element==null || element==0 || denominator==null ||denominator==0){
@@ -459,7 +296,18 @@ function divide(element,denominator){
 }
 
 //初始化曲线图
-function initGraph(arppu,categories,series){
+function initGraph(arppu,graph){
+	var categories=[];
+	var series =[];
+	var map={};
+	series.push(map);
+	var dataArr=[];
+	map["data"]=dataArr
+	map["name"]=[[#{statistics.top.up.pay.income}]];
+	$.each(graph,function(index,data){
+		categories.push(new Date(data.date).format("yyyy-MM-dd"));
+		dataArr.push(data.price);
+	});
 	$('#graph-div').highcharts({
 		credits:{
 			href:"",
@@ -487,6 +335,7 @@ function initGraph(arppu,categories,series){
         },
         series:  series
     });
+	$('#graph-div').show();
 	//计算arpu/渠道人数/渠道金额
 	var arpuSeries=[];
 	var numSeries=[];
