@@ -437,7 +437,7 @@ function callback(val,dataArr,isDetail){
 		}
 	});
 	//初始化曲线图
-	initGraph(categories,series);
+	//initGraph(categories,series);
 }
 
 
@@ -487,8 +487,41 @@ function initGraph(arppu,categories,series){
         },
         series:  series
     });
+	//计算arpu/渠道人数/渠道金额
+	var arpuSeries=[];
+	var numSeries=[];
+	var priceSeries=[];
+	$.each(arppu,function(index,packageData){
+		var numTotal=0;
+		var priceTotal=0;
+		$.each(packageData,function(packageId,data){
+			var arpuMap={};
+			var arpuMapArr=[];
+			arpuMap["name"]=packageId;
+			arpuMapArr.push(divide(data.sumPrice,data.num));
+			arpuMap["data"]=arpuMapArr;
+			arpuSeries.push(arpuMap);
+			numTotal+=data.num;
+			priceTotal+=data.sumPrice;
+		});
+		$.each(packageData,function(packageId,data){
+			var numMap={};
+			numMap["name"]=packageId;
+			numMap["y"]=divide(data.num,numTotal);
+			numSeries.push(numMap);
+			
+			var priceMap={};
+			priceMap["name"]=packageId;
+			priceMap["y"]=divide(data.sumPrice,priceTotal);
+			priceSeries.push(priceMap);
+		});
+	});
 	//arpu柱状图
 	$("#arpu-graph-div").highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
         chart: {
             type: 'column'
         },
@@ -496,32 +529,20 @@ function initGraph(arppu,categories,series){
             text: [[#{statistics.top.up.arppu.proportion}]]
         },
         xAxis: {
-            categories: [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec'
-            ],
+            categories: [[#{statistics.top.up.arppu.proportion}]],
             crosshair: true
         },
         yAxis: {
             min: 0,
+            allowDecimals:true,
             title: {
-                text: 'Rainfall (mm)'
+                text: [[#{statistics.top.up.arpu.unit}]]
             }
         },
         tooltip: {
             headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
             pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-            '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+            '<td style="padding:0"><b>{point.y:.2f}</b></td></tr>',
             footerFormat: '</table>',
             shared: true,
             useHTML: true
@@ -532,33 +553,25 @@ function initGraph(arppu,categories,series){
                 borderWidth: 0
             }
         },
-        series: [{
-            name: 'Tokyo',
-            data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
-        }, {
-            name: 'New York',
-            data: [83.6, 78.8, 98.5, 93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3]
-        }, {
-            name: 'London',
-            data: [48.9, 38.8, 39.3, 41.4, 47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2]
-        }, {
-            name: 'Berlin',
-            data: [42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1]
-        }]
+        series: arpuSeries
     });
 	$("#arpu-graph-div").show();
 	//包充值人数占比扇形图
 	$("#num-graph-div").highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
         chart: {
             plotBackgroundColor: null,
             plotBorderWidth: null,
             plotShadow: false
         },
         title: {
-            text: 'Browser market shares at a specific website, 2014'
+            text: [[#{statistics.top.up.pay.num.proportion}]]
         },
         tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
         },
         plotOptions: {
             pie: {
@@ -566,40 +579,32 @@ function initGraph(arppu,categories,series){
                 cursor: 'pointer',
                 dataLabels: {
                     enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
                 }
             }
         },
         series: [{
             type: 'pie',
             name: 'Browser share',
-            data: [
-                ['Firefox',   45.0],
-                ['IE',       26.8],
-                {
-                    name: 'Chrome',
-                    y: 12.8,
-                    sliced: true,
-                    selected: true
-                },
-                ['Safari',    8.5],
-                ['Opera',     6.2],
-                ['Others',   0.7]
-            ]
+            data: numSeries
         }]
     });
 	//包充值总额占比扇形图
 	$("#total-graph-div").highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
         chart: {
             plotBackgroundColor: null,
             plotBorderWidth: null,
             plotShadow: false
         },
         title: {
-            text: 'Browser market shares at a specific website, 2014'
+            text:[[#{statistics.top.up.pay.price.proportion}]]
         },
         tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
         },
         plotOptions: {
             pie: {
@@ -607,26 +612,14 @@ function initGraph(arppu,categories,series){
                 cursor: 'pointer',
                 dataLabels: {
                     enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
                 }
             }
         },
         series: [{
             type: 'pie',
             name: 'Browser share',
-            data: [
-                ['Firefox',   45.0],
-                ['IE',       26.8],
-                {
-                    name: 'Chrome',
-                    y: 12.8,
-                    sliced: true,
-                    selected: true
-                },
-                ['Safari',    8.5],
-                ['Opera',     6.2],
-                ['Others',   0.7]
-            ]
+            data: priceSeries
         }]
     });
 }
@@ -646,8 +639,6 @@ function initPanelTable(zoneArr){
 			$(".checked input[name='zone-all']").each(function(){
 				zoneArr.push($(this).val());
 			});
-			console.log(startLong)
-			console.log(endLong);
 			var query = {
 				limit : params.limit,
 				offset : params.offset,

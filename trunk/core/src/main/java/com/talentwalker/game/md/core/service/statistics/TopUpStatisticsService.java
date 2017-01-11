@@ -81,16 +81,22 @@ public class TopUpStatisticsService {
             DBObject matchPackageObj = (DBObject) JSON.parse(matchPackageStr);
             pipeline.add(matchPackageObj);
         }
-        if ("1".equals(orderState)) {
+        if (!StringUtils.isEmpty(orderState)) {
             String matchOrderState = "{$match:{state:" + orderState + "}}";
             DBObject matchOrderObj = (DBObject) JSON.parse(matchOrderState);
             pipeline.add(matchOrderObj);
-        } else if ("2".equals(orderState)) {
-            String matchOrderState = "{$match:{state:{$ne:" + orderState + "}}}";
-            DBObject matchOrderStateObj = (DBObject) JSON.parse(matchOrderState);
-            pipeline.add(matchOrderStateObj);
         }
-        String groupStr = "{$group:{_id:{package_id:'package_id'},totalNum:{$sum:1},total:{$sum:'$price'}}}";
+
+        if ("1".equals(itemType)) {
+            String matchItemType = "{$match:{product_type:" + itemType + "}}";
+            DBObject matchItemTypeObj = (DBObject) JSON.parse(matchItemType);
+            pipeline.add(matchItemTypeObj);
+        } else if ("2".equals(itemType)) {
+            String matchItemType = "{$match:{product_type:{$ne:" + 1 + "}}}";
+            DBObject matchItemTypeObj = (DBObject) JSON.parse(matchItemType);
+            pipeline.add(matchItemTypeObj);
+        }
+        String groupStr = "{$group:{_id:{package_id:'$package_id'},totalNum:{$sum:1},total:{$sum:'$price'}}}";
         DBObject groupObj = (DBObject) JSON.parse(groupStr);
         pipeline.add(groupObj);
         AggregationOutput output = mongoTemplate.getCollection("game_order").aggregate(pipeline);
