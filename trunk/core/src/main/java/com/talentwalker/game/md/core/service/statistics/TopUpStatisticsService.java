@@ -78,7 +78,7 @@ public class TopUpStatisticsService {
         DBObject matchZoneObj = (DBObject) JSON.parse(matchZoneStr);
         pipeline.add(matchZoneObj);
         if (!StringUtils.isEmpty(packageId)) {
-            String matchPackageStr = "{$match:{package_id:" + packageId + "}}";
+            String matchPackageStr = "{$match:{package_id:'" + packageId + "'}}";
             DBObject matchPackageObj = (DBObject) JSON.parse(matchPackageStr);
             pipeline.add(matchPackageObj);
         }
@@ -164,7 +164,7 @@ public class TopUpStatisticsService {
             DBObject matchZoneObj = (DBObject) JSON.parse(matchZoneStr);
             pipeline.add(matchZoneObj);
             if (!StringUtils.isEmpty(packageId)) {
-                String matchPackageStr = "{$match:{package_id:" + packageId + "}}";
+                String matchPackageStr = "{$match:{package_id:'" + packageId + "'}}";
                 DBObject matchPackageObj = (DBObject) JSON.parse(matchPackageStr);
                 pipeline.add(matchPackageObj);
             }
@@ -236,22 +236,34 @@ public class TopUpStatisticsService {
             }
         }
         String zoneStr = sb.toString();
-        List<DBObject> pipeline = new ArrayList<>();
+        List<DBObject> pipeline = new ArrayList<>();// 分组查询充值次数和付费总计
+        List<DBObject> pipeline1 = new ArrayList<>();// 分组查询充值人数
         String matchStr = "{$match:{$and:[{create_time:{$gt:" + startDate.getTime() + "}},{create_time:{$lt:"
                 + endDate.getTime() + "}}]}}";
         DBObject matchObj = (DBObject) JSON.parse(matchStr);
         pipeline.add(matchObj);
+
+        String matchPayTimeStr = "{$match:{$and:[{pay_time:{$gt:" + startDate.getTime() + "}},{pay_time:{$lt:"
+                + endDate.getTime() + "}}]}}";
+        DBObject matchPayTimeDbo = (DBObject) JSON.parse(matchPayTimeStr);
+        pipeline1.add(matchPayTimeDbo);
+
         String matchZoneStr = "{$match:{zone_id:{$in:[" + zoneStr + "]}}}";
         DBObject matchZoneObj = (DBObject) JSON.parse(matchZoneStr);
         pipeline.add(matchZoneObj);
+
+        pipeline1.add(matchZoneObj);
         if (!StringUtils.isEmpty(packageId)) {
-            String matchPackageStr = "{$match:{package_id:" + packageId + "}}";
+            String matchPackageStr = "{$match:{package_id:'" + packageId + "'}}";
             DBObject matchPackageObj = (DBObject) JSON.parse(matchPackageStr);
             pipeline.add(matchPackageObj);
+
+            pipeline1.add(matchPackageObj);
         }
         String matchOrderState = "{$match:{state:" + 0 + "}}";
         DBObject matchOrderObj = (DBObject) JSON.parse(matchOrderState);
         pipeline.add(matchOrderObj);
+
         if ("1".equals(itemType)) {
             String matchItemType = "{$match:{product_type:" + itemType + "}}";
             DBObject matchItemTypeObj = (DBObject) JSON.parse(matchItemType);
@@ -278,12 +290,6 @@ public class TopUpStatisticsService {
             tempMap.put("num", num);
         }
         // 付费人数
-        List<DBObject> pipeline1 = new ArrayList<>();
-        String matchPayTimeStr = "{$match:{$and:[{pay_time:{$gt:" + startDate.getTime() + "}},{pay_time:{$lt:"
-                + endDate.getTime() + "}}]}}";
-        DBObject matchPayTimeDbo = (DBObject) JSON.parse(matchPayTimeStr);
-        pipeline1.add(matchPayTimeDbo);
-        pipeline1.add(groupZoneDbo);
         String groupPayTimeStr = "{$group:{_id:'$zone_id',num:{$sum:1}}}";
         DBObject groupPayTimeDbo = (DBObject) JSON.parse(groupPayTimeStr);
         pipeline1.add(groupPayTimeDbo);
@@ -294,9 +300,9 @@ public class TopUpStatisticsService {
             String zoneId = dbo.getString("_id");
             int num = dbo.getInt("num");
             Map<String, Object> tempMap = map.get(zoneId);
-            System.out.println("++" + zoneId + "---" + num);
-            // tempMap.put("payNum", num);
+            tempMap.put("payNum", num);
         }
         return list;
     }
+
 }

@@ -9,6 +9,8 @@
 package com.talentwalker.game.md.admin.controller.statistics;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.talentwalker.game.md.admin.controller.BaseController;
 import com.talentwalker.game.md.admin.service.statistics.OrderService;
+import com.talentwalker.game.md.admin.service.statistics.TopUpStatisticsExcelService;
 import com.talentwalker.game.md.core.domain.gameworld.Order;
 import com.talentwalker.game.md.core.service.gameworld.CashShopService;
 import com.talentwalker.game.md.core.service.statistics.TopUpStatisticsService;
@@ -41,6 +44,9 @@ public class TopUpStatisticsController extends BaseController {
 
     @Resource
     private TopUpStatisticsService topUpStatisticsService;
+
+    @Resource
+    private TopUpStatisticsExcelService topUpStatisticsExcelService;
 
     /**
      * @Description:跳转到平台充值总览页面
@@ -127,5 +133,27 @@ public class TopUpStatisticsController extends BaseController {
             @RequestParam("itemType") String itemType, @RequestParam("zoneList[]") String[] zoneArr,
             @RequestParam("startStr") String startStr, @RequestParam("endStr") String endStr) {
         return topUpStatisticsService.zoneTopUp(packageId, orderState, itemType, zoneArr, startStr, endStr);
+    }
+
+    /**
+     * @Description:excel导出
+     * @param packageId
+     * @param orderState
+     * @param itemType
+     * @param zoneArr
+     * @param startStr
+     * @param endStr
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping(value = "export", method = RequestMethod.GET)
+    public Object export(@RequestParam("packageId") String packageId, @RequestParam("orderState") String orderState,
+            @RequestParam("itemType") String itemType, @RequestParam("zoneList[]") String[] zoneArr,
+            @RequestParam("startStr") String startStr, @RequestParam("endStr") String endStr,
+            HttpServletRequest request, HttpServletResponse response) {
+        topUpStatisticsExcelService.export(packageId, orderState, itemType, zoneArr, startStr, endStr, request,
+                response);
+        return null;
     }
 }

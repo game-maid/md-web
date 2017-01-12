@@ -102,8 +102,8 @@
 					</div>
 				</div>
 			</div>
-			<div class="ibox-content">
-				<div class="form-horizontal">
+			<div class="ibox-content" >
+				<div class="form-horizontal" id="graph-top-div">
 					<div class="form-group">
 					<!-- ARPU占比 -->
 						<div id="arpu-graph-div" class="col-sm-4" style="float: left;">
@@ -280,7 +280,21 @@ $("#select").click(function(){
 		data:data,
 		async:false,
 		callback:function(val){
-			console.log(val);
+			var text ='';
+			var num=0;
+			var payNum=0;
+			var price=0;
+			$.each(val,function(index,data){
+				$.each(data,function(zoneId,zoneData){
+					text+='<tr><td>'+zoneMap[zoneId]+'</td><td>'+zoneData.num+'</td><td>'+zoneData.payNum+'</td><td>'+zoneData.price+'</td></tr>';
+					num+=zoneData.num;
+					payNum+=zoneData.payNum;
+					price +=zoneData.price;
+				});
+			});
+			text+='<tr><td>'+[[#{statistics.zone.total}]]+'</td><td>'+num+'</td><td>'+payNum+'</td><td>'+price+'</td></tr>';
+			$("#data-table-body").empty();
+			$("#data-table-body").append(text);
 		},
 	});
 	$("#data-table-div").show();
@@ -343,6 +357,7 @@ function initGraph(arppu,graph){
 	$.each(arppu,function(index,packageData){
 		var numTotal=0;
 		var priceTotal=0;
+		var flag=true;
 		$.each(packageData,function(packageId,data){
 			var arpuMap={};
 			var arpuMapArr=[];
@@ -352,7 +367,13 @@ function initGraph(arppu,graph){
 			arpuSeries.push(arpuMap);
 			numTotal+=data.num;
 			priceTotal+=data.sumPrice;
+			flag=false;
 		});
+		if(flag){
+			$("#graph-top-div").hide();
+		}else{
+			$("#graph-top-div").show();
+		}
 		$.each(packageData,function(packageId,data){
 			var numMap={};
 			numMap["name"]=packageId;
@@ -472,7 +493,7 @@ function initGraph(arppu,graph){
         }]
     });
 }
-
+//分页统计（最下面的表格）
 function initPanelTable(zoneArr){
 	var condition={};
 	$("#panelTable").bootstrapTable({
@@ -639,19 +660,7 @@ function initPanelTable(zoneArr){
 
 //导出
 function exportCDKey(){
-	var data="";
-	var dateType=$("#date-type").val();
-	dateType=="day"?$("#graph-div").hide():$("#graph-div").show();
-	$("#data-table-div").show();
-	var date={};
-	if(dateType=="day"){
-		date=$("#day-date-input").val();
-	}else if(dateType=="week"){
-		date=$("#week-date-input").val();
-	}else if(dateType=="month"){
-		date=$("#month-date-input").val();
-	}
-    var zoneArr=[];
+	var zoneArr=[];
 	$(".checked input[name='zone-all']").each(function(){
 		zoneArr.push($(this).val());
 	});
@@ -659,9 +668,20 @@ function exportCDKey(){
 		swal("",[[#{statistics.active.zone.null}]],"warning");
 		return;
 	}
+	var zoneArr=[];
+	$(".checked input[name='zone-all']").each(function(){
+		zoneArr.push($(this).val());
+	});
+	/*<![CDATA[*/
+		var data="packageId="+$("#package-select").val()+"&orderState="+$("#order-state-select").val()+
+				"&itemType="+$("#item-type-select").val()+"&zoneList[]="+zoneArr+"&startStr="+$("#startDatetimepicker").val()+
+				"&endStr="+$("#endDatetimepicker").val();
+    /*]]>*/
 	
 	/*<![CDATA[*/
-		data+="/active/base/export?dateType="+dateType+"&date="+date+"&zoneArr="+zoneArr+"&isDetail="+$("#is-detail").val();	           
+		var data="/statistics/topUp/export?packageId="+$("#package-select").val()+"&orderState="+$("#order-state-select").val()+
+				"&itemType="+$("#item-type-select").val()+"&zoneList[]="+zoneArr+"&startStr="+$("#startDatetimepicker").val()+
+				"&endStr="+$("#endDatetimepicker").val();	           
 	/*]]>*/
 	window.location.href=data;
 	
