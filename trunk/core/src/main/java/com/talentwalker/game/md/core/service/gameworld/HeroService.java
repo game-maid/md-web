@@ -541,7 +541,7 @@ public class HeroService extends GameSupport {
             if (skill == null) {
                 continue;
             }
-            // this.getSkillFP(skill, skillFP, skillExtraAttrs);
+            this.getSkillFP(skill, skillFP, skillExtraAttrs);
         }
 
         // 技能、装备 额外增加属性
@@ -551,7 +551,7 @@ public class HeroService extends GameSupport {
             if (equip == null) {
                 continue;
             }
-            // this.getEquipFP(equip, equipExtraAttrs);
+            this.getEquipFP(equip, equipExtraAttrs);
         }
 
         // 属性战斗力

@@ -290,7 +290,7 @@ public class DuelService extends GameSupport {
         if (this.isNPC(duelRank.getId())) {
             Query query1 = new Query(Criteria.where("id").is(duelRank.getId()));
             DuelRobot duelRobot = mongoTemplate.findOne(query1, DuelRobot.class, robotKey);
-            heroService.setFormHoldFPRobot(duelRobot);
+            // heroService.setFormHoldFPRobot(duelRobot);
             rankMap.put("id", duelRobot.getId());
             rankMap.put("name", duelRobot.getName());
             rankMap.put("level", duelRobot.getLevel());
@@ -316,7 +316,7 @@ public class DuelService extends GameSupport {
             if (duelRank.getRank() != rank) {
                 Duel duel2 = duelRepository.findOne(duelRank.getId());
                 Lord lord2 = lordRepository.findOne(duelRank.getId());
-                heroService.setFormHoldFP(lord2);
+                // heroService.setFormHoldFP(lord2);
                 if (duel2 == null || lord2 == null) {
                     return null;
                 }
@@ -349,7 +349,7 @@ public class DuelService extends GameSupport {
                 rankMap.put("FP", FP);
                 rankMap.put("heros", heroList);
             } else {
-                heroService.setFormHoldFP(lord);
+                // heroService.setFormHoldFP(lord);
                 rankMap.put("id", lord.getId());
                 rankMap.put("name", lord.getName());
                 rankMap.put("level", lord.getLevel());
