@@ -691,12 +691,12 @@ public class HeroService extends GameSupport {
                 String type = map.get("type").toString();
                 double coe = 0;
                 double add = 0;
-                if (map.containsKey("value")) {
+                if (map.containsKey("value") && map.get("value") != null) {
                     coe = JSONArray.fromObject(map.get("value")).getDouble(0)
                             + JSONArray.fromObject(map.get("value")).getDouble(1) * (equip.getLevel() - 1)
                             + JSONArray.fromObject(map.get("value")).getDouble(2) * (equip.getLevel() - 1);
                 }
-                if (map.containsKey("percent")) {
+                if (map.containsKey("percent") && map.get("percent") != null) {
                     add = JSONArray.fromObject(map.get("percent")).getDouble(0)
                             + JSONArray.fromObject(map.get("percent")).getDouble(1) * (equip.getLevel() - 1)
                             + JSONArray.fromObject(map.get("percent")).getDouble(2) * (equip.getLevel() - 1);
@@ -734,11 +734,11 @@ public class HeroService extends GameSupport {
                 String type = map.get("type").toString();
                 double coe = 0;
                 double add = 0;
-                if (map.containsKey("value")) {
+                if (map.containsKey("coe") && map.get("coe") != null) {
                     coe = JSONArray.fromObject(map.get("coe")).getDouble(0)
                             + JSONArray.fromObject(map.get("coe")).getDouble(1) * (skill.getLevel() - 1);
                 }
-                if (map.containsKey("percent")) {
+                if (map.containsKey("add") && map.get("add") != null) {
                     add = JSONArray.fromObject(map.get("add")).getDouble(0)
                             + JSONArray.fromObject(map.get("add")).getDouble(1) * (skill.getLevel() - 1);
                 }
