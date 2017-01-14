@@ -118,6 +118,9 @@ public class LordService extends GameSupport {
     @Resource
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    private HeroService heroService;
+
     /**
      * 默认
      */
@@ -264,6 +267,8 @@ public class LordService extends GameSupport {
 
         lordRepository.save(lord);
         this.loginData(lord);
+
+        heroService.setFormHoldFP(lord);
 
         recordLogin(lord);
 

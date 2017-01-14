@@ -99,5 +99,7 @@ public class ConfigKey {
      * 新手招募招募类型
      */
     public static final String SHOP_HERO_RECRUIT_TYPE = "type";
+    /**********************突破计算*****************************/
+    public static final String RANK_UP = "rankUp";
 
 }
