@@ -75,6 +75,8 @@ public class DuelService extends GameSupport {
     private MailRepository mailRepository;
     @Autowired
     private MissionService missionService;
+    @Autowired
+    private HeroService heroService;
     /**
      * 排名key
      */
@@ -288,6 +290,7 @@ public class DuelService extends GameSupport {
         if (this.isNPC(duelRank.getId())) {
             Query query1 = new Query(Criteria.where("id").is(duelRank.getId()));
             DuelRobot duelRobot = mongoTemplate.findOne(query1, DuelRobot.class, robotKey);
+            heroService.setFormHoldFPRobot(duelRobot);
             rankMap.put("id", duelRobot.getId());
             rankMap.put("name", duelRobot.getName());
             rankMap.put("level", duelRobot.getLevel());
@@ -296,6 +299,7 @@ public class DuelService extends GameSupport {
             rankMap.put("notes", duelRobot.getNotes());
             List<Map<String, Object>> heroList = new ArrayList<Map<String, Object>>();
             List<FormHold> formHoldList = duelRobot.getFormDefend();
+            int FP = 0;
             for (FormHold formHold : formHoldList) {
                 Map<String, Object> map = new HashMap<String, Object>();
                 Hero hero = duelRobot.getHero().get(formHold.getHeroUid());
@@ -304,12 +308,15 @@ public class DuelService extends GameSupport {
                 map.put("breakLevel", hero.getBreakLevel());
                 map.put("loveLevel", hero.getLoveLevel());
                 heroList.add(map);
+                FP += formHold.getFP();
             }
+            rankMap.put("FP", FP); // 战斗力
             rankMap.put("heros", heroList);
         } else {
             if (duelRank.getRank() != rank) {
                 Duel duel2 = duelRepository.findOne(duelRank.getId());
                 Lord lord2 = lordRepository.findOne(duelRank.getId());
+                heroService.setFormHoldFP(lord2);
                 if (duel2 == null || lord2 == null) {
                     return null;
                 }
@@ -324,6 +331,7 @@ public class DuelService extends GameSupport {
                 if (forms == null) {
                     forms = new ArrayList<>();
                 }
+                int FP = 0;
                 for (int i = 0; i < forms.size(); i++) {
                     FormHold form = forms.get(i);
                     Hero hero = lord2.getHeros().get(form.getHeroUid());
@@ -335,10 +343,13 @@ public class DuelService extends GameSupport {
                     map.put("level", hero.getLevel());
                     map.put("breakLevel", hero.getBreakLevel());
                     map.put("loveLevel", hero.getLoveLevel());
+                    FP += form.getFP();
                     heroList.add(map);
                 }
+                rankMap.put("FP", FP);
                 rankMap.put("heros", heroList);
             } else {
+                heroService.setFormHoldFP(lord);
                 rankMap.put("id", lord.getId());
                 rankMap.put("name", lord.getName());
                 rankMap.put("level", lord.getLevel());
@@ -351,6 +362,7 @@ public class DuelService extends GameSupport {
                 if (forms == null) {
                     forms = new ArrayList<>();
                 }
+                int FP = 0;
                 for (int i = 0; i < forms.size(); i++) {
                     FormHold form = forms.get(i);
                     Hero hero = lord.getHeros().get(form.getHeroUid());
@@ -363,7 +375,9 @@ public class DuelService extends GameSupport {
                     map.put("breakLevel", hero.getBreakLevel());
                     map.put("loveLevel", hero.getLoveLevel());
                     heroList.add(map);
+                    FP += form.getFP();
                 }
+                rankMap.put("FP", FP);
                 rankMap.put("heros", heroList);
             }
         }
