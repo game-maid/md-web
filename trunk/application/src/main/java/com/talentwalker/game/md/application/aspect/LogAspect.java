@@ -19,8 +19,11 @@ import com.talentwalker.game.md.core.domain.GameLog;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.exception.GameException;
 import com.talentwalker.game.md.core.repository.GameLogRepository;
+import com.talentwalker.game.md.core.response.GameModel;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.ServletUtils;
+
+import net.sf.json.JSONObject;
 
 /**
  * @ClassName: LogAspect
@@ -47,7 +50,13 @@ public class LogAspect extends GameSupport {
         try {
             log.setParams(point.getArgs());
             result = point.proceed();
-            log.setResult(result);
+            if (result instanceof GameModel) {
+                GameModel gameModel = (GameModel) result;
+                JSONObject json = JSONObject.fromObject(gameModel.getModel());
+                log.setResult(json);
+            } else {
+                log.setResult(result);
+            }
             updateLog(log);
         } catch (Throwable e) {
             if (e instanceof GameException) {
