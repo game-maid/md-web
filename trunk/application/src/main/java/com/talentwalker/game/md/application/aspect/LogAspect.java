@@ -23,6 +23,9 @@ import com.talentwalker.game.md.core.response.GameModel;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.ServletUtils;
 
+import net.sf.json.JSONObject;
+import net.sf.json.JsonConfig;
+
 /**
  * @ClassName: LogAspect
  * @Description: 游戏日志
@@ -51,7 +54,7 @@ public class LogAspect extends GameSupport {
             if (result instanceof GameModel) {
                 GameModel gameModel = (GameModel) result;
                 // JSONObject json = gameModel.getModel();
-                log.setResult(gameModel.getModel());
+                log.setResult(formatJSONObject(gameModel.getModel()));
             } else {
                 log.setResult(result);
             }
@@ -70,6 +73,13 @@ public class LogAspect extends GameSupport {
             gameLogRepository.insert(log);
         }
         return result;
+    }
+
+    private JSONObject formatJSONObject(Object obj) {
+        JsonConfig jsonConfig = new JsonConfig();
+        jsonConfig.setAllowNonStringKeys(true);
+        jsonConfig.setExcludes(new String[] {"Integer" });
+        return JSONObject.fromObject(obj, jsonConfig);
     }
 
     private GameLog getLog() {
