@@ -23,8 +23,6 @@ import com.talentwalker.game.md.core.response.GameModel;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.ServletUtils;
 
-import net.sf.json.JSONObject;
-
 /**
  * @ClassName: LogAspect
  * @Description: 游戏日志
@@ -52,8 +50,8 @@ public class LogAspect extends GameSupport {
             result = point.proceed();
             if (result instanceof GameModel) {
                 GameModel gameModel = (GameModel) result;
-                JSONObject json = JSONObject.fromObject(gameModel.getModel());
-                log.setResult(json);
+                // JSONObject json = gameModel.getModel();
+                log.setResult(gameModel.getModel());
             } else {
                 log.setResult(result);
             }
