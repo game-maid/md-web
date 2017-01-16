@@ -713,7 +713,7 @@ public class HeroService extends GameSupport {
 
                 if (extraAttr.containsKey(type)) {
                     coe += extraAttr.get(type).get("coe");
-                    coe += extraAttr.get(type).get("add");
+                    add += extraAttr.get(type).get("add");
                 }
                 equipAttr.put("coe", coe);
                 equipAttr.put("add", add);
@@ -754,7 +754,7 @@ public class HeroService extends GameSupport {
 
                 if (skillAttrs.containsKey(type)) {
                     coe += skillAttrs.get(type).get("coe");
-                    coe += skillAttrs.get(type).get("add");
+                    add += skillAttrs.get(type).get("add");
                 }
                 skillAttr.put("coe", coe);
                 skillAttr.put("add", add);
