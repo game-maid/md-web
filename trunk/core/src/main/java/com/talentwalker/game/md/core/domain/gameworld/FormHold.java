@@ -12,6 +12,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.annotation.Transient;
+
 /**
  * @ClassName: FormHold
  * @Description: Description of this class
@@ -24,6 +26,11 @@ public class FormHold implements Serializable {
     protected String heroUid;
     protected List<String> skillUid;
     protected List<String> equipUid;
+    /**
+     * 战斗力
+     */
+    @Transient
+    protected int FP;
 
     /**
      * @return heroUid
@@ -68,6 +75,20 @@ public class FormHold implements Serializable {
      */
     public void setEquipUid(List<String> equipUid) {
         this.equipUid = equipUid;
+    }
+
+    /**
+     * @return fP
+     */
+    public int getFP() {
+        return FP;
+    }
+
+    /**
+     * @param fP 要设置的 fP
+     */
+    public void setFP(int fP) {
+        FP = fP;
     }
 
 }

@@ -12,14 +12,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.talentwalker.game.md.core.config.ConfigKey;
 import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
+import com.talentwalker.game.md.core.domain.gameworld.DuelRobot;
 import com.talentwalker.game.md.core.domain.gameworld.Equip;
 import com.talentwalker.game.md.core.domain.gameworld.FormHold;
 import com.talentwalker.game.md.core.domain.gameworld.Hero;
@@ -71,6 +74,7 @@ public class HeroService extends GameSupport {
      * 装备配置
      */
     final static String CONFIG_EQUIP = "equip";
+    private static final Logger logger = Logger.getLogger(HeroService.class);
 
     private void checkHero(String heroId) {
         DataConfig config = this.getDataConfig().get(CONFIG_HERO_CONFIG).get(heroId);
@@ -406,7 +410,87 @@ public class HeroService extends GameSupport {
 
     }
 
-    public HeroInfo getHeroInfo(Lord lord, Hero hero) {
+    /**
+     * @Description:
+     * @param lord
+     * @throws
+     */
+    public void setFormHoldFP(Lord lord) {
+        if (lord.getForm().size() <= 0) {
+            return;
+        }
+        List<FormHold> formList = lord.getForm().get(0);
+        if (formList == null) {
+            return;
+        }
+        for (FormHold form : formList) {
+            if (form == null || StringUtils.isEmpty(form.getHeroUid())) {
+                continue;
+            }
+            Hero hero = lord.getHeros().get(form.getHeroUid());
+            HeroInfo heroInfo = this.getHeroInfo(lord, hero, true);
+            form.setFP(this.getHeroFP(heroInfo));
+        }
+    }
+
+    /**
+     * @Description:
+     * @param duelRobot
+     * @throws
+     */
+    public void setFormHoldFPRobot(DuelRobot duelRobot) {
+        List<FormHold> formList = duelRobot.getFormDefend();
+        for (FormHold form : formList) {
+            if (form == null || StringUtils.isEmpty(form.getHeroUid())) {
+                continue;
+            }
+            Hero hero = duelRobot.getHero().get(form.getHeroUid());
+            HeroInfo heroInfo = this.getHeroInfoRobot(duelRobot, hero, true);
+            form.setFP(this.getHeroFP(heroInfo));
+        }
+    }
+
+    /**
+     * @Description:
+     * @param lord
+     * @param hero
+     * @param isFormHold
+     * @return
+     * @throws
+     */
+    public HeroInfo getHeroInfoRobot(DuelRobot duelRobot, Hero hero, boolean isFormHold) {
+        HeroInfo heroInfo = new HeroInfo();
+        heroInfo.setHero(hero);
+        List<FormHold> formList = duelRobot.getFormDefend();
+        if (formList == null) {
+            formList = new ArrayList<>();
+        }
+        List<Equip> equipList = new ArrayList<>();
+        List<Skill> skillList = new ArrayList<>();
+        if (isFormHold) {
+            for (FormHold form : formList) {
+                if (hero.getHeroUid().equals(form.getHeroUid())) {
+                    List<String> strEquip = form.getEquipUid();
+                    for (String equipUid : strEquip) {
+                        equipList.add(duelRobot.getEquips().get(equipUid));
+                    }
+                }
+            }
+        }
+        heroInfo.setEquipList(equipList);
+        heroInfo.setSkillList(skillList);
+        return heroInfo;
+    }
+
+    /**
+     * @Description:
+     * @param lord
+     * @param hero
+     * @param isFormHold 是否是阵容战斗力 true：阵容中英雄战斗力，false:英雄战斗力
+     * @return
+     * @throws
+     */
+    public HeroInfo getHeroInfo(Lord lord, Hero hero, boolean isFormHold) {
         HeroInfo heroInfo = new HeroInfo();
         heroInfo.setHero(hero);
         List<FormHold> formList = lord.getForm().get(0);
@@ -415,15 +499,17 @@ public class HeroService extends GameSupport {
         }
         List<Equip> equipList = new ArrayList<>();
         List<Skill> skillList = new ArrayList<>();
-        for (FormHold form : formList) {
-            if (hero.getHeroUid().equals(form.getHeroUid())) {
-                List<String> strEquip = form.getEquipUid();
-                for (String equipUid : strEquip) {
-                    equipList.add(lord.getEquips().get(equipUid));
-                }
-                List<String> strSkill = form.getSkillUid();
-                for (String skillUid : strSkill) {
-                    skillList.add(lord.getSkills().get(skillUid));
+        if (isFormHold) {
+            for (FormHold form : formList) {
+                if (hero.getHeroUid().equals(form.getHeroUid())) {
+                    List<String> strEquip = form.getEquipUid();
+                    for (String equipUid : strEquip) {
+                        equipList.add(lord.getEquips().get(equipUid));
+                    }
+                    List<String> strSkill = form.getSkillUid();
+                    for (String skillUid : strSkill) {
+                        skillList.add(lord.getSkills().get(skillUid));
+                    }
                 }
             }
         }
@@ -443,23 +529,29 @@ public class HeroService extends GameSupport {
         DataConfig configFightPower = this.getDataConfig().get(CONFIG_FIGHT_POWER);
         // 初始化战斗力
         double initFP = configHero.getDouble("fightPowerOrigin");
-        int heroLevel = hero.getLevel();
         // 等级战斗力
-        double lvFP = Math.ceil(hero.getLevel() * configFightPower.getDouble("lv"));
-
+        double lvFP = Math.ceil(hero.getLevel() * configFightPower.get("lv").getDouble("coe"));
         // 技能、装备 额外增加属性
-        Map<String, Double> extraAttr = new HashMap<>();
+        Map<String, Map<String, Double>> skillExtraAttrs = new HashMap<>();
 
         // 技能战斗力
         double skillFP = 0;
         // 技能提升属性
         for (Skill skill : heroInfo.getSkillList()) {
-            this.getSkillFP(skill, skillFP, extraAttr);
+            if (skill == null) {
+                continue;
+            }
+            this.getSkillFP(skill, skillFP, skillExtraAttrs);
         }
 
+        // 技能、装备 额外增加属性
+        Map<String, Map<String, Double>> equipExtraAttrs = new HashMap<>();
         // 装备提升属性
         for (Equip equip : heroInfo.getEquipList()) {
-            this.getEquipFP(equip, extraAttr);
+            if (equip == null) {
+                continue;
+            }
+            this.getEquipFP(equip, equipExtraAttrs);
         }
 
         // 属性战斗力
@@ -475,23 +567,32 @@ public class HeroService extends GameSupport {
         mainAttrMap.put("def", null);
         mainAttrMap.put("hp", null);
         mainAttrMap.put("mp", null);
-        DataConfig configAttr = configHero.get("attr");
-        Iterator<String> itAttr = configAttr.getJsonObject().keys();
-        while (itAttr.hasNext()) {
-            String attrValue = itAttr.next();
-            double fp = 0;
-            // 技能、装备提升属性
-            if (extraAttr.containsKey(attrValue)) {
-                fp += extraAttr.get(attrValue);
+        // 基础属性
+        Map<String, Double> daseAttr = this.getHoreBaseAttrs(hero);
+        Set<String> set = daseAttr.keySet();
+        for (String attrValue : set) {
+            if (!configFightPower.getJsonObject().containsKey(attrValue)) {
+                continue;
             }
+            // 基础属性
+            double fp = daseAttr.get(attrValue);
+            // 技能、装备提升属性
+            double add = 0; // 属性加成
+            double coe = 0; // 属性加成百分比
+            if (skillExtraAttrs.containsKey(attrValue)) {
+                add += skillExtraAttrs.get(attrValue).get("add");
+                coe += skillExtraAttrs.get(attrValue).get("coe");
+            }
+            if (equipExtraAttrs.containsKey(attrValue)) {
+                add += equipExtraAttrs.get(attrValue).get("add");
+                coe += equipExtraAttrs.get(attrValue).get("coe");
+            }
+            fp = (fp + add) * (1 + coe);
+
             if (mainAttrMap.containsKey(attrValue)) {
                 // 主属性
-                fp += configAttr.get(attrValue).getDouble(0) + configAttr.get(attrValue).getDouble(1) * heroLevel;
                 mainAttrFP += fp * configFightPower.get(attrValue).getDouble("coe");
             } else {
-                // 副属性
-                fp += configAttr.get(attrValue).getDouble(0) + configAttr.get(attrValue).getDouble(1) * heroLevel;
-
                 // 公式计算副属性
                 switch (attrValue) {
                 case "cridmg":
@@ -511,12 +612,74 @@ public class HeroService extends GameSupport {
                 }
                 lesserFP += fp * configFightPower.get(attrValue).getDouble("coe");
             }
+
         }
         attrFP = mainAttrFP * (1 + lesserFP);
-
         int heroFP = (int) Math.ceil(initFP + lvFP + attrFP + skillFP);
+        logger.info("技能属性加层！！！---" + JSONObject.fromObject(skillExtraAttrs).toString());
+        logger.info("装备属性加层！！！---" + JSONObject.fromObject(equipExtraAttrs).toString());
+        logger.info("技能属性加层！！！---" + JSONObject.fromObject(daseAttr).toString());
+        logger.info(hero.getHeroId() + "/初始化战斗力/" + initFP);
+        logger.info(hero.getHeroId() + "/等级战斗力/" + lvFP);
+        logger.info(hero.getHeroId() + "/技能战斗力/" + skillFP);
+        logger.info(hero.getHeroId() + "/主属性战斗力/" + mainAttrFP);
+        logger.info(hero.getHeroId() + "/副战斗力/" + lesserFP);
+        logger.info(hero.getHeroId() + "/属性战斗力/" + attrFP);
 
         return (int) Math.ceil(heroFP);
+    }
+
+    /**
+     * @Description:英雄基础属性
+     * @param hero
+     * @param attrValue
+     * @param configAttr
+     * @throws
+     */
+    private Map<String, Double> getHoreBaseAttrs(Hero hero) {
+        DataConfig configAttr = this.getDataConfig().get(ConfigKey.HERO_CONFIG).get(hero.getHeroId()).get("attr");
+        DataConfig configRank = this.getDataConfig().get(ConfigKey.RANK_UP);
+        int breakLevel = hero.getBreakLevel();
+        Map<String, Double> attrs = new HashMap<>();
+        Iterator<String> itAttr = configAttr.getJsonObject().keys();
+        while (itAttr.hasNext()) {
+            String attrValue = itAttr.next();
+            double d1 = 0;
+            double d2 = 0;
+            if (configAttr.get(attrValue).getJsonObject().containsKey(0 + "")) {
+                d1 = configAttr.get(attrValue).getDouble(0 + "");
+            }
+            if (configAttr.get(attrValue).getJsonObject().containsKey(1 + "")) {
+                d2 = configAttr.get(attrValue).getDouble(1 + "");
+            }
+            double fp = d1 + d2 * (hero.getLevel() - 1);
+            attrs.put(attrValue, fp); // 基础属性
+            if (breakLevel >= 0 && configRank.getJsonObject().containsKey(hero.getHeroId())) {
+                DataConfig rankUp = configRank.get(hero.getHeroId()).get("rank");
+                for (int i = breakLevel; i > 0; i--) {
+                    if (!rankUp.getJsonObject().containsKey(breakLevel + "")) {
+                        continue;
+                    } else {
+                        if (rankUp.get(breakLevel + "").getJsonObject().containsKey("attr")) {
+                            continue;
+                        }
+                        DataConfig attConfig = rankUp.get(breakLevel + "").get("attr");
+                        Iterator<String> it = attConfig.getJsonObject().keys();
+                        while (it.hasNext()) {
+                            String attr = it.next();
+                            if (attrs.containsKey(attr)) {
+                                attrs.put(attr, attrs.get(attr) + attConfig.getDouble(attr));
+                            } else {
+                                attrs.put(attr, attConfig.getDouble(attr));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return attrs;
+
     }
 
     /**
@@ -526,9 +689,37 @@ public class HeroService extends GameSupport {
      * @param extraAttr
      * @throws
      */
-    private void getEquipFP(Equip equip, Map<String, Double> extraAttr) {
-        DataConfig config = this.getDataConfig().get(CONFIG_SKILL).get(equip.getEquipId());
+    private void getEquipFP(Equip equip, Map<String, Map<String, Double>> extraAttr) {
+        DataConfig config = this.getDataConfig().get(CONFIG_EQUIP).get(equip.getEquipId());
 
+        if (config.getJsonObject().containsKey("attr")) {
+            DataConfig attrConfig = config.get("attr");
+            List<Map<String, Object>> itAttr = attrConfig.getJsonArray();
+            for (Map<String, Object> map : itAttr) {
+                Map<String, Double> equipAttr = new HashMap<>();
+                String type = map.get("type").toString();
+                double coe = 0;
+                double add = 0;
+                if (map.containsKey("value") && map.get("value") != null) {
+                    add = JSONArray.fromObject(map.get("value")).getDouble(0)
+                            + JSONArray.fromObject(map.get("value")).getDouble(1) * (equip.getLevel() - 1)
+                            + JSONArray.fromObject(map.get("value")).getDouble(2) * (equip.getLevel() - 1);
+                }
+                if (map.containsKey("percent") && map.get("percent") != null) {
+                    coe = JSONArray.fromObject(map.get("percent")).getDouble(0)
+                            + JSONArray.fromObject(map.get("percent")).getDouble(1) * (equip.getLevel() - 1)
+                            + JSONArray.fromObject(map.get("percent")).getDouble(2) * (equip.getLevel() - 1);
+                }
+
+                if (extraAttr.containsKey(type)) {
+                    coe += extraAttr.get(type).get("coe");
+                    add += extraAttr.get(type).get("add");
+                }
+                equipAttr.put("coe", coe);
+                equipAttr.put("add", add);
+                extraAttr.put(type, equipAttr);
+            }
+        }
     }
 
     /**
@@ -538,13 +729,38 @@ public class HeroService extends GameSupport {
      * @param skillAttr
      * @throws
      */
-    private void getSkillFP(Skill skill, double skillFP, Map<String, Double> skillAttr) {
+    private void getSkillFP(Skill skill, double skillFP, Map<String, Map<String, Double>> skillAttrs) {
         DataConfig config = this.getDataConfig().get(CONFIG_SKILL).get(skill.getSkillId());
         if (config.getJsonObject().containsKey("fightPower")) {
             DataConfig configFightPower = config.get("fightPower");
             skillFP += configFightPower.getDouble(0) + configFightPower.getDouble(1) * skill.getLevel();
         }
+        if (config.getJsonObject().containsKey("attr")) {
+            DataConfig attrConfig = config.get("attr");
+            List<Map<String, Object>> itAttr = attrConfig.getJsonArray();
+            for (Map<String, Object> map : itAttr) {
+                Map<String, Double> skillAttr = new HashMap<>();
+                String type = map.get("type").toString();
+                double coe = 0;
+                double add = 0;
+                if (map.containsKey("coe") && map.get("coe") != null) {
+                    coe = JSONArray.fromObject(map.get("coe")).getDouble(0)
+                            + JSONArray.fromObject(map.get("coe")).getDouble(1) * (skill.getLevel() - 1);
+                }
+                if (map.containsKey("add") && map.get("add") != null) {
+                    add = JSONArray.fromObject(map.get("add")).getDouble(0)
+                            + JSONArray.fromObject(map.get("add")).getDouble(1) * (skill.getLevel() - 1);
+                }
 
+                if (skillAttrs.containsKey(type)) {
+                    coe += skillAttrs.get(type).get("coe");
+                    add += skillAttrs.get(type).get("add");
+                }
+                skillAttr.put("coe", coe);
+                skillAttr.put("add", add);
+                skillAttrs.put(type, skillAttr);
+            }
+        }
     }
 
     private int intValue(Integer integer) {
