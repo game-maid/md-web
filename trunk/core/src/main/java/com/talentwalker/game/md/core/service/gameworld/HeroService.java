@@ -652,7 +652,7 @@ public class HeroService extends GameSupport {
             if (configAttr.get(attrValue).getJsonObject().containsKey(1 + "")) {
                 d2 = configAttr.get(attrValue).getDouble(1 + "");
             }
-            double fp = d1 + d2 * hero.getLevel();
+            double fp = d1 + d2 * (hero.getLevel() - 1);
             attrs.put(attrValue, fp); // 基础属性
             if (breakLevel >= 0 && configRank.getJsonObject().containsKey(hero.getHeroId())) {
                 DataConfig rankUp = configRank.get(hero.getHeroId()).get("rank");
@@ -701,12 +701,12 @@ public class HeroService extends GameSupport {
                 double coe = 0;
                 double add = 0;
                 if (map.containsKey("value") && map.get("value") != null) {
-                    coe = JSONArray.fromObject(map.get("value")).getDouble(0)
+                    add = JSONArray.fromObject(map.get("value")).getDouble(0)
                             + JSONArray.fromObject(map.get("value")).getDouble(1) * (equip.getLevel() - 1)
                             + JSONArray.fromObject(map.get("value")).getDouble(2) * (equip.getLevel() - 1);
                 }
                 if (map.containsKey("percent") && map.get("percent") != null) {
-                    add = JSONArray.fromObject(map.get("percent")).getDouble(0)
+                    coe = JSONArray.fromObject(map.get("percent")).getDouble(0)
                             + JSONArray.fromObject(map.get("percent")).getDouble(1) * (equip.getLevel() - 1)
                             + JSONArray.fromObject(map.get("percent")).getDouble(2) * (equip.getLevel() - 1);
                 }
