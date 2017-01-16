@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -73,6 +74,7 @@ public class HeroService extends GameSupport {
      * 装备配置
      */
     final static String CONFIG_EQUIP = "equip";
+    private static final Logger logger = Logger.getLogger(HeroService.class);
 
     private void checkHero(String heroId) {
         DataConfig config = this.getDataConfig().get(CONFIG_HERO_CONFIG).get(heroId);
@@ -527,10 +529,8 @@ public class HeroService extends GameSupport {
         DataConfig configFightPower = this.getDataConfig().get(CONFIG_FIGHT_POWER);
         // 初始化战斗力
         double initFP = configHero.getDouble("fightPowerOrigin");
-        int heroLevel = hero.getLevel();
         // 等级战斗力
         double lvFP = Math.ceil(hero.getLevel() * configFightPower.get("lv").getDouble("coe"));
-
         // 技能、装备 额外增加属性
         Map<String, Map<String, Double>> skillExtraAttrs = new HashMap<>();
 
@@ -616,6 +616,12 @@ public class HeroService extends GameSupport {
         }
         attrFP = mainAttrFP * (1 + lesserFP);
         int heroFP = (int) Math.ceil(initFP + lvFP + attrFP + skillFP);
+        logger.info(hero.getHeroId() + "/初始化战斗力/" + initFP);
+        logger.info(hero.getHeroId() + "/等级战斗力/" + lvFP);
+        logger.info(hero.getHeroId() + "/技能战斗力/" + skillFP);
+        logger.info(hero.getHeroId() + "/主属性战斗力/" + skillFP);
+        logger.info(hero.getHeroId() + "/副战斗力/" + skillFP);
+        logger.info(hero.getHeroId() + "/属性战斗力/" + skillFP);
 
         return (int) Math.ceil(heroFP);
     }
