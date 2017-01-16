@@ -24,6 +24,7 @@ import com.talentwalker.game.md.core.domain.gameworld.MonthCard;
 import com.talentwalker.game.md.core.domain.gameworld.TopUpFirstRecord;
 import com.talentwalker.game.md.core.repository.gameworld.LordRepository;
 import com.talentwalker.game.md.core.repository.gameworld.TopUpFirstRecordRepository;
+import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.ServletUtils;
 
 /**
@@ -32,7 +33,7 @@ import com.talentwalker.game.md.core.util.ServletUtils;
  * @author <a href="mailto:zhaolibao@talentwalker.com">赵丽宝</a> 于 2016年12月5日 下午3:20:21
  */
 @Service
-public class TopUpCardService {
+public class TopUpCardService extends GameSupport {
     @Autowired
     private IDataConfigManager dataConfigManager;
     @Autowired
@@ -54,7 +55,7 @@ public class TopUpCardService {
 
     public void topUp(Lord lord, String productId, GameUser gameUser) {
         ServletUtils.getRequest().setAttribute("currentLord_admin", lord);
-        DataConfig config = dataConfigManager.getTest();
+        DataConfig config = this.getDataConfig();
         // 首充记录
         TopUpFirstRecord topUpFirstRecord = topUpFirstRecordRepository.findOne(lord.getId());
         DataConfig topupConfig = config.get(CONFIG_CASH_SHOP).get(productId);

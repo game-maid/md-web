@@ -19,6 +19,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,6 +64,9 @@ public class CashShopForTgame {
     public static Map<String, String> appKey = new HashMap<String, String>();
     public static Map<String, String> appId = new HashMap<String, String>();
     public static Map<String, String> server = new HashMap<String, String>();
+
+    private static final Logger logger = Logger.getLogger(CashShopForTgame.class);
+
     static {
         appKey.put("tgameiOS", "38d0078d7b166b3dcd0b5a9d0b1e718d");
         appKey.put("tgameAndroid", "1b3cbee57e790086e2dadf1a6c3b2ade");
@@ -83,11 +87,14 @@ public class CashShopForTgame {
     @RequestMapping(value = "tgame/orderAsyn", method = RequestMethod.POST)
     @ResponseBody
     public String addOrderAsyn(PushOrderTgame order) {
+        logger.info("**************订单id-" + order.getOrderId() + "*************");
         String orderId = order.getExtInfo();
         Order orderRecord = orderRepository.findOne(orderId);
         GameUser gameUser = orderRecord.getGameUser();
         Lord lord = orderRecord.getLord();
+        logger.info("**************签名-" + order.getSign() + "*************");
         if (checkSign(order, appKey.get(gameUser.getPackageId()))) {
+            logger.info("**************签名验证成功-" + order.getSign() + "*************");
             if (orderRecord.getState() == Order.STATE_NO) {
                 topUpCardService.topUp(lord, order.getProductId(), gameUser);
                 orderRecord.setState(Order.STATE_YES);
