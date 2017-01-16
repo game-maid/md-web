@@ -616,6 +616,9 @@ public class HeroService extends GameSupport {
         }
         attrFP = mainAttrFP * (1 + lesserFP);
         int heroFP = (int) Math.ceil(initFP + lvFP + attrFP + skillFP);
+        logger.info("技能属性加层！！！---" + JSONObject.fromObject(skillExtraAttrs).toString());
+        logger.info("装备属性加层！！！---" + JSONObject.fromObject(equipExtraAttrs).toString());
+        logger.info("技能属性加层！！！---" + JSONObject.fromObject(daseAttr).toString());
         logger.info(hero.getHeroId() + "/初始化战斗力/" + initFP);
         logger.info(hero.getHeroId() + "/等级战斗力/" + lvFP);
         logger.info(hero.getHeroId() + "/技能战斗力/" + skillFP);
