@@ -54,7 +54,7 @@ public class LogAspect extends GameSupport {
             if (result instanceof GameModel) {
                 GameModel gameModel = (GameModel) result;
                 // JSONObject json = gameModel.getModel();
-                log.setResult(formatJSONObject(gameModel.getModel()).toString());
+                log.setResult(formatJSONObject(gameModel.getModel()));
             } else {
                 log.setResult(result);
             }
