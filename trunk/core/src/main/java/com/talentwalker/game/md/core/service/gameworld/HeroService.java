@@ -619,9 +619,9 @@ public class HeroService extends GameSupport {
         logger.info(hero.getHeroId() + "/初始化战斗力/" + initFP);
         logger.info(hero.getHeroId() + "/等级战斗力/" + lvFP);
         logger.info(hero.getHeroId() + "/技能战斗力/" + skillFP);
-        logger.info(hero.getHeroId() + "/主属性战斗力/" + skillFP);
-        logger.info(hero.getHeroId() + "/副战斗力/" + skillFP);
-        logger.info(hero.getHeroId() + "/属性战斗力/" + skillFP);
+        logger.info(hero.getHeroId() + "/主属性战斗力/" + mainAttrFP);
+        logger.info(hero.getHeroId() + "/副战斗力/" + lesserFP);
+        logger.info(hero.getHeroId() + "/属性战斗力/" + attrFP);
 
         return (int) Math.ceil(heroFP);
     }
