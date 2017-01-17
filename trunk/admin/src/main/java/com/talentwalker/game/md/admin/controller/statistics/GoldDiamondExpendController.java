@@ -24,8 +24,16 @@ import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 @RequestMapping(value = "statistics/goldDiamondExpend", method = RequestMethod.GET)
 public class GoldDiamondExpendController extends BaseController {
     @GameResponse
-    @RequestMapping(value = "list")
+    @RequestMapping(value = "list", method = RequestMethod.GET)
     public String list() {
         return "statistics/goldDiamondExpend";
+    }
+
+    @GameResponse
+    @RequestMapping(value = "findList", method = RequestMethod.POST)
+    public Object list(String zoneId, Integer itemType, Integer userType, String lordId, Integer payType,
+            Integer registerCondition, Integer function) {
+        System.out.println("test");
+        return null;
     }
 }
