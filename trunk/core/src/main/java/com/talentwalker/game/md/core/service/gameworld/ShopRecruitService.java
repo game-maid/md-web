@@ -105,16 +105,9 @@ public class ShopRecruitService extends GameSupport {
             recruit.setType(4);
             mapRecruit.put(ConfigKey.SHOP_HERO_RECRUIT_FIRST, recruit);
             shopRecruit.setRecruit(mapRecruit);
-        } else if (guidanceRcruit == 1) {
+        } else if (guidanceRcruit >= 1) {
             Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
             recruitMap.remove(ConfigKey.SHOP_HERO_RECRUIT_FIRST);
-            Recruit recruit = initRecruit();
-            recruit.setId(ConfigKey.SHOP_HERO_RECRUIT_SECOND);
-            recruit.setType(4);
-            recruitMap.put(ConfigKey.SHOP_HERO_RECRUIT_SECOND, recruit);
-        } else if (guidanceRcruit >= 2) {
-            Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
-            recruitMap.remove(ConfigKey.SHOP_HERO_RECRUIT_SECOND);
             commonRecruit(config, recruitMap, lord, shopRecruit, activityRecruit);
         }
         // 常驻招募和触发招募
