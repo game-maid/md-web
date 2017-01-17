@@ -24,6 +24,7 @@ import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.ServletUtils;
 
 import net.sf.json.JSONObject;
+import net.sf.json.JsonConfig;
 
 /**
  * @ClassName: LogAspect
@@ -52,8 +53,8 @@ public class LogAspect extends GameSupport {
             result = point.proceed();
             if (result instanceof GameModel) {
                 GameModel gameModel = (GameModel) result;
-                JSONObject json = JSONObject.fromObject(gameModel.getModel());
-                log.setResult(json);
+                // JSONObject json = gameModel.getModel();
+                log.setResult(formatJSONObject(gameModel.getModel()));
             } else {
                 log.setResult(result);
             }
@@ -72,6 +73,12 @@ public class LogAspect extends GameSupport {
             gameLogRepository.insert(log);
         }
         return result;
+    }
+
+    private String formatJSONObject(Object obj) {
+        JsonConfig jsonConfig = new JsonConfig();
+        jsonConfig.setAllowNonStringKeys(true);
+        return JSONObject.fromObject(obj, jsonConfig).toString();
     }
 
     private GameLog getLog() {

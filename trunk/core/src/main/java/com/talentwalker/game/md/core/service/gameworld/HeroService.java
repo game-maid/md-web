@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -73,6 +74,7 @@ public class HeroService extends GameSupport {
      * 装备配置
      */
     final static String CONFIG_EQUIP = "equip";
+    private static final Logger logger = Logger.getLogger(HeroService.class);
 
     private void checkHero(String heroId) {
         DataConfig config = this.getDataConfig().get(CONFIG_HERO_CONFIG).get(heroId);
@@ -527,10 +529,8 @@ public class HeroService extends GameSupport {
         DataConfig configFightPower = this.getDataConfig().get(CONFIG_FIGHT_POWER);
         // 初始化战斗力
         double initFP = configHero.getDouble("fightPowerOrigin");
-        int heroLevel = hero.getLevel();
         // 等级战斗力
         double lvFP = Math.ceil(hero.getLevel() * configFightPower.get("lv").getDouble("coe"));
-
         // 技能、装备 额外增加属性
         Map<String, Map<String, Double>> skillExtraAttrs = new HashMap<>();
 
@@ -616,6 +616,15 @@ public class HeroService extends GameSupport {
         }
         attrFP = mainAttrFP * (1 + lesserFP);
         int heroFP = (int) Math.ceil(initFP + lvFP + attrFP + skillFP);
+        logger.info("技能属性加层！！！---" + JSONObject.fromObject(skillExtraAttrs).toString());
+        logger.info("装备属性加层！！！---" + JSONObject.fromObject(equipExtraAttrs).toString());
+        logger.info("技能属性加层！！！---" + JSONObject.fromObject(daseAttr).toString());
+        logger.info(hero.getHeroId() + "/初始化战斗力/" + initFP);
+        logger.info(hero.getHeroId() + "/等级战斗力/" + lvFP);
+        logger.info(hero.getHeroId() + "/技能战斗力/" + skillFP);
+        logger.info(hero.getHeroId() + "/主属性战斗力/" + mainAttrFP);
+        logger.info(hero.getHeroId() + "/副战斗力/" + lesserFP);
+        logger.info(hero.getHeroId() + "/属性战斗力/" + attrFP);
 
         return (int) Math.ceil(heroFP);
     }
@@ -643,7 +652,7 @@ public class HeroService extends GameSupport {
             if (configAttr.get(attrValue).getJsonObject().containsKey(1 + "")) {
                 d2 = configAttr.get(attrValue).getDouble(1 + "");
             }
-            double fp = d1 + d2 * hero.getLevel();
+            double fp = d1 + d2 * (hero.getLevel() - 1);
             attrs.put(attrValue, fp); // 基础属性
             if (breakLevel >= 0 && configRank.getJsonObject().containsKey(hero.getHeroId())) {
                 DataConfig rankUp = configRank.get(hero.getHeroId()).get("rank");
@@ -691,20 +700,20 @@ public class HeroService extends GameSupport {
                 String type = map.get("type").toString();
                 double coe = 0;
                 double add = 0;
-                if (map.containsKey("value")) {
-                    coe = JSONArray.fromObject(map.get("value")).getDouble(0)
+                if (map.containsKey("value") && map.get("value") != null) {
+                    add = JSONArray.fromObject(map.get("value")).getDouble(0)
                             + JSONArray.fromObject(map.get("value")).getDouble(1) * (equip.getLevel() - 1)
                             + JSONArray.fromObject(map.get("value")).getDouble(2) * (equip.getLevel() - 1);
                 }
-                if (map.containsKey("percent")) {
-                    add = JSONArray.fromObject(map.get("percent")).getDouble(0)
+                if (map.containsKey("percent") && map.get("percent") != null) {
+                    coe = JSONArray.fromObject(map.get("percent")).getDouble(0)
                             + JSONArray.fromObject(map.get("percent")).getDouble(1) * (equip.getLevel() - 1)
                             + JSONArray.fromObject(map.get("percent")).getDouble(2) * (equip.getLevel() - 1);
                 }
 
                 if (extraAttr.containsKey(type)) {
                     coe += extraAttr.get(type).get("coe");
-                    coe += extraAttr.get(type).get("add");
+                    add += extraAttr.get(type).get("add");
                 }
                 equipAttr.put("coe", coe);
                 equipAttr.put("add", add);
@@ -734,18 +743,18 @@ public class HeroService extends GameSupport {
                 String type = map.get("type").toString();
                 double coe = 0;
                 double add = 0;
-                if (map.containsKey("value")) {
+                if (map.containsKey("coe") && map.get("coe") != null) {
                     coe = JSONArray.fromObject(map.get("coe")).getDouble(0)
                             + JSONArray.fromObject(map.get("coe")).getDouble(1) * (skill.getLevel() - 1);
                 }
-                if (map.containsKey("percent")) {
+                if (map.containsKey("add") && map.get("add") != null) {
                     add = JSONArray.fromObject(map.get("add")).getDouble(0)
                             + JSONArray.fromObject(map.get("add")).getDouble(1) * (skill.getLevel() - 1);
                 }
 
                 if (skillAttrs.containsKey(type)) {
                     coe += skillAttrs.get(type).get("coe");
-                    coe += skillAttrs.get(type).get("add");
+                    add += skillAttrs.get(type).get("add");
                 }
                 skillAttr.put("coe", coe);
                 skillAttr.put("add", add);

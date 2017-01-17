@@ -268,7 +268,7 @@ public class LordService extends GameSupport {
         lordRepository.save(lord);
         this.loginData(lord);
 
-        heroService.setFormHoldFP(lord);
+        // heroService.setFormHoldFP(lord);
 
         recordLogin(lord);
 
