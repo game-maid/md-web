@@ -87,6 +87,7 @@ public class GameLog extends BaseDomain {
     /**
      * 消耗的道具
      */
+    @Field("expend_items")
     private List<String> expendItems;
 
     /**
