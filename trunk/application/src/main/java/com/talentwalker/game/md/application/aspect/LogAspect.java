@@ -75,11 +75,10 @@ public class LogAspect extends GameSupport {
         return result;
     }
 
-    private JSONObject formatJSONObject(Object obj) {
+    private String formatJSONObject(Object obj) {
         JsonConfig jsonConfig = new JsonConfig();
         jsonConfig.setAllowNonStringKeys(true);
-        jsonConfig.setExcludes(new String[] {"Integer" });
-        return JSONObject.fromObject(obj, jsonConfig);
+        return JSONObject.fromObject(obj, jsonConfig).toString();
     }
 
     private GameLog getLog() {
