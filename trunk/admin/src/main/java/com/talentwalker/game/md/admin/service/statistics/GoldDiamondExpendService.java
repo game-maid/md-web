@@ -8,12 +8,15 @@
 
 package com.talentwalker.game.md.admin.service.statistics;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
@@ -47,19 +50,34 @@ public class GoldDiamondExpendService extends BaseService {
      * @param function
      * @throws
      */
-    public void findList(String zoneId, String itemType, Integer userType, String lordId, Integer payType,
-            Integer registerCondition, Integer function) {
+    public void findList(String startStr, String endStr, String zoneId, String itemType, Integer userType,
+            String lordId, Integer payType, Integer registerCondition, Integer function) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        long startDate = 0L;
+        long endDate = 0L;
+        try {
+            startDate = sdf.parse(startStr).getTime();
+            endDate = sdf.parse(endStr).getTime() + DateUtils.MILLIS_PER_DAY;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         SearchFilter filter = SearchFilter.newSearchFilter();
         Pageable pageable = filter.getPageable();
 
         // 分组 统计总数 count
         int count = 0;
         List<DBObject> countList = new ArrayList<>();
+        String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
         String matchLordId = "{$match:{player_id:'" + lordId + "'}}";
+        String matchTime = "{$match:{$and:[{request_time:{$gte:" + startDate + "}},{request_time:{$lt:" + endDate
+                + "}}]}}";
         String matchItemType = "{$match:{expend_items:{$in:['" + itemType + "']}}}";
         String discountLordId = "{$group:{_id:'$uri'}}";
         String groupNum = "{$group:{_id:'$count',count:{$sum:1}}}";
+        countList.add((DBObject) JSON.parse(matchZoneId));
         countList.add((DBObject) JSON.parse(matchLordId));
+        countList.add((DBObject) JSON.parse(matchTime));
         countList.add((DBObject) JSON.parse(matchItemType));
         countList.add((DBObject) JSON.parse(discountLordId));
         countList.add((DBObject) JSON.parse(groupNum));

@@ -39,6 +39,8 @@ public class GoldDiamondExpendController extends BaseController {
 
     /**
      * @Description:查询
+     * @param startStr
+     * @param endStr
      * @param zoneId
      * @param itemType
      * @param userType
@@ -51,9 +53,10 @@ public class GoldDiamondExpendController extends BaseController {
      */
     @GameResponse
     @RequestMapping(value = "findList", method = RequestMethod.POST)
-    public Page<GameLog> list(String zoneId, String itemType, Integer userType, String lordId, Integer payType,
-            Integer registerCondition, Integer function) {
-        goldDiamondExpendService.findList(zoneId, itemType, userType, lordId, payType, registerCondition, function);
+    public Page<GameLog> list(String startStr, String endStr, String zoneId, String itemType, Integer userType,
+            String lordId, Integer payType, Integer registerCondition, Integer function) {
+        goldDiamondExpendService.findList(startStr, endStr, zoneId, itemType, userType, lordId, payType,
+                registerCondition, function);
         return null;
     }
 }
