@@ -90,7 +90,7 @@ public class GoldDiamondExpendService extends BaseService {
         // 分页 分组查询 list
 
         List<DBObject> selectList = new ArrayList<>();
-        String groupItemNum = "{$group:{_id:'$uri',num:{$sum:}}}";
+        String groupItemNum = "{$group:{_id:'$uri',num:{$sum:'$result.pay.lord." + itemType + "'}}}";
         selectList.add((DBObject) JSON.parse(matchLordId));
         selectList.add((DBObject) JSON.parse(matchItemType));
         selectList.add((DBObject) JSON.parse(groupItemNum));

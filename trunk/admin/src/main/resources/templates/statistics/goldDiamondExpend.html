@@ -189,6 +189,8 @@ function initTable(){
 			var query = {
 				limit : params.limit,
 				offset : params.offset,
+				startStr:$("#startDatetimepicker").val(),
+				endStr:$("#endDatetimepicker").val(),
 				zoneId: $("#zone-select").val(),
 				itemType:$("#item-type-select").val(),
 				userType:$("#user-type-select").val(),
