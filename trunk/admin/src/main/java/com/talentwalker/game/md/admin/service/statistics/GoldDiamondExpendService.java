@@ -17,6 +17,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.log4j.Logger;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,8 @@ public class GoldDiamondExpendService extends BaseService {
 
     @Resource
     private MongoTemplate mongoTemplate;
+
+    private static final Logger LOGGER = Logger.getLogger(GoldDiamondExpendService.class);
 
     /**
      * @Description:
@@ -86,12 +89,16 @@ public class GoldDiamondExpendService extends BaseService {
         while (totalIt.hasNext()) {
             BasicDBObject next = (BasicDBObject) totalIt.next();
             count = next.getInt("count");
+            LOGGER.info("总条数：" + count);
         }
         // 分页 分组查询 list
-
+        // 道具数量 、消费次数
         List<DBObject> selectList = new ArrayList<>();
-        String groupItemNum = "{$group:{_id:'$uri',num:{$sum:'$result.pay.lord." + itemType + "'}}}";
+        String groupItemNum = "{$group:{_id:'$uri',expendTimes:{$sum:1},num:{$sum:'$result.pay.lord." + itemType
+                + "'}}}";
+        selectList.add((DBObject) JSON.parse(matchZoneId));
         selectList.add((DBObject) JSON.parse(matchLordId));
+        selectList.add((DBObject) JSON.parse(matchTime));
         selectList.add((DBObject) JSON.parse(matchItemType));
         selectList.add((DBObject) JSON.parse(groupItemNum));
         AggregationOutput selectOutPut = mongoTemplate.getCollection("game_log").aggregate(selectList);
@@ -100,7 +107,24 @@ public class GoldDiamondExpendService extends BaseService {
             BasicDBObject next = (BasicDBObject) selectIt.next();
             String uri = next.getString("_id");
             int num = next.getInt("num");
-            System.out.println(uri + "-----" + num);
+            int expendTimes = next.getInt("expendTimes");
+            System.out.println(uri + "-----" + num + "---------" + expendTimes);
+        }
+        // 消费人数
+        List<DBObject> payList = new ArrayList<>();
+        String groupPayNum = "{$group:{_id:'$uri',count:{$sum:1}}}";
+        payList.add((DBObject) JSON.parse(matchZoneId));
+        payList.add((DBObject) JSON.parse(matchLordId));
+        payList.add((DBObject) JSON.parse(matchTime));
+        payList.add((DBObject) JSON.parse(discountLordId));
+        payList.add((DBObject) JSON.parse(groupPayNum));
+        AggregationOutput payOutPut = mongoTemplate.getCollection("game_log").aggregate(payList);
+        Iterator<DBObject> payIt = payOutPut.results().iterator();
+        while (payIt.hasNext()) {
+            BasicDBObject next = (BasicDBObject) payIt.next();
+            String uri = next.getString("_id");
+            int payTimes = next.getInt("count");
+            System.out.println(uri + "----------" + payTimes);
         }
     }
 
