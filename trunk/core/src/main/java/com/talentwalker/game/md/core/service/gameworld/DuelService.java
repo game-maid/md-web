@@ -307,6 +307,7 @@ public class DuelService extends GameSupport {
                 map.put("level", hero.getLevel());
                 map.put("breakLevel", hero.getBreakLevel());
                 map.put("loveLevel", hero.getLoveLevel());
+                map.put("heroFP", formHold.getFP());
                 heroList.add(map);
                 FP += formHold.getFP();
             }
@@ -343,6 +344,7 @@ public class DuelService extends GameSupport {
                     map.put("level", hero.getLevel());
                     map.put("breakLevel", hero.getBreakLevel());
                     map.put("loveLevel", hero.getLoveLevel());
+                    map.put("heroFP", form.getFP());
                     FP += form.getFP();
                     heroList.add(map);
                 }
@@ -374,6 +376,7 @@ public class DuelService extends GameSupport {
                     map.put("level", hero.getLevel());
                     map.put("breakLevel", hero.getBreakLevel());
                     map.put("loveLevel", hero.getLoveLevel());
+                    map.put("heroFP", form.getFP());
                     heroList.add(map);
                     FP += form.getFP();
                 }

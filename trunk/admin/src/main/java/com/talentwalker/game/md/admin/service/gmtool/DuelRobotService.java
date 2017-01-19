@@ -76,7 +76,7 @@ public class DuelRobotService extends BaseService {
         String datalogicId = gameZoneList.getDataLogic().getId();
         String rankKey = this.getRankKey(datalogicId);
         String robotKey = this.getRobotKey(datalogicId);
-        DataConfig config = dataConfigManager.getTest();
+        DataConfig config = dataConfigManager.getOnline();
         DataConfig rankGroup = config.get("duel_rankScore");
         Iterator it = rankGroup.getJsonObject().keys();
         this.deleteRankList(rankKey);
@@ -95,6 +95,17 @@ public class DuelRobotService extends BaseService {
             int rankEnd = rankGroup.get(index).getInteger("ranking");
             int level = rankGroup.get(index).getInteger("npclv");// 主公等级
             int heroLevel = level * lvLimit;// 英雄等级
+            DataConfig tacticlimitConfig = config.get("tacticLimit");
+            Iterator limitIt = tacticlimitConfig.getJsonObject().keys();
+            int subListNum = 8; // 英雄截取数量
+            while (limitIt.hasNext()) {
+                String limitKey = limitIt.next().toString();
+                if (tacticlimitConfig.get(limitKey).getInteger("lv") >= level) {
+                    subListNum = tacticlimitConfig.get(limitKey).getInteger("value");
+                    break;
+                }
+            }
+
             // 签名
             String notes = "";
             DataConfig newPlayerConfig = config.get("newPlayer");
@@ -115,6 +126,9 @@ public class DuelRobotService extends BaseService {
                 DataConfig npcGroupConfig = config.get("duel_npcgroup").get(randomNpc);
                 String head = npcGroupConfig.getString("playerHead");
                 List<String> heroList = npcGroupConfig.get("duelnpc").getJsonArray();
+                if (heroList.size() > subListNum) {
+                    heroList = heroList.subList(0, subListNum);
+                }
                 /*
                  * DataConfig tacticLimit = config.get("tacticLimit"); Iterator itLimit =
                  * tacticLimit.getJsonObject().keys(); while (itLimit.hasNext()) { int number =

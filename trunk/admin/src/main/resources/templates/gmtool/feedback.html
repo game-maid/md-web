@@ -72,6 +72,7 @@
 							<h3 class="modal-title" id="roleLabel" th:text="#{gmtool.feedback.feedback}">客服反馈</h3>
 						</div>
 						<div class="modal-body">
+							<input type="hidden" name="feedbackId" id="feedbackId" value="" />
 							<div class="form-group">
 								<label class="col-sm-3 control-label" th:text="#{gmtool.feedback.id}">客服ID</label>
 								<div class="col-sm-7">
@@ -321,6 +322,7 @@ function initBootstrapTable(){
  */
  var reply = function(id){
 	 $("#replyForm")[0].reset();
+	 $("#feedbackId").val(id);
 	 $("#replyForm").validate({
 		submitHandler:function(form){
 			onsave(id);
@@ -331,7 +333,8 @@ function initBootstrapTable(){
 }
 var onsave = function(id){
 	/*<![CDATA[*/
-	var data =$("#replyForm").serialize()+"&feedbackId="+id;
+	//var data =$("#replyForm").serialize()+"&feedbackId="+id;
+	var data =$("#replyForm").serialize();
 	/*]]>*/
 	gameAjax({
 		url : "/feedback/reply",
@@ -339,6 +342,7 @@ var onsave = function(id){
 		callback : function(val) {
 			$("#replyModal").modal("hide");
 			$("#table").bootstrapTable("refresh");
+			$("#feedbackId").val("");
 		}
 	});
 }

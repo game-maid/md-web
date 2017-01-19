@@ -8,6 +8,9 @@
 
 package com.talentwalker.game.md.application.aspect;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -15,6 +18,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.domain.GameLog;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.exception.GameException;
@@ -24,6 +28,8 @@ import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.ServletUtils;
 
 import net.sf.json.JSONObject;
+import net.sf.json.JsonConfig;
+import net.sf.json.util.PropertyFilter;
 
 /**
  * @ClassName: LogAspect
@@ -52,8 +58,8 @@ public class LogAspect extends GameSupport {
             result = point.proceed();
             if (result instanceof GameModel) {
                 GameModel gameModel = (GameModel) result;
-                JSONObject json = JSONObject.fromObject(gameModel.getModel());
-                log.setResult(json);
+                // JSONObject json = gameModel.getModel();
+                log.setResult(formatJSONObject(gameModel.getModel()));
             } else {
                 log.setResult(result);
             }
@@ -72,6 +78,24 @@ public class LogAspect extends GameSupport {
             gameLogRepository.insert(log);
         }
         return result;
+    }
+
+    /**
+     * @Description:允许将非字符串为键的map 格式化为jsonObject
+     * @param obj
+     * @return
+     * @throws
+     */
+    private JSONObject formatJSONObject(Object obj) {
+        JsonConfig jsonConfig = new JsonConfig();
+        jsonConfig.setAllowNonStringKeys(true);
+        jsonConfig.setJsonPropertyFilter(new PropertyFilter() {
+            @Override
+            public boolean apply(Object arg0, String arg1, Object value) {
+                return value == null;
+            }
+        });
+        return JSONObject.fromObject(obj, jsonConfig);
     }
 
     private GameLog getLog() {
@@ -98,12 +122,21 @@ public class LogAspect extends GameSupport {
     }
 
     private void updateLog(GameLog log) {
+        List<String> expendItems = new ArrayList<>();
+        log.setExpendItems(expendItems);
         if (!isThrough()) {
             log.setPostDiamond(getLord().getDiamond());
             log.setPostGold(getLord().getGold());
             log.setPostLevel(getLord().getLevel());
             log.setPostVipscore(getLord().getVipScore());
+            if (log.getPreDiamond() > log.getPostDiamond()) {// 消耗钻石
+                expendItems.add(ItemID.DIAMOND);
+            }
+            if (log.getPreGold() > log.getPostDiamond()) {// 消耗金币
+                expendItems.add(ItemID.GOLD);
+            }
         }
+
     }
 
     private boolean isThrough() {
