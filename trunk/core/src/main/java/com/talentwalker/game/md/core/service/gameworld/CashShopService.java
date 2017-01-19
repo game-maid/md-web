@@ -26,6 +26,7 @@ import com.talentwalker.game.md.core.domain.gameworld.Order;
 import com.talentwalker.game.md.core.domain.gameworld.PushOrderTgame;
 import com.talentwalker.game.md.core.repository.gameworld.OrderRepository;
 import com.talentwalker.game.md.core.util.GameSupport;
+import com.talentwalker.game.md.core.util.StringUtils;
 
 /**
  * @ClassName: CashShopService
@@ -50,7 +51,7 @@ public class CashShopService extends GameSupport {
         Lord lord = getLord();
         GameUser gameUser = getGameUser();
         // 订单号 lordId+时间戳
-        String orderId = lord.getId() + new Date().getTime();
+        String orderId = new Date().getTime() + StringUtils.getRandomInt(9);
         // 保存订单，状态未支付
         Order order = new Order();
         DataConfig dataConfig = getDataConfig().get(ConfigKey.CASH_SHOP_CONFIG).get(productId);
