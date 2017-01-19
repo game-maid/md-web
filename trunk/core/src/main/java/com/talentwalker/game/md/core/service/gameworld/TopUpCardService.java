@@ -119,7 +119,7 @@ public class TopUpCardService extends GameSupport {
             gainPayService.gain(lord, ItemID.DIAMOND, baseAmount);
         }
         if (vipScore > 0) {
-            gainPayService.gain(lord, ItemID.VIPSCORE, baseAmount);
+            gainPayService.gain(lord, ItemID.VIPSCORE, vipScore);
         }
         topUpFirstRecordRepository.save(topUpFirstRecord);
         lordRepository.save(lord);

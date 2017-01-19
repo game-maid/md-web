@@ -108,20 +108,43 @@ public class CashShopForTgame {
             }
         }
 
-        /*
-         * GameUser gameUser = gameUserRepository.findDistinctBySsoIdAndPlatformIdAndGameZoneId(order.getUserId(),
-         * PushOrderTgame.PLATFORM_ID, order.getExtInfo()); if (checkSign(order, appKey.get(gameUser.getPackageId()))) {
-         * Order orderRecord = orderRepository.findOne(order.getOrderId()); if (orderRecord == null) { DataConfig config
-         * = configManager.getTest(); Double price = config.get(ConfigKey.CASH_SHOP_CONFIG).get(order.getProductId())
-         * .getDouble(ConfigKey.CASH_SHOP_CONFIG_PRICE); Lord lord = lordRepository.findOne(gameUser.getId());
-         * topUpCardService.topUp(lord, order.getProductId(), gameUser); orderRecord = new Order();
-         * orderRecord.setId(order.getOrderId()); orderRecord.setGameUser(gameUser); orderRecord.setLord(lord);
-         * orderRecord.setProductId(order.getProductId()); orderRecord.setQuantity(order.getProductNum());
-         * orderRecord.setCustomId(extInfo); orderRecord.setZoneId(gameUser.getGameZoneId());
-         * orderRecord.setPackageId(gameUser.getPackageId()); orderRecord.setPrice(price);
-         * orderRecord.setLordId(lord.getId()); orderRepository.save(orderRecord); // 后台统计 statistics(gameUser, lord); }
-         * else {// 已经处理过了 } }
+        /**
+         * 测试
          */
+
+        // Lord lord = lordRepository.findOne("1061351");
+        // GameUser gameUser = gameUserRepository.findOne("1061351");
+        //
+        // // 订单号 lordId+时间戳
+        // String orderId = lord.getId() + new Date().getTime();
+        // // 保存订单，状态未支付
+        // Order orderRecord = new Order();
+        // DataConfig dataConfig = configManager.getTest().get(ConfigKey.CASH_SHOP_CONFIG).get("com.tgame.oltw.3000");
+        // orderRecord.setId(orderId);
+        // orderRecord.setLord(lord);
+        // orderRecord.setGameUser(gameUser);
+        // orderRecord.setProductId("com.tgame.oltw.3000");
+        // orderRecord.setQuantity(1);
+        // orderRecord.setState(Order.STATE_NO);
+        // orderRecord.setZoneId(gameUser.getGameZoneId());
+        // orderRecord.setPackageId(gameUser.getPackageId());
+        // orderRecord.setLordId(lord.getId());
+        // orderRecord.setLordLevel(lord.getLevel());
+        // orderRecord.setLordVipLevel(lord.getVipLevel());
+        // orderRecord.setLordVipScore(lord.getVipScore());
+        // orderRecord.setPrice(dataConfig.getDouble(ConfigKey.CASH_SHOP_CONFIG_PRICE));
+        // orderRecord.setProductType(dataConfig.getInteger(ConfigKey.CASH_SHOP_CONFIG_TYPE));
+        // orderRecord.setCreateTime(System.currentTimeMillis());
+        // orderRecord.setPlatformId(PushOrderTgame.PLATFORM_ID);
+        //
+        // topUpCardService.topUp(lord, "com.tgame.oltw.3000", gameUser);
+        // orderRecord.setState(Order.STATE_YES);
+        // orderRecord.setOrderId("test");
+        // orderRecord.setPayTime(System.currentTimeMillis());
+        // orderRepository.save(orderRecord);
+        // // 后台统计
+        // statistics(gameUser, lord);
+
         return "success";
 
     }
