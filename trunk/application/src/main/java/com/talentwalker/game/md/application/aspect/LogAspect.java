@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.domain.GameLog;
+import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.exception.GameException;
 import com.talentwalker.game.md.core.repository.GameLogRepository;
@@ -86,16 +87,16 @@ public class LogAspect extends GameSupport {
      * @return
      * @throws
      */
-    private JSONObject formatJSONObject(Object obj) {
+    private String formatJSONObject(Object obj) {
         JsonConfig jsonConfig = new JsonConfig();
         jsonConfig.setAllowNonStringKeys(true);
         jsonConfig.setJsonPropertyFilter(new PropertyFilter() {
             @Override
-            public boolean apply(Object arg0, String arg1, Object value) {
+            public boolean apply(Object arg0, String key, Object value) {
                 return value == null;
             }
         });
-        return JSONObject.fromObject(obj, jsonConfig);
+        return JSONObject.fromObject(obj, jsonConfig).toString();
     }
 
     private GameLog getLog() {
@@ -147,5 +148,11 @@ public class LogAspect extends GameSupport {
             return true;
         }
         return false;
+    }
+
+    public static void main(String[] args) {
+        Lord lord = new Lord();
+        lord.setId("id");
+        JSONObject fromObject = JSONObject.fromObject(lord);
     }
 }
