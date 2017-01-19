@@ -122,7 +122,7 @@ public class TopUpStatisticsExcelService extends BaseService {
             TopUpStatisticsExcel excel = new TopUpStatisticsExcel();
             excel.setIndex(++index);
             excel.setOrderId(order.getId());
-            excel.setDesc(dataConfig.get(order.getPackageId()).getString("desp"));
+            excel.setDesc(dataConfig.get(order.getProductId()).getString("desp"));
             excel.setProductId(order.getProductId());
             excel.setNum(order.getQuantity());
             excel.setLordId(order.getLordId());
