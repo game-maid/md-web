@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.domain.GameLog;
-import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.exception.GameException;
 import com.talentwalker.game.md.core.repository.GameLogRepository;
@@ -148,11 +147,5 @@ public class LogAspect extends GameSupport {
             return true;
         }
         return false;
-    }
-
-    public static void main(String[] args) {
-        Lord lord = new Lord();
-        lord.setId("id");
-        JSONObject fromObject = JSONObject.fromObject(lord);
     }
 }
