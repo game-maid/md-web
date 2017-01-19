@@ -703,12 +703,12 @@ public class HeroService extends GameSupport {
                 if (map.containsKey("value") && map.get("value") != null) {
                     add = JSONArray.fromObject(map.get("value")).getDouble(0)
                             + JSONArray.fromObject(map.get("value")).getDouble(1) * (equip.getLevel() - 1)
-                            + JSONArray.fromObject(map.get("value")).getDouble(2) * (equip.getLevel() - 1);
+                            + JSONArray.fromObject(map.get("value")).getDouble(2) * (equip.getStage());
                 }
                 if (map.containsKey("percent") && map.get("percent") != null) {
                     coe = JSONArray.fromObject(map.get("percent")).getDouble(0)
                             + JSONArray.fromObject(map.get("percent")).getDouble(1) * (equip.getLevel() - 1)
-                            + JSONArray.fromObject(map.get("percent")).getDouble(2) * (equip.getLevel() - 1);
+                            + JSONArray.fromObject(map.get("percent")).getDouble(2) * (equip.getStage());
                 }
 
                 if (extraAttr.containsKey(type)) {
