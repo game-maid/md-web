@@ -86,7 +86,7 @@ public class LogAspect extends GameSupport {
      * @return
      * @throws
      */
-    private String formatJSONObject(Object obj) {
+    private JSONObject formatJSONObject(Object obj) {
         JsonConfig jsonConfig = new JsonConfig();
         jsonConfig.setAllowNonStringKeys(true);
         jsonConfig.setJsonPropertyFilter(new PropertyFilter() {
@@ -95,7 +95,7 @@ public class LogAspect extends GameSupport {
                 return value == null;
             }
         });
-        return JSONObject.fromObject(obj, jsonConfig).toString();
+        return JSONObject.fromObject(obj, jsonConfig);
     }
 
     private GameLog getLog() {
