@@ -149,6 +149,12 @@ function showModel(){
 function addItem(){
 	var id = $("#itemId").val();
 	var amount = $("#amount").val();
+	if(amount>10000){
+		$("#amount").val("");
+		//钻石上限
+		swal([[#{sys.item.diamond.limit}]], "", "error");
+		return;
+	}
 	if(id.length==0||amount==0||amount.length==0){
 		return;
 	}
@@ -158,19 +164,31 @@ function addItem(){
 	}
 	amount = parseInt(amount);
 	$("#itemData").show();
-	//清空文本框
-	$("#itemId").val("");
-	$("#amount").val("");
 	
 	var tableData=table.bootstrapTable('getData');
 	var isAdd=true; //true id重复只增加数量
+	var diamondLimit=false;
 	$.each(tableData,function(index,val){
 		if(val.id==id){
 			amount+=parseInt(val.amount);
+			if(id=="diamond"){
+				if(amount>10000){
+					diamondLimit=true;
+				}
+			}
 			tableData[index]["amount"]=amount;
 			isAdd=false;
 		}
 	});
+	if(diamondLimit){
+		//钻石上限
+		swal([[#{sys.item.diamond.limit}]], "", "error");
+		return;
+	}
+	//清空文本框
+	$("#itemId").val("");
+	$("#amount").val("");
+	
 	if(isAdd){
 		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removeItem(\''+id+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
 		var name = window.itemAll[id];
