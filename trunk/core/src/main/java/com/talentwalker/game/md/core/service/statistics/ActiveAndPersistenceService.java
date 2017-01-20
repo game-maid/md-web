@@ -255,13 +255,36 @@ public class ActiveAndPersistenceService {
             int incomeTimes = 0;
             int preOneNewUserNum = 0;
             int preTwoNewUserNum = 0;
+            int preThreeNewUserNum = 0;
+            int preFourNewUserNum = 0;
+            int preFiveNewUserNum = 0;
             int preSixNewUserNum = 0;
+            int preThirteenNewUserNum = 0;
+            int preFourteenNewUserNum = 0;
+            int preTwentyNewUserNum = 0;
+            int preTwentySevenNewUserNum = 0;
+            int preTwentyNineNewUserNum = 0;
+            int preThirtyFourNewUserNum = 0;
+            int preFortyEightNewUserNum = 0;
+            int preFiftyFiveNewUserNum = 0;
             int preOnePersistence = 0;
             int preTwoPersistence = 0;
+            int preThreePersistence = 0;
+            int preFourPersistence = 0;
+            int preFivePersistence = 0;
             int preSixPersistence = 0;
+            int preFourteenPersistence = 0;
+            int preTwentyNinePersistence = 0;
             double preOneIncomeNum = 0D;
             double preTwoIncomeNum = 0D;
             double preSixIncomeNum = 0D;
+            double preThirteenIncomeNum = 0D;
+            double preTwentyIncomeNum = 0D;
+            double preTwentySevenIncomeNum = 0D;
+            double preThirtyFourIncomeNum = 0D;
+            double preFortyEightIncomeNum = 0D;
+            double preFiftyFiveIncomeNum = 0D;
+            int newUserPayer = 0;
             while (iterator.hasNext()) {
                 String zoneId = iterator.next().getKey();
                 Map<String, ActiveBasePackage> packageData = zoneData.get(zoneId);
@@ -277,30 +300,86 @@ public class ActiveAndPersistenceService {
                 incomeNum += temp.getIncomeNum() == null ? 0 : temp.getIncomeNum();
                 incomeTimes += temp.getIncomeTimes() == null ? 0 : temp.getIncomeTimes();
                 preOneNewUserNum += temp.getPreOneNewUserNum() == null ? 0 : temp.getPreOneNewUserNum();
-                preTwoNewUserNum += temp.getPreTwoNewUserNum() == null ? 0 : temp.getPreTwoNewUserNum();
+                preTwoNewUserNum += temp.getPreOneNewUserNum() == null ? 0 : temp.getPreOneNewUserNum();
+                preThreeNewUserNum += temp.getPreThreeNewUserNum() == null ? 0 : temp.getPreThreeNewUserNum();
+                preFourNewUserNum += temp.getPreFourNewUserNum() == null ? 0 : temp.getPreFourNewUserNum();
+                preFiveNewUserNum += temp.getPreFiveNewUserNum() == null ? 0 : temp.getPreFiveNewUserNum();
                 preSixNewUserNum += temp.getPreSixNewUserNum() == null ? 0 : temp.getPreSixNewUserNum();
+                preThirteenNewUserNum += temp.getPreFourteenNewUserNum() == null ? 0 : temp.getPreFourteenNewUserNum();
+                preFourteenNewUserNum += temp.getPreFourteenNewUserNum() == null ? 0 : temp.getPreFourteenNewUserNum();
+                preTwentyNewUserNum += temp.getPreTwentyNewUserNum() == null ? 0 : temp.getPreTwentyNewUserNum();
+                preTwentySevenNewUserNum += temp.getPreTwentySevenNewUserNum() == null ? 0
+                        : temp.getPreTwentySevenNewUserNum();
+                preTwentyNineNewUserNum += temp.getPreTwentyNineNewUserNum() == null ? 0
+                        : temp.getPreTwentyNineNewUserNum();
+                preThirtyFourNewUserNum += temp.getPreThirtyFourNewUserNum() == null ? 0
+                        : temp.getPreThirtyFourNewUserNum();
+                preFortyEightNewUserNum += temp.getPreFortyEightNewUserNum() == null ? 0
+                        : temp.getPreFortyEightNewUserNum();
+                preFiftyFiveNewUserNum += temp.getPreFiftyFiveNewUserNum() == null ? 0
+                        : temp.getPreFiftyFiveNewUserNum();
                 preOnePersistence += temp.getPreOnePersistence() == null ? 0 : temp.getPreOnePersistence();
                 preTwoPersistence += temp.getPreTwoPersistence() == null ? 0 : temp.getPreTwoPersistence();
+                preThreePersistence += temp.getPreThreePersistence() == null ? 0 : temp.getPreThreePersistence();
+                preFourPersistence += temp.getPreFourPersistence() == null ? 0 : temp.getPreFourPersistence();
+                preFivePersistence += temp.getPreFivePersistence() == null ? 0 : temp.getPreFivePersistence();
                 preSixPersistence += temp.getPreSixPersistence() == null ? 0 : temp.getPreSixPersistence();
+                preFourteenPersistence += temp.getPreFourteenPersistence() == null ? 0
+                        : temp.getPreFourteenPersistence();
+                preTwentyNinePersistence += temp.getPreTwentyNinePersistence() == null ? 0
+                        : temp.getPreTwentyNinePersistence();
                 preOneIncomeNum += temp.getPreOneIncomeNum() == null ? 0 : temp.getPreOneIncomeNum();
                 preTwoIncomeNum += temp.getPreTwoIncomeNum() == null ? 0 : temp.getPreTwoIncomeNum();
                 preSixIncomeNum += temp.getPreSixIncomeNum() == null ? 0 : temp.getPreSixIncomeNum();
+                preTwentyIncomeNum += temp.getPreTwentySevenIncomeNum() == null ? 0 : temp.getPreTwentySevenIncomeNum();
+                preTwentySevenIncomeNum += temp.getPreTwentySevenIncomeNum() == null ? 0
+                        : temp.getPreTwentySevenIncomeNum();
+                preThirtyFourIncomeNum += temp.getPreThirtyFourIncomeNum() == null ? 0
+                        : temp.getPreThirtyFourIncomeNum();
+                preFortyEightIncomeNum += temp.getPreFortyEightIncomeNum() == null ? 0
+                        : temp.getPreFortyEightIncomeNum();
+                preFiftyFiveIncomeNum += temp.getPreFiftyFiveIncomeNum() == null ? 0 : temp.getPreFiftyFiveIncomeNum();
+                newUserPayer += temp.getNewUserPayer() == null ? 0 : temp.getNewUserPayer();
             }
             abp.setActiveNum(activeNum);
+            abp.setNewUserNum(newUserNum);
+            abp.setNewPayerNum(newPayerNum);
+            abp.setPayerNum(payerNum);
             abp.setIncomeNum(incomeNum);
             abp.setIncomeTimes(incomeTimes);
-            abp.setNewPayerNum(newPayerNum);
-            abp.setNewUserNum(newUserNum);
-            abp.setPayerNum(payerNum);
-            abp.setPreOneIncomeNum(preOneIncomeNum);
             abp.setPreOneNewUserNum(preOneNewUserNum);
-            abp.setPreOnePersistence(preOnePersistence);
-            abp.setPreSixIncomeNum(preSixIncomeNum);
-            abp.setPreSixNewUserNum(preSixNewUserNum);
-            abp.setPreSixPersistence(preSixPersistence);
-            abp.setPreTwoIncomeNum(preTwoIncomeNum);
             abp.setPreTwoNewUserNum(preTwoNewUserNum);
+            abp.setPreThreeNewUserNum(preThreeNewUserNum);
+            abp.setPreFourNewUserNum(preFourNewUserNum);
+            abp.setPreFiveNewUserNum(preFiveNewUserNum);
+            abp.setPreSixNewUserNum(preSixNewUserNum);
+            abp.setPreThirteenNewUserNum(preThirteenNewUserNum);
+            abp.setPreFourteenNewUserNum(preFourteenNewUserNum);
+            abp.setPreTwentyNewUserNum(preTwentyNewUserNum);
+            abp.setPreTwentySevenNewUserNum(preTwentySevenNewUserNum);
+            abp.setPreTwentyNineNewUserNum(preTwentyNineNewUserNum);
+            abp.setPreThirtyFourNewUserNum(preThirtyFourNewUserNum);
+            abp.setPreFortyEightNewUserNum(preFortyEightNewUserNum);
+            abp.setPreFiftyFiveNewUserNum(preFiftyFiveNewUserNum);
+            abp.setPreOnePersistence(preOnePersistence);
             abp.setPreTwoPersistence(preTwoPersistence);
+            abp.setPreThreePersistence(preThreePersistence);
+            abp.setPreFourPersistence(preFourPersistence);
+            abp.setPreFivePersistence(preFivePersistence);
+            abp.setPreSixPersistence(preSixPersistence);
+            abp.setPreFourteenPersistence(preFourteenPersistence);
+            abp.setPreTwentyNinePersistence(preTwentyNinePersistence);
+            abp.setPreOneIncomeNum(preOneIncomeNum);
+            abp.setPreTwoIncomeNum(preTwoIncomeNum);
+            abp.setPreSixIncomeNum(preSixIncomeNum);
+            abp.setPreThirteenIncomeNum(preThirteenIncomeNum);
+            abp.setPreTwentyIncomeNum(preTwentyIncomeNum);
+            abp.setPreTwentySevenIncomeNum(preTwentySevenIncomeNum);
+            abp.setPreThirtyFourIncomeNum(preThirtyFourIncomeNum);
+            abp.setPreFortyEightIncomeNum(preFortyEightIncomeNum);
+            abp.setPreFiftyFiveIncomeNum(preFiftyFiveIncomeNum);
+            abp.setNewUserPayer(newUserPayer);
+
             zoneData.put(ActiveBaseData.DAY_TOTAL, dayTotal);
         }
 
