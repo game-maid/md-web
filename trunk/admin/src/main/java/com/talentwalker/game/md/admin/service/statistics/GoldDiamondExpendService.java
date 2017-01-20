@@ -92,11 +92,11 @@ public class GoldDiamondExpendService extends BaseService {
         Pageable pageable = SearchFilter.newSearchFilter().getPageable();
         int limit = pageable.getPageSize();
         int offset = pageable.getOffset();
-        String limitStr = "{$limit:" + 3 + "}";
-        String offsetStr = "{$skip:" + 0 + "}";
+        String limitStr = "{$limit:" + limit + "}";
+        String offsetStr = "{$skip:" + offset + "}";
         // 道具数量 、消费次数
         List<DBObject> selectList = new ArrayList<>();
-        String groupItemNum = "{$group:{_id:'$uri',expendTimes:{$sum:1},num:{$sum:'$result.pay.lord." + itemType
+        String groupItemNum = "{$group:{_id:{uri:'$uri'},expendTimes:{$sum:1},num:{$sum:'$result.pay.lord." + itemType
                 + "'}}}";
         String sortByUri = "{$sort:{_id.uri:-1}}";
         selectList.add((DBObject) JSON.parse(matchZoneId));
@@ -105,13 +105,13 @@ public class GoldDiamondExpendService extends BaseService {
         selectList.add((DBObject) JSON.parse(matchItemType));
         selectList.add((DBObject) JSON.parse(groupItemNum));
         selectList.add((DBObject) JSON.parse(sortByUri));
-        // selectList.add((DBObject) JSON.parse(offsetStr));
-        // selectList.add((DBObject) JSON.parse(limitStr));
+        selectList.add((DBObject) JSON.parse(offsetStr));
+        selectList.add((DBObject) JSON.parse(limitStr));
         AggregationOutput selectOutPut = mongoTemplate.getCollection("game_log").aggregate(selectList);
         Iterator<DBObject> selectIt = selectOutPut.results().iterator();
         while (selectIt.hasNext()) {
             BasicDBObject next = (BasicDBObject) selectIt.next();
-            String uri = next.getString("_id");
+            String uri = ((BasicDBObject) next.get("_id")).getString("uri");
             int num = next.getInt("num");
             int expendTimes = next.getInt("expendTimes");
             System.out.println(uri + "-----" + num + "---------" + expendTimes);
@@ -119,8 +119,8 @@ public class GoldDiamondExpendService extends BaseService {
         // 消费人数
         List<DBObject> payList = new ArrayList<>();
         String discountLordId = "{$group:{_id:{player_id:'$player_id',uri:'$uri'}}}";
-        String groupPayNum = "{$group:{_id:'$_id.uri',count:{$sum:1}}}";
-        String sort = "{$sort:{'_id._id.uri':-1}}";
+        String groupPayNum = "{$group:{_id:{uri:'$_id.uri'},count:{$sum:1}}}";
+        String sort = "{$sort:{'_id.uri':-1}}";
         payList.add((DBObject) JSON.parse(matchZoneId));
         payList.add((DBObject) JSON.parse(matchLordId));
         payList.add((DBObject) JSON.parse(matchTime));
@@ -128,14 +128,14 @@ public class GoldDiamondExpendService extends BaseService {
         payList.add((DBObject) JSON.parse(discountLordId));
         payList.add((DBObject) JSON.parse(groupPayNum));
         payList.add((DBObject) JSON.parse(sort));
-        // payList.add((DBObject) JSON.parse(offsetStr));
-        // payList.add((DBObject) JSON.parse(limitStr));
+        payList.add((DBObject) JSON.parse(offsetStr));
+        payList.add((DBObject) JSON.parse(limitStr));
         AggregationOutput payOutPut = mongoTemplate.getCollection("game_log").aggregate(payList);
         Iterator<DBObject> payIt = payOutPut.results().iterator();
         System.out.println("----");
         while (payIt.hasNext()) {
             BasicDBObject next = (BasicDBObject) payIt.next();
-            String uri = next.getString("_id");
+            String uri = ((BasicDBObject) next.get("_id")).getString("uri");
             int payTimes = next.getInt("count");
             System.out.println(uri + "----------" + payTimes);
         }
