@@ -126,7 +126,7 @@ public class LogAspect extends GameSupport {
             if (log.getPreDiamond() > log.getPostDiamond()) {// 消耗钻石
                 expendItems.add(ItemID.DIAMOND);
             }
-            if (log.getPreGold() > log.getPostDiamond()) {// 消耗金币
+            if (log.getPreGold() > log.getPostGold()) {// 消耗金币
                 expendItems.add(ItemID.GOLD);
             }
         }
