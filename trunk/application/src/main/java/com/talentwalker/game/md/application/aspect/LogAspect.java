@@ -29,7 +29,6 @@ import com.talentwalker.game.md.core.util.ServletUtils;
 
 import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
-import net.sf.json.util.PropertyFilter;
 
 /**
  * @ClassName: LogAspect
@@ -86,16 +85,11 @@ public class LogAspect extends GameSupport {
      * @return
      * @throws
      */
-    private String formatJSONObject(Object obj) {
+    private JSONObject formatJSONObject(Object obj) {
         JsonConfig jsonConfig = new JsonConfig();
         jsonConfig.setAllowNonStringKeys(true);
-        jsonConfig.setJsonPropertyFilter(new PropertyFilter() {
-            @Override
-            public boolean apply(Object arg0, String key, Object value) {
-                return value == null;
-            }
-        });
-        return JSONObject.fromObject(obj, jsonConfig).toString();
+        String temp = JSONObject.fromObject(obj, jsonConfig).toString();
+        return JSONObject.fromObject(temp.replace("null", "\"null\""));
     }
 
     private GameLog getLog() {
