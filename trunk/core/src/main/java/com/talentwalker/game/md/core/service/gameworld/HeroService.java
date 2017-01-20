@@ -474,6 +474,10 @@ public class HeroService extends GameSupport {
                     for (String equipUid : strEquip) {
                         equipList.add(duelRobot.getEquips().get(equipUid));
                     }
+                    // 增加默认技能
+                    if (hero.getDefaultSkill() != null) {
+                        skillList.add(hero.getDefaultSkill());
+                    }
                 }
             }
         }
@@ -510,6 +514,10 @@ public class HeroService extends GameSupport {
                     for (String skillUid : strSkill) {
                         skillList.add(lord.getSkills().get(skillUid));
                     }
+                    // 增加默认技能
+                    if (hero.getDefaultSkill() != null) {
+                        skillList.add(hero.getDefaultSkill());
+                    }
                 }
             }
         }
@@ -541,7 +549,7 @@ public class HeroService extends GameSupport {
             if (skill == null) {
                 continue;
             }
-            this.getSkillFP(skill, skillFP, skillExtraAttrs);
+            skillFP += this.getSkillFP(skill, skillExtraAttrs);
         }
 
         // 技能、装备 额外增加属性
@@ -654,24 +662,25 @@ public class HeroService extends GameSupport {
             }
             double fp = d1 + d2 * (hero.getLevel() - 1);
             attrs.put(attrValue, fp); // 基础属性
-            if (breakLevel >= 0 && configRank.getJsonObject().containsKey(hero.getHeroId())) {
-                DataConfig rankUp = configRank.get(hero.getHeroId()).get("rank");
-                for (int i = breakLevel; i > 0; i--) {
-                    if (!rankUp.getJsonObject().containsKey(breakLevel + "")) {
+        }
+
+        if (breakLevel >= 0 && configRank.getJsonObject().containsKey(hero.getHeroId())) {
+            DataConfig rankUp = configRank.get(hero.getHeroId()).get("rank");
+            for (int i = breakLevel; i > 0; i--) {
+                if (!rankUp.getJsonObject().containsKey(breakLevel + "")) {
+                    continue;
+                } else {
+                    if (rankUp.get(breakLevel + "").getJsonObject().containsKey("attr")) {
                         continue;
-                    } else {
-                        if (rankUp.get(breakLevel + "").getJsonObject().containsKey("attr")) {
-                            continue;
-                        }
-                        DataConfig attConfig = rankUp.get(breakLevel + "").get("attr");
-                        Iterator<String> it = attConfig.getJsonObject().keys();
-                        while (it.hasNext()) {
-                            String attr = it.next();
-                            if (attrs.containsKey(attr)) {
-                                attrs.put(attr, attrs.get(attr) + attConfig.getDouble(attr));
-                            } else {
-                                attrs.put(attr, attConfig.getDouble(attr));
-                            }
+                    }
+                    DataConfig attConfig = rankUp.get(breakLevel + "").get("attr");
+                    Iterator<String> it = attConfig.getJsonObject().keys();
+                    while (it.hasNext()) {
+                        String attr = it.next();
+                        if (attrs.containsKey(attr)) {
+                            attrs.put(attr, attrs.get(attr) + attConfig.getDouble(attr));
+                        } else {
+                            attrs.put(attr, attConfig.getDouble(attr));
                         }
                     }
                 }
@@ -729,13 +738,14 @@ public class HeroService extends GameSupport {
      * @param skillAttr
      * @throws
      */
-    private void getSkillFP(Skill skill, double skillFP, Map<String, Map<String, Double>> skillAttrs) {
+    private double getSkillFP(Skill skill, Map<String, Map<String, Double>> skillAttrs) {
+        double skillFP = 0.0;
         DataConfig config = this.getDataConfig().get(CONFIG_SKILL).get(skill.getSkillId());
         if (config.getJsonObject().containsKey("fightPower")) {
             DataConfig configFightPower = config.get("fightPower");
             skillFP += configFightPower.getDouble(0) + configFightPower.getDouble(1) * skill.getLevel();
         }
-        if (config.getJsonObject().containsKey("attr")) {
+        if (config.getJsonObject().containsKey("attr") && "psv".equals(config.getString("type"))) {
             DataConfig attrConfig = config.get("attr");
             List<Map<String, Object>> itAttr = attrConfig.getJsonArray();
             for (Map<String, Object> map : itAttr) {
@@ -761,6 +771,7 @@ public class HeroService extends GameSupport {
                 skillAttrs.put(type, skillAttr);
             }
         }
+        return skillFP;
     }
 
     private int intValue(Integer integer) {
