@@ -65,9 +65,6 @@ public class GoldDiamondExpendService extends BaseService {
             e.printStackTrace();
         }
 
-        SearchFilter filter = SearchFilter.newSearchFilter();
-        Pageable pageable = filter.getPageable();
-
         // 分组 统计总数 count
         int count = 0;
         List<DBObject> countList = new ArrayList<>();
@@ -76,13 +73,13 @@ public class GoldDiamondExpendService extends BaseService {
         String matchTime = "{$match:{$and:[{request_time:{$gte:" + startDate + "}},{request_time:{$lt:" + endDate
                 + "}}]}}";
         String matchItemType = "{$match:{expend_items:{$in:['" + itemType + "']}}}";
-        String discountLordId = "{$group:{_id:'$uri'}}";
+        String discountUri = "{$group:{_id:'$uri'}}";
         String groupNum = "{$group:{_id:'$count',count:{$sum:1}}}";
         countList.add((DBObject) JSON.parse(matchZoneId));
         countList.add((DBObject) JSON.parse(matchLordId));
         countList.add((DBObject) JSON.parse(matchTime));
         countList.add((DBObject) JSON.parse(matchItemType));
-        countList.add((DBObject) JSON.parse(discountLordId));
+        countList.add((DBObject) JSON.parse(discountUri));
         countList.add((DBObject) JSON.parse(groupNum));
         AggregationOutput totalOutPut = mongoTemplate.getCollection("game_log").aggregate(countList);
         Iterator<DBObject> totalIt = totalOutPut.results().iterator();
@@ -92,15 +89,24 @@ public class GoldDiamondExpendService extends BaseService {
             LOGGER.info("总条数：" + count);
         }
         // 分页 分组查询 list
+        Pageable pageable = SearchFilter.newSearchFilter().getPageable();
+        int limit = pageable.getPageSize();
+        int offset = pageable.getOffset();
+        String limitStr = "{$limit:" + 3 + "}";
+        String offsetStr = "{$skip:" + 0 + "}";
         // 道具数量 、消费次数
         List<DBObject> selectList = new ArrayList<>();
         String groupItemNum = "{$group:{_id:'$uri',expendTimes:{$sum:1},num:{$sum:'$result.pay.lord." + itemType
                 + "'}}}";
+        String sortByUri = "{$sort:{_id.uri:-1}}";
         selectList.add((DBObject) JSON.parse(matchZoneId));
         selectList.add((DBObject) JSON.parse(matchLordId));
         selectList.add((DBObject) JSON.parse(matchTime));
         selectList.add((DBObject) JSON.parse(matchItemType));
         selectList.add((DBObject) JSON.parse(groupItemNum));
+        selectList.add((DBObject) JSON.parse(sortByUri));
+        // selectList.add((DBObject) JSON.parse(offsetStr));
+        // selectList.add((DBObject) JSON.parse(limitStr));
         AggregationOutput selectOutPut = mongoTemplate.getCollection("game_log").aggregate(selectList);
         Iterator<DBObject> selectIt = selectOutPut.results().iterator();
         while (selectIt.hasNext()) {
@@ -112,14 +118,21 @@ public class GoldDiamondExpendService extends BaseService {
         }
         // 消费人数
         List<DBObject> payList = new ArrayList<>();
-        String groupPayNum = "{$group:{_id:'$uri',count:{$sum:1}}}";
+        String discountLordId = "{$group:{_id:{player_id:'$player_id',uri:'$uri'}}}";
+        String groupPayNum = "{$group:{_id:'$_id.uri',count:{$sum:1}}}";
+        String sort = "{$sort:{'_id._id.uri':-1}}";
         payList.add((DBObject) JSON.parse(matchZoneId));
         payList.add((DBObject) JSON.parse(matchLordId));
         payList.add((DBObject) JSON.parse(matchTime));
+        payList.add((DBObject) JSON.parse(matchItemType));
         payList.add((DBObject) JSON.parse(discountLordId));
         payList.add((DBObject) JSON.parse(groupPayNum));
+        payList.add((DBObject) JSON.parse(sort));
+        // payList.add((DBObject) JSON.parse(offsetStr));
+        // payList.add((DBObject) JSON.parse(limitStr));
         AggregationOutput payOutPut = mongoTemplate.getCollection("game_log").aggregate(payList);
         Iterator<DBObject> payIt = payOutPut.results().iterator();
+        System.out.println("----");
         while (payIt.hasNext()) {
             BasicDBObject next = (BasicDBObject) payIt.next();
             String uri = next.getString("_id");
