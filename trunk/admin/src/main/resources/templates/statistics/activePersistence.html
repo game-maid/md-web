@@ -377,7 +377,6 @@ function callback(val,dataArr,isDetail){
 				var preTwoPersistenceRate = divide(packageData.preTwoPersistence,packageData.preTwoNewUserNum);
 				var preThreePersistenceRate = divide(packageData.preThreePersistence,packageData.preThreeNewUserNum);
 				var preFourPersistenceRate=divide(packageData.preFourPersistence,packageData.preFourNewUserNum);
-				console.log(zoneId+"--"+packageData.preFivePersistence+"--"+packageData.preFiveNewUserNum);
 				var preFivePersistenceRate = divide(packageData.preFivePersistence,packageData.preFiveNewUserNum);
 				var preSixPersistenceRate = divide(packageData.preSixPersistence,packageData.preSixNewUserNum);
 				var preFourteenPersistenceRate=divide(packageData.preFourteenPersistence,packageData.preFourteenNewUserNum);
@@ -386,7 +385,7 @@ function callback(val,dataArr,isDetail){
 				if(packageId=='zzzdayTotal'){
 					$.each(dataArr,function(index,data){
 						switch(data){
-							case 'secondPersistenceRate':preOnePersistenceDataData.push(preOnePersistenceRate);break;
+							case 'secondPersistenceRate':preOnePersistenceDataData.push(preOnePersistenceRate);;break;
 							case 'thirdlyPersistenceRate':preTwoPersistenceDataData.push(preTwoPersistenceRate);break;
 							case 'fourthPersistenceRate':preThreePersistenceDataData.push(preThreePersistenceRate);break;
 							case 'fifthPersistenceRate':preFourPersistenceDataData.push(preFourPersistenceRate);;break;
@@ -430,6 +429,9 @@ function callback(val,dataArr,isDetail){
 	});
 	//初始化曲线图
 	initGraph(categories,series);
+	$.each(series[0].data,function(index,data){
+		console.log(data);
+	})
 }
 
 
