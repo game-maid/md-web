@@ -93,6 +93,8 @@
 					</div>
 				</div>
 				<div>
+					<label class="checkbox-inline i-checks">
+				                    <input name="data-all" type="checkbox" value="persentLtv" th:text="#{statistics.active.persent.LTV}" /></label>
 					<label id="second-ltv-label" class="checkbox-inline i-checks">
 				                    <input name="data-all" type="checkbox" value="secondLtv" th:text="#{statistics.active.second.LTV}" /></label>
 					<label id="thirdly-ltv-label" class="checkbox-inline i-checks">
@@ -139,6 +141,7 @@
 							<th width="5.2%" th:text="#{statistics.active.date}"></th>
 							<th width="5.2%" th:text="#{statistics.active.zone}"></th>
 							<th width="5.2%" th:text="#{statistics.active.pacakge}"></th>
+							<th width="5.2%" th:text="#{statistics.active.persent.LTV}"></th>
 							<th width="5.2%" th:text="#{statistics.active.second.LTV}"></th>
 							<th width="5.2%" th:text="#{statistics.active.thirdly.LTV}"></th>
 							<th width="5.2%" th:text="#{statistics.active.seventh.LTV}"></th>
@@ -330,48 +333,53 @@ function callback(val,dataArr,isDetail){
 	var text='';
 	var categories =[];
 	var series=[];
+	var persentLtvData={};
+	persentLtvData.name=[[#{statistics.active.persent.LTV}]];
+	var persentLtvDataData=[];
+	persentLtvData.data=persentLtvDataData;
+	
 	var secondLtvData={};
-	secondLtvData.name=[[#{statistics.active.num}]];
+	secondLtvData.name=[[#{statistics.active.second.LTV}]];
 	var secondLtvDataData=[];
 	secondLtvData.data=secondLtvDataData;
 	
 	var thirdlyLtvData={};
-	thirdlyLtvData.name=[[#{statistics.active.new.user.num}]];
+	thirdlyLtvData.name=[[#{statistics.active.thirdly.LTV}]];
 	var thirdlyLtvDataData=[];
 	thirdlyLtvData.data=thirdlyLtvDataData;
 	
 	var seventhLtvData={};
-	seventhLtvData.name=[[#{statistics.active.new.payer.num}]];
+	seventhLtvData.name=[[#{statistics.active.seventh.LTV}]];
 	var seventhLtvDataData=[];
 	seventhLtvData.data=seventhLtvDataData;
 	
 	var fourteenthLtvData={};
-	fourteenthLtvData.name=[[#{statistics.active.payer.num}]];
+	fourteenthLtvData.name=[[#{statistics.active.fourteenth.LTV}]];
 	var fourteenthLtvDataData=[];
 	fourteenthLtvData.data=fourteenthLtvDataData;
 	
 	var twentyFirstLtvData={};
-	twentyFirstLtvData.name=[[#{statistics.active.income.num}]];
+	twentyFirstLtvData.name=[[#{statistics.active.twenty.first.LTV}]];
 	var twentyFirstLtvDataData =[];
 	twentyFirstLtvData.data=twentyFirstLtvDataData;
 	
 	var twentyEighthLtvData={};
-	twentyEighthLtvData.name=[[#{statistics.active.income.times}]];
+	twentyEighthLtvData.name=[[#{statistics.active.twenty.eighth.LTV}]];
 	var twentyEighthLtvDataData=[];
 	twentyEighthLtvData.data=twentyEighthLtvDataData;
 	
 	var  thirtyFifthLtvData={};
-	thirtyFifthLtvData.name=[[#{statistics.active.new.pay.rate}]];
+	thirtyFifthLtvData.name=[[#{statistics.active.thirty.fifth.LTV}]];
 	var thirtyFifthLtvDataData=[];
 	thirtyFifthLtvData.data=thirtyFifthLtvDataData;
 	
 	var fortyNinthLtvData ={};
-	fortyNinthLtvData.name=[[#{statistics.active.active.pay.rate}]];
+	fortyNinthLtvData.name=[[#{statistics.active.forty.ninth.LTV}]];
 	var fortyNinthLtvDataData=[];
 	fortyNinthLtvData.data=fortyNinthLtvDataData;
 	
 	var fiftySixthLtvData={};
-	fiftySixthLtvData.name=[[#{statistics.active.ARPU}]];
+	fiftySixthLtvData.name=[[#{statistics.active.fifty.sixth.LTV}]];
 	var fiftySixthLtvDataData=[];
 	fiftySixthLtvData.data=fiftySixthLtvDataData;
 	/*<![CDATA[*/
@@ -381,19 +389,21 @@ function callback(val,dataArr,isDetail){
 		categories.push(date);
 		$.each(dayData.zoneData,function(zoneId,zoneData){
 			$.each(zoneData,function(packageId,packageData){
-				var secondLtv=divide(packageData.preOneIncomeNum,packageData.preOneNewUserNum);
-				var thirdlyLtv=divide(packageData.preTwoIncomeNum,packageData.preTwoNewUserNum);
-				var seventhLtv=divide(packageData.preSixIncomeNum,packageData.preSixNewUserNum);
-				var fourteenthLtv=divide(packageData.preThirteenIncomeNum,packageData.preThirteenNewUserNum);
-				var twentyFirstLtv=divide(packageData.preTwentyIncomeNum,packageData.preTwentyNewUserNum);
-				var twentyEighthLtv=divide(packageData.preTwentySevenIncomeNum,packageData.preTwentySevenNewUserNum);
-				var thirtyFifthLtv=divide(packageData.preThirtyFourIncomeNum,packageData.preThirtyFourNewUserNum);
-				var fortyNinthLtv=divide(packageData.preFortyEightIncomeNum,packageData.preFortyEightNewUserNum);
-				var fiftySixthLtv=divide(packageData.preFiftyFiveIncomeNum,packageData.preFiftyFiveNewUserNum);
+				var persentLtv=divide(packageData.persentIncomeNum,packageData.newUserNum);
+				var secondLtv=divide(packageData.preOneIncomeNum,packageData.newUserNum);
+				var thirdlyLtv=divide(packageData.preTwoIncomeNum,packageData.newUserNum);
+				var seventhLtv=divide(packageData.preSixIncomeNum,packageData.newUserNum);
+				var fourteenthLtv=divide(packageData.preThirteenIncomeNum,packageData.newUserNum);
+				var twentyFirstLtv=divide(packageData.preTwentyIncomeNum,packageData.newUserNum);
+				var twentyEighthLtv=divide(packageData.preTwentySevenIncomeNum,packageData.newUserNum);
+				var thirtyFifthLtv=divide(packageData.preThirtyFourIncomeNum,packageData.newUserNum);
+				var fortyNinthLtv=divide(packageData.preFortyEightIncomeNum,packageData.newUserNum);
+				var fiftySixthLtv=divide(packageData.preFiftyFiveIncomeNum,packageData.newUserNum);
 				//初始化曲线图数据
 				if(packageId=='zzzdayTotal'){
 					$.each(dataArr,function(index,data){
 						switch(data){
+							case 'persentLtv':persentLtvDataData.push(persentLtv);break;
 							case 'secondLtv':secondLtvDataData.push(secondLtv);break;
 							case 'thirdlyLtv':thirdlyLtvDataData.push(thirdlyLtv);break;
 							case 'seventhLtv':seventhLtvDataData.push(seventhLtv);break;
@@ -417,7 +427,7 @@ function callback(val,dataArr,isDetail){
 				}else{
 					text+='<tr><td>'+date+'</td><td>'+zoneId+'</td><td>'+packageId+'</td> '
 				}
-				text+='</td><td>'+secondLtv+'%'+'</td><td>'+thirdlyLtv+'%'+'</td><td>'+seventhLtv+'%';
+				text+='</td><td>'+persentLtv+'%'+'</td><td>'+secondLtv+'%'+'</td><td>'+thirdlyLtv+'%'+'</td><td>'+seventhLtv+'%';
 				text+='</td><td>'+fourteenthLtv+'%'+'</td><td>'+twentyFirstLtv+'%'+'</td><td>'+twentyEighthLtv+'%';
 				text+='</td><td>'+thirtyFifthLtv+'%'+'</td><td>'+thirtyFifthLtv+'%'+'</td><td>'+fiftySixthLtv+'%';
 				text+='</td></tr>';
@@ -429,6 +439,7 @@ function callback(val,dataArr,isDetail){
 	/*]]>*/
 	$.each(dataArr,function(index,data){
 		switch(data){
+		case 'persentLtv':series.push(persentLtvData);break;
 		case 'secondLtv':series.push(secondLtvData);break;
 		case 'thirdlyLtv':series.push(thirdlyLtvData);break;
 		case 'seventhLtv':series.push(seventhLtvData);break;

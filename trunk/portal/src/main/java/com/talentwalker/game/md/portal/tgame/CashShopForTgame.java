@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.talentwalker.game.md.core.config.ConfigKey;
+import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.dataconfig.IDataConfigManager;
 import com.talentwalker.game.md.core.domain.GameUser;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
@@ -87,63 +90,63 @@ public class CashShopForTgame {
     @RequestMapping(value = "tgame/orderAsyn", method = RequestMethod.POST)
     @ResponseBody
     public String addOrderAsyn(PushOrderTgame order) {
-        logger.info("**************订单id-" + order.getOrderId() + "*************");
-        String orderId = order.getExtInfo();
-        Order orderRecord = orderRepository.findOne(orderId);
-        GameUser gameUser = orderRecord.getGameUser();
-        Lord lord = orderRecord.getLord();
-        logger.info("**************签名-" + order.getSign() + "*************");
-        if (checkSign(order, appKey.get(gameUser.getPackageId()))) {
-            logger.info("**************签名验证成功-" + order.getSign() + "*************");
-            if (orderRecord.getState() == Order.STATE_NO) {
-                topUpCardService.topUp(lord, order.getProductId(), gameUser);
-                orderRecord.setState(Order.STATE_YES);
-                orderRecord.setOrderId(order.getOrderId());
-                orderRecord.setPayTime(System.currentTimeMillis());
-                orderRepository.save(orderRecord);
-                // 后台统计
-                statistics(gameUser, lord);
-            } else {
-                // 处理过了
-            }
-        }
+        // logger.info("**************订单id-" + order.getOrderId() + "*************");
+        // String orderId = order.getExtInfo();
+        // Order orderRecord = orderRepository.findOne(orderId);
+        // GameUser gameUser = orderRecord.getGameUser();
+        // Lord lord = orderRecord.getLord();
+        // logger.info("**************签名-" + order.getSign() + "*************");
+        // if (checkSign(order, appKey.get(gameUser.getPackageId()))) {
+        // logger.info("**************签名验证成功-" + order.getSign() + "*************");
+        // if (orderRecord.getState() == Order.STATE_NO) {
+        // topUpCardService.topUp(lord, order.getProductId(), gameUser);
+        // orderRecord.setState(Order.STATE_YES);
+        // orderRecord.setOrderId(order.getOrderId());
+        // orderRecord.setPayTime(System.currentTimeMillis());
+        // orderRepository.save(orderRecord);
+        // // 后台统计
+        // statistics(gameUser, lord);
+        // } else {
+        // // 处理过了
+        // }
+        // }
 
         /**
          * 测试
          */
 
-        // Lord lord = lordRepository.findOne("1061351");
-        // GameUser gameUser = gameUserRepository.findOne("1061351");
-        //
-        // // 订单号 lordId+时间戳
-        // String orderId = lord.getId() + new Date().getTime();
-        // // 保存订单，状态未支付
-        // Order orderRecord = new Order();
-        // DataConfig dataConfig = configManager.getTest().get(ConfigKey.CASH_SHOP_CONFIG).get("com.tgame.oltw.3000");
-        // orderRecord.setId(orderId);
-        // orderRecord.setLord(lord);
-        // orderRecord.setGameUser(gameUser);
-        // orderRecord.setProductId("com.tgame.oltw.3000");
-        // orderRecord.setQuantity(1);
-        // orderRecord.setState(Order.STATE_NO);
-        // orderRecord.setZoneId(gameUser.getGameZoneId());
-        // orderRecord.setPackageId(gameUser.getPackageId());
-        // orderRecord.setLordId(lord.getId());
-        // orderRecord.setLordLevel(lord.getLevel());
-        // orderRecord.setLordVipLevel(lord.getVipLevel());
-        // orderRecord.setLordVipScore(lord.getVipScore());
-        // orderRecord.setPrice(dataConfig.getDouble(ConfigKey.CASH_SHOP_CONFIG_PRICE));
-        // orderRecord.setProductType(dataConfig.getInteger(ConfigKey.CASH_SHOP_CONFIG_TYPE));
-        // orderRecord.setCreateTime(System.currentTimeMillis());
-        // orderRecord.setPlatformId(PushOrderTgame.PLATFORM_ID);
-        //
-        // topUpCardService.topUp(lord, "com.tgame.oltw.3000", gameUser);
-        // orderRecord.setState(Order.STATE_YES);
-        // orderRecord.setOrderId("test");
-        // orderRecord.setPayTime(System.currentTimeMillis());
-        // orderRepository.save(orderRecord);
-        // // 后台统计
-        // statistics(gameUser, lord);
+        Lord lord = lordRepository.findOne("1061497");
+        GameUser gameUser = gameUserRepository.findOne("1061497");
+
+        // 订单号 lordId+时间戳
+        String orderId = lord.getId() + new Date().getTime();
+        // 保存订单，状态未支付
+        Order orderRecord = new Order();
+        DataConfig dataConfig = configManager.getTest().get(ConfigKey.CASH_SHOP_CONFIG).get("com.tgame.oltw.3000");
+        orderRecord.setId(orderId);
+        orderRecord.setLord(lord);
+        orderRecord.setGameUser(gameUser);
+        orderRecord.setProductId("com.tgame.oltw.3000");
+        orderRecord.setQuantity(1);
+        orderRecord.setState(Order.STATE_NO);
+        orderRecord.setZoneId(gameUser.getGameZoneId());
+        orderRecord.setPackageId(gameUser.getPackageId());
+        orderRecord.setLordId(lord.getId());
+        orderRecord.setLordLevel(lord.getLevel());
+        orderRecord.setLordVipLevel(lord.getVipLevel());
+        orderRecord.setLordVipScore(lord.getVipScore());
+        orderRecord.setPrice(dataConfig.getDouble(ConfigKey.CASH_SHOP_CONFIG_PRICE));
+        orderRecord.setProductType(dataConfig.getInteger(ConfigKey.CASH_SHOP_CONFIG_TYPE));
+        orderRecord.setCreateTime(System.currentTimeMillis());
+        orderRecord.setPlatformId(PushOrderTgame.PLATFORM_ID);
+
+        topUpCardService.topUp(lord, "com.tgame.oltw.3000", gameUser);
+        orderRecord.setState(Order.STATE_YES);
+        orderRecord.setOrderId("test");
+        orderRecord.setPayTime(System.currentTimeMillis());
+        orderRepository.save(orderRecord);
+        // 后台统计
+        statistics(gameUser, lord);
 
         return "success";
 
