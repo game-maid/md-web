@@ -11,13 +11,17 @@ package com.talentwalker.game.md.admin.service.statistics;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
@@ -53,8 +57,8 @@ public class GoldDiamondExpendService extends BaseService {
      * @param function
      * @throws
      */
-    public void findList(String startStr, String endStr, String zoneId, String itemType, Integer userType,
-            String lordId, Integer payType, Integer registerCondition, Integer function) {
+    public Page<Map<String, Object>> findList(String startStr, String endStr, String zoneId, String itemType,
+            Integer userType, String lordId, Integer payType, Integer registerCondition, Integer function) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         long startDate = 0L;
         long endDate = 0L;
@@ -66,7 +70,7 @@ public class GoldDiamondExpendService extends BaseService {
         }
 
         // 分组 统计总数 count
-        int count = 0;
+        long total = 0L;
         List<DBObject> countList = new ArrayList<>();
         String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
         String matchLordId = "{$match:{player_id:'" + lordId + "'}}";
@@ -85,10 +89,13 @@ public class GoldDiamondExpendService extends BaseService {
         Iterator<DBObject> totalIt = totalOutPut.results().iterator();
         while (totalIt.hasNext()) {
             BasicDBObject next = (BasicDBObject) totalIt.next();
-            count = next.getInt("count");
-            LOGGER.info("总条数：" + count);
+            total = next.getLong("count");
+            LOGGER.info("总条数：" + total);
         }
+
         // 分页 分组查询 list
+        ArrayList<Map<String, Object>> content = new ArrayList<>();
+
         Pageable pageable = SearchFilter.newSearchFilter().getPageable();
         int limit = pageable.getPageSize();
         int offset = pageable.getOffset();
@@ -110,10 +117,15 @@ public class GoldDiamondExpendService extends BaseService {
         AggregationOutput selectOutPut = mongoTemplate.getCollection("game_log").aggregate(selectList);
         Iterator<DBObject> selectIt = selectOutPut.results().iterator();
         while (selectIt.hasNext()) {
+            HashMap<String, Object> map = new HashMap<>();
+            content.add(map);
             BasicDBObject next = (BasicDBObject) selectIt.next();
             String uri = ((BasicDBObject) next.get("_id")).getString("uri");
             int num = next.getInt("num");
             int expendTimes = next.getInt("expendTimes");
+            map.put("functionName", uri);
+            map.put("itemNum", num);
+            map.put("expendTimes", expendTimes);
             System.out.println(uri + "-----" + num + "---------" + expendTimes);
         }
         // 消费人数
@@ -136,9 +148,16 @@ public class GoldDiamondExpendService extends BaseService {
         while (payIt.hasNext()) {
             BasicDBObject next = (BasicDBObject) payIt.next();
             String uri = ((BasicDBObject) next.get("_id")).getString("uri");
-            int payTimes = next.getInt("count");
-            System.out.println(uri + "----------" + payTimes);
+            int payerNum = next.getInt("count");
+            for (Map<String, Object> map : content) {
+                if (map.get("functionName").equals(uri)) {
+                    map.put("payerNum", payerNum);
+                    break;
+                }
+            }
+            System.out.println(uri + "----------" + payerNum);
         }
+        return new PageImpl<>(content, pageable, total);
     }
 
 }

@@ -8,6 +8,8 @@
 
 package com.talentwalker.game.md.admin.controller.statistics;
 
+import java.util.Map;
+
 import javax.annotation.Resource;
 
 import org.springframework.data.domain.Page;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.talentwalker.game.md.admin.controller.BaseController;
 import com.talentwalker.game.md.admin.service.statistics.GoldDiamondExpendService;
-import com.talentwalker.game.md.core.domain.GameLog;
 import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 
 /**
@@ -53,10 +54,10 @@ public class GoldDiamondExpendController extends BaseController {
      */
     @GameResponse
     @RequestMapping(value = "findList", method = RequestMethod.POST)
-    public Page<GameLog> list(String startStr, String endStr, String zoneId, String itemType, Integer userType,
-            String lordId, Integer payType, Integer registerCondition, Integer function) {
-        goldDiamondExpendService.findList(startStr, endStr, zoneId, itemType, userType, lordId, payType,
-                registerCondition, function);
-        return null;
+    public Page<Map<String, Object>> list(String startStr, String endStr, String zoneId, String itemType,
+            Integer userType, String lordId, Integer payType, Integer registerCondition, Integer function) {
+        Page<Map<String, Object>> findList = goldDiamondExpendService.findList(startStr, endStr, zoneId, itemType,
+                userType, lordId, payType, registerCondition, function);
+        return findList;
     }
 }

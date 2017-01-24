@@ -1,7 +1,6 @@
 
 package com.talentwalker.game.md.core.service.gameworld;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -121,18 +120,6 @@ public class FeedbackService extends GameSupport {
 
         SearchFilter filter = SearchFilter.newSearchFilter(new Sort(Direction.ASC, "status"));
         Page<Feedback> page = feedbackRepository.findAll(filter);
-
-        List<Feedback> content = page.getContent();
-        List<String> playerIds = new ArrayList<>();
-        for (Feedback feedback : content) {
-            List<String> mailIds = feedback.getMailIds();
-            // 查询客服反馈信息
-
-            // 拿到玩家id
-            String playerId = feedback.getPlayerId();
-            playerIds.add(playerId);
-        }
-
         return page;
 
     }

@@ -202,90 +202,42 @@ function initTable(){
 			return query;
 		},
 		detailView : true,
-		detailFormatter:function(index, row){
-			var detail = '<table class="table">';
-			detail += '<tr><td><b th:text="#{gamelog.param}">参数</b></td><td colspan="7">'+JSON.stringify(row.params)+'</td></tr>';
-			detail += '<tr><td><b th:text="#{gamelog.result}">返回值</b></td><td>'+JSON.stringify(row.result)+'</td></tr>';
-			detail += '<tr><td><b th:text="#{gamelog.gold}">金币</b></td><td>'+row.preGold+'->'+row.postGold+'</td>';
-			detail += '<td><b th:text="#{gamelog.diamond}">钻石</b></td><td>'+row.preDiamond+'->'+row.postDiamond+'</td>';
-			detail += '<td><b th:text="#{gamelog.level}">等级</b></td><td>'+row.preLevel+'->'+row.postLevel+'</td>';
-			detail += '<td><b th:text="#{gamelog.vip}">vip积分</b></td><td>'+row.preVipscore+'->'+row.postVipscore+'</td></tr>';
-			detail += '<tr><td><b>ssoId</b></td><td colspan="3">'+row.ssoId+'</td>';
-			detail += '<td><b>sessionId</b></td><td colspan="3">'+row.sessionId+'</td></tr>';
-			detail += '<tr><td><b th:text="#{gamelog.clientversion}">客户端版本号</b></td><td colspan="3">'+row.clientVersion+'</td>';
-			detail += '<td><b th:text="#{gamelog.physical}">物理服</b></td><td colspan="3">'+physicalMap[row.physicalserverId]+'</td></tr>';
-			detail += '</table>';
-			return detail;
-		},
 		pagination : true,
 		singleSelect : false,
 		sidePagination : "server",
 		columns : [
 			{
-				title : [[#{gamelog.player}]],
-				field : "playerId",
+				title : [[#{statistics.gold.function.name}]],
+				field : "functionName",
 				align : "center",
-			},
-			{
-				title : [[#{sys.platform}]],
-				field : "platformId",
-				align : "center",
-				formatter : function(value){
-					return platformMap[value];
+				formatter:function(value){
+					return value;
 				}
 			},
 			{
-				title : [[#{gamelog.gamezone}]],
-				field : "zoneId",
-				align : "center",
-				formatter : function(value) {
-					return zoneMap[value];
-				},
-			},
-			{
-				title : [[#{gamelog.package}]],
-				field : "packageId",
+				title : [[#{statistics.gold.item.num}]],
+				field : "itemNum",
 				align : "center",
 				formatter : function(value){
-					return pkgMap[value];
+					return vlaue==null?0:value;
 				}
 			},
 			{
-				title : [[#{gamelog.action}]],
-				field : "uri",
-				align : "center",
-			},
-			{
-				title : [[#{gamelog.responsecode}]],
-				field : "code",
+				title : [[#{statistics.gold.expend.times}]],
+				field : "expendTimes",
 				align : "center",
 				formatter : function(value) {
-					if(value == 0){
-						return '<span th:text="#{gamelog.success}" class="text-success">成功</span>';
-					}else{
-						/* return "<span>失败</span>|" + value; */
-						return '<span class="text-danger">' + value + '</span>';
-					}
+					return vlaue==null?0:value;
 				},
 			},
 			{
-				title : [[#{gamelog.cost}]],
-				field : "cost",
+				title : [[#{statistics.gold.peyer.num}]],
+				field : "payerNum",
 				align : "center",
-			},
-			{
-				title : [[#{gamelog.ip}]],
-				field : "ip",
-				align : "center",
-			},
-			{
-				title : [[#{gamelog.requesttime}]],
-				field : "requestTime",
-				align : "center",
-				formatter : function(value) {
-					return new Date(value).format("yyyy-MM-dd hh:mm:ss");
-				},
-			},
+				formatter : function(value){
+					return vlaue==null?0:value;
+				}
+			}
 		]
 	});
 }
