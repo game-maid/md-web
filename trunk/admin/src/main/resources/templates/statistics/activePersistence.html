@@ -373,14 +373,14 @@ function callback(val,dataArr,isDetail){
 		categories.push(date);
 		$.each(dayData.zoneData,function(zoneId,zoneData){
 			$.each(zoneData,function(packageId,packageData){
-				var preOnePersistenceRate=divide(packageData.preOnePersistence,packageData.preOneNewUserNum);
-				var preTwoPersistenceRate = divide(packageData.preTwoPersistence,packageData.preTwoNewUserNum);
-				var preThreePersistenceRate = divide(packageData.preThreePersistence,packageData.preThreeNewUserNum);
-				var preFourPersistenceRate=divide(packageData.preFourPersistence,packageData.preFourNewUserNum);
-				var preFivePersistenceRate = divide(packageData.preFivePersistence,packageData.preFiveNewUserNum);
-				var preSixPersistenceRate = divide(packageData.preSixPersistence,packageData.preSixNewUserNum);
-				var preFourteenPersistenceRate=divide(packageData.preFourteenPersistence,packageData.preFourteenNewUserNum);
-				var preTwentyNinePersistenceRate = divide(packageData.preTwentyNinePersistence,packageData.preTwentyNineNewUserNum);
+				var preOnePersistenceRate=divide(packageData.preOnePersistence,packageData.newUserNum);
+				var preTwoPersistenceRate = divide(packageData.preTwoPersistence,packageData.newUserNum);
+				var preThreePersistenceRate = divide(packageData.preThreePersistence,packageData.newUserNum);
+				var preFourPersistenceRate=divide(packageData.preFourPersistence,packageData.newUserNum);
+				var preFivePersistenceRate = divide(packageData.preFivePersistence,packageData.newUserNum);
+				var preSixPersistenceRate = divide(packageData.preSixPersistence,packageData.newUserNum);
+				var preFourteenPersistenceRate=divide(packageData.preFourteenPersistence,packageData.newUserNum);
+				var preTwentyNinePersistenceRate = divide(packageData.preTwentyNinePersistence,packageData.newUserNum);
 				//初始化曲线图数据
 				if(packageId=='zzzdayTotal'){
 					$.each(dataArr,function(index,data){
