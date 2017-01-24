@@ -1169,8 +1169,8 @@ public class DuelService extends GameSupport {
                     rankKey);
             rank = duelRrank.getRank();
             if (rank > index) {
+                responseMap.put("rank", index);
                 if (duel.getHrank() > index) {
-                    responseMap.put("rank", index);
                     responseMap.put("uprank", duel.getHrank() - index);
                     responseMap.put("hrank", index);
                     duel.setHrank(index);
