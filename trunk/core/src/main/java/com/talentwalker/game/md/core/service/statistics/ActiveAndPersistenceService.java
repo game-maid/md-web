@@ -115,7 +115,7 @@ public class ActiveAndPersistenceService {
             }
             startCal.setTime(date);
             while (startCal.getTimeInMillis() < endLong) {
-                ltvData(cal, zoneStr, zoneList, tableData, false);
+                ltvData(startCal, zoneStr, zoneList, tableData, false);
             }
             // 月
         } else {
@@ -1250,18 +1250,18 @@ public class ActiveAndPersistenceService {
         String matchLordsPreTwoPersistence = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
         getNum(startDate, tableData, "game_login", "setPreTwoPersistence", int.class, group, matchZone,
                 matchTwoLoginTime, matchLordsPreTwoPersistence);
+        // 前六天新增用户数
+        String matchPreSixNewUserNum = "{$match:{$and:[{register_time:{$gt:" + preSixStart + "}},{register_time:{$lt:"
+                + preSixEnd + "}}]}}";
+        getNum(startDate, tableData, "game_register", "setPreSixNewUserNum", int.class, group, matchZone,
+                matchPreSixNewUserNum);
+        // 前六天存留数
+        String matchSixLoginTime = "{$match:{$and:[{login_time:{$gt:" + preSixStart + "}},{login_time:{$lt:" + preSixEnd
+                + "}}]}}";
+        String matchLordsPreSixPersistence = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+        getNum(startDate, tableData, "game_login", "setPreSixPersistence", int.class, group, matchZone,
+                matchSixLoginTime, matchLordsPreSixPersistence);
         if (flag) {
-            // 前六天新增用户数
-            String matchPreSixNewUserNum = "{$match:{$and:[{register_time:{$gt:" + preSixStart
-                    + "}},{register_time:{$lt:" + preSixEnd + "}}]}}";
-            getNum(startDate, tableData, "game_register", "setPreSixNewUserNum", int.class, group, matchZone,
-                    matchPreSixNewUserNum);
-            // 前六天存留数
-            String matchSixLoginTime = "{$match:{$and:[{login_time:{$gt:" + preSixStart + "}},{login_time:{$lt:"
-                    + preSixEnd + "}}]}}";
-            String matchLordsPreSixPersistence = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
-            getNum(startDate, tableData, "game_login", "setPreSixPersistence", int.class, group, matchZone,
-                    matchSixLoginTime, matchLordsPreSixPersistence);
             // 前三天新增用户
             String matchPreThreeNewUserNum = "{$match:{$and:[{register_time:{$gt:" + preThreeStart
                     + "}},{register_time:{$lt:" + preThreeEnd + "}}]}}";
