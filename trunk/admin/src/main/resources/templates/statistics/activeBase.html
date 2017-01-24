@@ -433,12 +433,12 @@ function callback(val,dataArr,isDetail){
 				var activePayRate = divide(payerNum,activeNum);
 				var arpu = divide(incomeNum,activeNum);
 				var arppu = divide(incomeNum,payerNum);
-				var preOnePersistenceRate=divide(packageData.preOnePersistence,packageData.preOneNewUserNum);
-				var preTwoPersistenceRate = divide(packageData.preTwoPersistence,packageData.preTwoNewUserNum);
-				var preSixPersistenceRate = divide(packageData.preSixPersistence,packageData.preSixNewUserNum);
-				var preOneLTV=divide(packageData.preOneIncomeNum,packageData.preOneNewUserNum);
-				var preTwoLTV=divide(packageData.preTwoIncomeNum,packageData.preTwoNewUserNum);
-				var preSixLTV=divide(packageData.preSixIncomeNum,packageData.preSixNewUserNum);
+				var preOnePersistenceRate=divide(packageData.preOnePersistence,packageData.newUserNum);
+				var preTwoPersistenceRate = divide(packageData.preTwoPersistence,packageData.newUserNum);
+				var preSixPersistenceRate = divide(packageData.preSixPersistence,packageData.newUserNum);
+				var preOneLTV=divide(packageData.preOneIncomeNum,packageData.newUserNum);
+				var preTwoLTV=divide(packageData.preTwoIncomeNum,packageData.newUserNum);
+				var preSixLTV=divide(packageData.preSixIncomeNum,packageData.newUserNum);
 				//初始化曲线图数据
 				if(packageId=='zzzdayTotal'){
 					$.each(dataArr,function(index,data){
