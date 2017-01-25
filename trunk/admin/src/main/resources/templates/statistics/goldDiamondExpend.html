@@ -201,7 +201,7 @@ function initTable(){
 			};
 			return query;
 		},
-		detailView : true,
+		detailView : false,
 		pagination : true,
 		singleSelect : false,
 		sidePagination : "server",
@@ -219,7 +219,7 @@ function initTable(){
 				field : "itemNum",
 				align : "center",
 				formatter : function(value){
-					return vlaue==null?0:value;
+					return value==null?0:value;
 				}
 			},
 			{
@@ -227,7 +227,7 @@ function initTable(){
 				field : "expendTimes",
 				align : "center",
 				formatter : function(value) {
-					return vlaue==null?0:value;
+					return value==null?0:value;
 				},
 			},
 			{
@@ -235,7 +235,7 @@ function initTable(){
 				field : "payerNum",
 				align : "center",
 				formatter : function(value){
-					return vlaue==null?0:value;
+					return value==null?0:value;
 				}
 			}
 		]

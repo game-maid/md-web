@@ -8,7 +8,9 @@
 
 package com.talentwalker.game.md.admin.controller.statistics;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -58,6 +60,14 @@ public class GoldDiamondExpendController extends BaseController {
             Integer userType, String lordId, Integer payType, Integer registerCondition, Integer function) {
         Page<Map<String, Object>> findList = goldDiamondExpendService.findList(startStr, endStr, zoneId, itemType,
                 userType, lordId, payType, registerCondition, function);
+
+        List<Map<String, Object>> content = findList.getContent();
+        for (Map<String, Object> map : content) {
+            Set<String> keySet = map.keySet();
+            for (String string : keySet) {
+                System.out.println(string + "---" + map.get(string));
+            }
+        }
         return findList;
     }
 }
