@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.talentwalker.game.md.core.config.ConfigKey;
 import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
+import com.talentwalker.game.md.core.domain.gameworld.Duel;
 import com.talentwalker.game.md.core.domain.gameworld.DuelRobot;
 import com.talentwalker.game.md.core.domain.gameworld.Equip;
 import com.talentwalker.game.md.core.domain.gameworld.FormHold;
@@ -431,6 +432,28 @@ public class HeroService extends GameSupport {
             HeroInfo heroInfo = this.getHeroInfo(lord, hero, true);
             form.setFP(this.getHeroFP(heroInfo));
         }
+        // lord.getForm().set(0, formList);
+    }
+
+    /**
+     * @Description:
+     * @param lord
+     * @throws
+     */
+    public void setFormHoldFP(Lord lord, Duel duel) {
+        List<FormHold> formList = duel.getFormDefend();
+        if (formList == null) {
+            return;
+        }
+        for (FormHold form : formList) {
+            if (form == null || StringUtils.isEmpty(form.getHeroUid())) {
+                continue;
+            }
+            Hero hero = lord.getHeros().get(form.getHeroUid());
+            HeroInfo heroInfo = this.getHeroInfo(lord, hero, true);
+            form.setFP(this.getHeroFP(heroInfo));
+        }
+        // lord.getForm().set(0, formList);
     }
 
     /**
