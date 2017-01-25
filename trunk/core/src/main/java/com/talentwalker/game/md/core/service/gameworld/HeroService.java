@@ -697,6 +697,9 @@ public class HeroService extends GameSupport {
                         continue;
                     }
                     DataConfig attConfig = rankUp.get(breakLevel + "").get("attr");
+                    if (attConfig == null) {
+                        continue;
+                    }
                     Iterator<String> it = attConfig.getJsonObject().keys();
                     while (it.hasNext()) {
                         String attr = it.next();
