@@ -15,6 +15,10 @@ public class ActiveAndPersistenceLtvExcel {
     private String zoneId;
     private String packageId;
     /**
+     * 当日LTV
+     */
+    private String persentLtv;
+    /**
      * 次日LTV
      */
     private String secondLtv;
@@ -105,6 +109,20 @@ public class ActiveAndPersistenceLtvExcel {
      */
     public void setPackageId(String packageId) {
         this.packageId = packageId;
+    }
+
+    /**
+     * @return persentLtv
+     */
+    public String getPersentLtv() {
+        return persentLtv;
+    }
+
+    /**
+     * @param persentLtv 要设置的 persentLtv
+     */
+    public void setPersentLtv(String persentLtv) {
+        this.persentLtv = persentLtv;
     }
 
     /**

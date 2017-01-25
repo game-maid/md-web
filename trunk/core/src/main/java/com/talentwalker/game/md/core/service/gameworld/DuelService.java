@@ -317,7 +317,7 @@ public class DuelService extends GameSupport {
             if (duelRank.getRank() != rank) {
                 Duel duel2 = duelRepository.findOne(duelRank.getId());
                 Lord lord2 = lordRepository.findOne(duelRank.getId());
-                heroService.setFormHoldFP(lord2);
+                heroService.setFormHoldFP(lord2, duel2);
                 if (duel2 == null || lord2 == null) {
                     return null;
                 }
@@ -351,7 +351,7 @@ public class DuelService extends GameSupport {
                 rankMap.put("FP", FP);
                 rankMap.put("heros", heroList);
             } else {
-                heroService.setFormHoldFP(lord);
+                heroService.setFormHoldFP(lord, duel);
                 rankMap.put("id", lord.getId());
                 rankMap.put("name", lord.getName());
                 rankMap.put("level", lord.getLevel());
@@ -1169,8 +1169,8 @@ public class DuelService extends GameSupport {
                     rankKey);
             rank = duelRrank.getRank();
             if (rank > index) {
+                responseMap.put("rank", index);
                 if (duel.getHrank() > index) {
-                    responseMap.put("rank", index);
                     responseMap.put("uprank", duel.getHrank() - index);
                     responseMap.put("hrank", index);
                     duel.setHrank(index);

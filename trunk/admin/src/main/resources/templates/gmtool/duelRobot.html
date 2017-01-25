@@ -38,16 +38,29 @@
 		loadZoneList("gamezone");
 	});
 	function generate(){
-		var zoneId=$("#gamezone").val();
-		waitingDialog.show("正在生成，请稍后...");
-		gameAjax({
-			url : "/duelRobot/generate",
-			data:"zoneId="+zoneId,
-			callback : function(data) {
-				waitingDialog.hide();
-				console.log(data);
+		swal({
+			title : [[#{sys.duel.robot.confirm}]],
+			text : [[#{sys.duel.robot.hint}]],
+			type : "warning",
+			showCancelButton : true,
+			confirmButtonColor : "#DD6B55",
+			confirmButtonText : [[#{sys.confirm.confirmtext}]],
+			cancelButtonText : [[#{sys.confirm.canceltext}]],
+			closeOnConfirm: false
+		}, function(isConfirm) {
+			if (isConfirm) {
+				var zoneId=$("#gamezone").val();
+				waitingDialog.show("正在生成，请稍后...");
+				gameAjax({
+					url : "/duelRobot/generate",
+					data:"zoneId="+zoneId,
+					callback : function(data) {
+						waitingDialog.hide();
+						console.log(data);
+					}
+				});
 			}
-		});
+		})
 	}
 </script>
 </html>

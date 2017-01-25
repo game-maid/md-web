@@ -437,19 +437,16 @@ public class ActiveAndPersistenceExcelService extends BaseService {
                     aape.setDate(abd.getDate());
                     aape.setZoneId(zoneId);
                     aape.setPackageId(packageId);
-                    aape.setSecondLtv(divide(abp.getPreOneIncomeNum(), abp.getPreOneNewUserNum()) + "%");
-                    aape.setThirdlyLtv(divide(abp.getPreTwoIncomeNum(), abp.getPreTwoNewUserNum()) + "%");
-                    aape.setSeventhLtv(divide(abp.getPreSixIncomeNum(), abp.getPreSixNewUserNum()) + "%");
-                    aape.setFourteenthLtv(divide(abp.getPreThirteenIncomeNum(), abp.getPreThirteenNewUserNum()) + "%");
-                    aape.setTwentyFirstLtv(divide(abp.getPreTwentyIncomeNum(), abp.getPreTwentyNewUserNum()) + "%");
-                    aape.setTwentyEighthLtv(
-                            divide(abp.getPreTwentySevenIncomeNum(), abp.getPreTwentySevenNewUserNum()) + "%");
-                    aape.setThirtyFifthLtv(
-                            divide(abp.getPreThirtyFourIncomeNum(), abp.getPreThirtyFourNewUserNum()) + "%");
-                    aape.setFortyNinthLtv(
-                            divide(abp.getPreFortyEightIncomeNum(), abp.getPreFortyEightNewUserNum()) + "%");
-                    aape.setFiftySixthLtv(
-                            divide(abp.getPreFiftyFiveIncomeNum(), abp.getPreFiftyFiveNewUserNum()) + "%");
+                    aape.setPersentLtv(divide(abp.getPersentIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setSecondLtv(divide(abp.getPreOneIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setThirdlyLtv(divide(abp.getPreTwoIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setSeventhLtv(divide(abp.getPreSixIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setFourteenthLtv(divide(abp.getPreThirteenIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setTwentyFirstLtv(divide(abp.getPreTwentyIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setTwentyEighthLtv(divide(abp.getPreTwentySevenIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setThirtyFifthLtv(divide(abp.getPreThirtyFourIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setFortyNinthLtv(divide(abp.getPreFortyEightIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setFiftySixthLtv(divide(abp.getPreFiftyFiveIncomeNum(), abp.getNewUserNum()) + "%");
                     excelList.add(aape);
                 }
             }
@@ -457,11 +454,11 @@ public class ActiveAndPersistenceExcelService extends BaseService {
         // excel 头
         String[] header = {getMessage("sys.sequence"), getMessage("statistics.active.date"),
                 getMessage("statistics.active.zone"), getMessage("statistics.active.pacakge"),
-                getMessage("statistics.active.second.LTV"), getMessage("statistics.active.thirdly.LTV"),
-                getMessage("statistics.active.seventh.LTV"), getMessage("statistics.active.fourteenth.LTV"),
-                getMessage("statistics.active.twenty.first.LTV"), getMessage("statistics.active.twenty.eighth.LTV"),
-                getMessage("statistics.active.thirty.fifth.LTV"), getMessage("statistics.active.forty.ninth.LTV"),
-                getMessage("statistics.active.fifty.sixth.LTV") };
+                getMessage("statistics.active.persent.LTV"), getMessage("statistics.active.second.LTV"),
+                getMessage("statistics.active.thirdly.LTV"), getMessage("statistics.active.seventh.LTV"),
+                getMessage("statistics.active.fourteenth.LTV"), getMessage("statistics.active.twenty.first.LTV"),
+                getMessage("statistics.active.twenty.eighth.LTV"), getMessage("statistics.active.thirty.fifth.LTV"),
+                getMessage("statistics.active.forty.ninth.LTV"), getMessage("statistics.active.fifty.sixth.LTV") };
 
         ExportExcel<ActiveAndPersistenceLtvExcel> excel = new ExportExcel<>();
         String path = request.getServletContext().getRealPath("/");
