@@ -109,6 +109,9 @@ public class UserStatisticsService {
             map.put("package", packageMap);
             zoneTotal += total;
         }
+        for (Map<String, Object> map : list) {
+
+        }
         return list;
     }
 
