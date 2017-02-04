@@ -70,13 +70,11 @@ public class TopUpStatisticsService {
         }
         String zoneStr = sb.toString();
         List<DBObject> pipeline = new ArrayList<>();
-        String matchStr = "{$match:{$and:[{create_time:{$gt:" + startDate.getTime() + "}},{create_time:{$lt:"
+        String matchCreateTimeStr = "{$match:{$and:[{create_time:{$gt:" + startDate.getTime() + "}},{create_time:{$lt:"
                 + endDate.getTime() + "}}]}}";
-        DBObject matchObj = (DBObject) JSON.parse(matchStr);
-        pipeline.add(matchObj);
+        pipeline.add((DBObject) JSON.parse(matchCreateTimeStr));
         String matchZoneStr = "{$match:{zone_id:{$in:[" + zoneStr + "]}}}";
-        DBObject matchZoneObj = (DBObject) JSON.parse(matchZoneStr);
-        pipeline.add(matchZoneObj);
+        pipeline.add((DBObject) JSON.parse(matchZoneStr));
         if (!StringUtils.isEmpty(packageId)) {
             String matchPackageStr = "{$match:{package_id:'" + packageId + "'}}";
             DBObject matchPackageObj = (DBObject) JSON.parse(matchPackageStr);
@@ -88,11 +86,11 @@ public class TopUpStatisticsService {
             pipeline.add(matchOrderObj);
         }
 
-        if ("1".equals(itemType)) {
+        if ("1".equals(itemType)) {// 钻石
             String matchItemType = "{$match:{product_type:" + itemType + "}}";
             DBObject matchItemTypeObj = (DBObject) JSON.parse(matchItemType);
             pipeline.add(matchItemTypeObj);
-        } else if ("2".equals(itemType)) {
+        } else if ("2".equals(itemType)) {// 月卡
             String matchItemType = "{$match:{product_type:{$ne:" + 1 + "}}}";
             DBObject matchItemTypeObj = (DBObject) JSON.parse(matchItemType);
             pipeline.add(matchItemTypeObj);
@@ -114,8 +112,30 @@ public class TopUpStatisticsService {
         }
         // 充值人数
         List<DBObject> payNumPipeline = new ArrayList<>();
-
-        mongoTemplate.getCollection("game_order").aggregate(payNumPipeline);
+        payNumPipeline.add((DBObject) JSON.parse(matchCreateTimeStr));
+        payNumPipeline.add((DBObject) JSON.parse(matchZoneStr));
+        if (!StringUtils.isEmpty(packageId)) {
+            payNumPipeline.add((DBObject) JSON.parse("{$match:{package_id:'" + packageId + "'}}"));
+        }
+        if (!StringUtils.isEmpty(orderState)) {
+            payNumPipeline.add((DBObject) JSON.parse("{$match:{state:" + orderState + "}}"));
+        }
+        if ("1".equals(itemType)) {// 钻石
+            payNumPipeline.add((DBObject) JSON.parse("{$match:{product_type:" + itemType + "}}"));
+        } else if ("2".equals(itemType)) {// 月卡
+            payNumPipeline.add((DBObject) JSON.parse("{$match:{product_type:{$ne:" + 1 + "}}}"));
+        }
+        payNumPipeline.add((DBObject) JSON.parse("{$group:{_id:{package_id:'$package_id',lord_id:'$lord_id'}}}"));
+        payNumPipeline.add((DBObject) JSON.parse("{$group:{_id:{package_id:'$_id.package_id'},payNum:{$sum:1}}}"));
+        AggregationOutput payNumOutput = mongoTemplate.getCollection("game_order").aggregate(payNumPipeline);
+        Iterator<DBObject> payNumIt = payNumOutput.results().iterator();
+        while (payNumIt.hasNext()) {
+            BasicDBObject next = (BasicDBObject) payNumIt.next();
+            String packageId2 = ((BasicDBObject) next.get("_id")).getString("package_id");
+            int payNum = next.getInt("payNum");
+            Map<String, Object> map = resultMap.get(packageId2);
+            map.put("num", payNum);
+        }
         List<Object> list = new ArrayList<>();
         list.add(resultMap);
         return list;
@@ -239,33 +259,22 @@ public class TopUpStatisticsService {
         }
         String zoneStr = sb.toString();
         List<DBObject> pipeline = new ArrayList<>();// 分组查询充值次数和付费总计
-        List<DBObject> pipeline1 = new ArrayList<>();// 分组查询充值人数
-        String matchStr = "{$match:{$and:[{create_time:{$gt:" + startDate.getTime() + "}},{create_time:{$lt:"
+        String matchCreateTimeStr = "{$match:{$and:[{create_time:{$gt:" + startDate.getTime() + "}},{create_time:{$lt:"
                 + endDate.getTime() + "}}]}}";
-        DBObject matchObj = (DBObject) JSON.parse(matchStr);
-        pipeline.add(matchObj);
-
-        String matchPayTimeStr = "{$match:{$and:[{pay_time:{$gt:" + startDate.getTime() + "}},{pay_time:{$lt:"
-                + endDate.getTime() + "}}]}}";
-        DBObject matchPayTimeDbo = (DBObject) JSON.parse(matchPayTimeStr);
-        pipeline1.add(matchPayTimeDbo);
-
+        pipeline.add((DBObject) JSON.parse(matchCreateTimeStr));
         String matchZoneStr = "{$match:{zone_id:{$in:[" + zoneStr + "]}}}";
-        DBObject matchZoneObj = (DBObject) JSON.parse(matchZoneStr);
-        pipeline.add(matchZoneObj);
-
-        pipeline1.add(matchZoneObj);
+        pipeline.add((DBObject) JSON.parse(matchZoneStr));
         if (!StringUtils.isEmpty(packageId)) {
             String matchPackageStr = "{$match:{package_id:'" + packageId + "'}}";
             DBObject matchPackageObj = (DBObject) JSON.parse(matchPackageStr);
             pipeline.add(matchPackageObj);
-
-            pipeline1.add(matchPackageObj);
         }
-        String matchOrderState = "{$match:{state:" + 0 + "}}";
-        DBObject matchOrderObj = (DBObject) JSON.parse(matchOrderState);
-        pipeline.add(matchOrderObj);
-
+        if (!StringUtils.isEmpty(packageId)) {
+            pipeline.add((DBObject) JSON.parse("{$match:{package_id:'" + packageId + "'}}"));
+        }
+        if (!StringUtils.isEmpty(orderState)) {
+            pipeline.add((DBObject) JSON.parse("{$match:{state:" + orderState + "}}"));
+        }
         if ("1".equals(itemType)) {
             String matchItemType = "{$match:{product_type:" + itemType + "}}";
             DBObject matchItemTypeObj = (DBObject) JSON.parse(matchItemType);
@@ -292,17 +301,30 @@ public class TopUpStatisticsService {
             tempMap.put("num", num);
         }
         // 付费人数
-        String groupPayTimeStr = "{$group:{_id:'$zone_id',num:{$sum:1}}}";
-        DBObject groupPayTimeDbo = (DBObject) JSON.parse(groupPayTimeStr);
-        pipeline1.add(groupPayTimeDbo);
-        AggregationOutput output = mongoTemplate.getCollection("game_payer").aggregate(pipeline1);
-        Iterator<DBObject> iterator = output.results().iterator();
-        while (iterator.hasNext()) {
-            BasicDBObject dbo = (BasicDBObject) iterator.next();
-            String zoneId = dbo.getString("_id");
-            int num = dbo.getInt("num");
+        List<DBObject> payNumPipeline = new ArrayList<>();
+        payNumPipeline.add((DBObject) JSON.parse(matchCreateTimeStr));
+        payNumPipeline.add((DBObject) JSON.parse(matchZoneStr));
+        if (!StringUtils.isEmpty(packageId)) {
+            payNumPipeline.add((DBObject) JSON.parse("{$match:{package_id:'" + packageId + "'}}"));
+        }
+        if (!StringUtils.isEmpty(orderState)) {
+            payNumPipeline.add((DBObject) JSON.parse("{$match:{state:" + orderState + "}}"));
+        }
+        if ("1".equals(itemType)) {// 钻石
+            payNumPipeline.add((DBObject) JSON.parse("{$match:{product_type:" + itemType + "}}"));
+        } else if ("2".equals(itemType)) {// 月卡
+            payNumPipeline.add((DBObject) JSON.parse("{$match:{product_type:{$ne:" + 1 + "}}}"));
+        }
+        payNumPipeline.add((DBObject) JSON.parse("{$group:{_id:{zone_id:'$zone_id',lord_id:'$lord_id'}}}"));
+        payNumPipeline.add((DBObject) JSON.parse("{$group:{_id:{zone_id:'$_id.zone_id'},payNum:{$sum:1}}}"));
+        AggregationOutput payNumOutput = mongoTemplate.getCollection("game_order").aggregate(payNumPipeline);
+        Iterator<DBObject> payNumIt = payNumOutput.results().iterator();
+        while (payNumIt.hasNext()) {
+            BasicDBObject next = (BasicDBObject) payNumIt.next();
+            String zoneId = ((BasicDBObject) next.get("_id")).getString("zone_id");
+            int payNum = next.getInt("payNum");
             Map<String, Object> tempMap = map.get(zoneId);
-            tempMap.put("payNum", num);
+            tempMap.put("payNum", payNum);
         }
         return list;
     }

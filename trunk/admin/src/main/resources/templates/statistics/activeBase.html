@@ -515,7 +515,7 @@ function callback(val,dataArr,isDetail){
 function checkNull(val){
 	if(val==null||val==0)
 		return 0;
-	return val;
+	return Math.round(val*100)/100;
 }
 //两数相除 两位小数
 function divide(element,denominator){
@@ -523,7 +523,7 @@ function divide(element,denominator){
 		return 0;
 	}
 	var divide = element/denominator;
-	return Math.round(divide*100)/100;
+	return Math.round(divide*10000)/100;
 }
 
 //初始化曲线图

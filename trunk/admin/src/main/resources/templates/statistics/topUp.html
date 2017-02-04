@@ -284,10 +284,10 @@ $("#select").click(function(){
 			var price=0;
 			$.each(val,function(index,data){
 				$.each(data,function(zoneId,zoneData){
-					text+='<tr><td>'+zoneMap[zoneId]+'</td><td>'+zoneData.num+'</td><td>'+zoneData.payNum+'</td><td>'+zoneData.price+'</td></tr>';
+					text+='<tr><td>'+zoneMap[zoneId]+'</td><td>'+zoneData.num+'</td><td>'+zoneData.payNum+'</td><td>'+checkNull(zoneData.price)+'</td></tr>';
 					num+=zoneData.num;
 					payNum+=zoneData.payNum;
-					price +=zoneData.price;
+					price +=checkNull(zoneData.price);
 				});
 			});
 			text+='<tr><td>'+[[#{statistics.zone.total}]]+'</td><td>'+num+'</td><td>'+payNum+'</td><td>'+price+'</td></tr>';
@@ -297,14 +297,19 @@ $("#select").click(function(){
 	});
 	$("#data-table-div").show();
 });
-
+//检查参数是否为null,如果为null返回o
+function checkNull(val){
+	if(val==null||val==0)
+		return 0;
+	return Math.round(val*100)/100;
+}
 //两数相除 两位小数
 function divide(element,denominator){
 	if(element==null || element==0 || denominator==null ||denominator==0){
 		return 0;
 	}
 	var divide = element/denominator;
-	return Math.round(divide*100)/100;
+	return Math.round(divide*10000)/100;
 }
 
 //初始化曲线图
@@ -318,7 +323,7 @@ function initGraph(arppu,graph){
 	map["name"]=[[#{statistics.top.up.pay.income}]];
 	$.each(graph,function(index,data){
 		categories.push(new Date(data.date).format("yyyy-MM-dd"));
-		dataArr.push(data.price);
+		dataArr.push(checkNull(data.price));
 	});
 	$('#graph-div').highcharts({
 		credits:{
@@ -360,7 +365,7 @@ function initGraph(arppu,graph){
 			var arpuMap={};
 			var arpuMapArr=[];
 			arpuMap["name"]=packageId;
-			arpuMapArr.push(divide(data.sumPrice,data.num));
+			arpuMapArr.push(Math.round(data.sumPrice/data.num*100)/100);
 			arpuMap["data"]=arpuMapArr;
 			arpuSeries.push(arpuMap);
 			numTotal+=data.num;
