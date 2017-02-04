@@ -60,7 +60,7 @@ public class TopUpStatisticsService {
             e.printStackTrace();
         }
 
-        // 充值总额// 充值人数
+        // 充值总额
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < zoneArr.length; i++) {
             sb.append("'").append(zoneArr[i]).append("'");
@@ -97,7 +97,7 @@ public class TopUpStatisticsService {
             DBObject matchItemTypeObj = (DBObject) JSON.parse(matchItemType);
             pipeline.add(matchItemTypeObj);
         }
-        String groupStr = "{$group:{_id:{package_id:'$package_id'},totalNum:{$sum:1},total:{$sum:'$price'}}}";
+        String groupStr = "{$group:{_id:{package_id:'$package_id'},total:{$sum:'$price'}}}";
         DBObject groupObj = (DBObject) JSON.parse(groupStr);
         pipeline.add(groupObj);
         AggregationOutput output = mongoTemplate.getCollection("game_order").aggregate(pipeline);
@@ -108,12 +108,14 @@ public class TopUpStatisticsService {
             BasicDBObject keyValues = (BasicDBObject) dbo.get("_id");
             String packagId = keyValues.getString("package_id");
             double total = dbo.getDouble("total");
-            int num = dbo.getInt("totalNum");
             Map<String, Object> map = new HashMap<>();
             map.put("sumPrice", total);
-            map.put("num", num);
             resultMap.put(packagId, map);
         }
+        // 充值人数
+        List<DBObject> payNumPipeline = new ArrayList<>();
+
+        mongoTemplate.getCollection("game_order").aggregate(payNumPipeline);
         List<Object> list = new ArrayList<>();
         list.add(resultMap);
         return list;
