@@ -295,8 +295,6 @@ $("#select").click(function(){
 	}else if(dateType=="month"){
 		date=$("#month-date-input").val();
 	}
-	
-	
 	var dataArr = [];
 	$(".checked input[name='data-all']").each(function(){ 
 		dataArr.push($(this).val());
@@ -427,9 +425,9 @@ function callback(val,dataArr,isDetail){
 				}else{
 					text+='<tr><td>'+date+'</td><td>'+zoneId+'</td><td>'+packageId+'</td> '
 				}
-				text+='</td><td>'+persentLtv+'%'+'</td><td>'+secondLtv+'%'+'</td><td>'+thirdlyLtv+'%'+'</td><td>'+seventhLtv+'%';
-				text+='</td><td>'+fourteenthLtv+'%'+'</td><td>'+twentyFirstLtv+'%'+'</td><td>'+twentyEighthLtv+'%';
-				text+='</td><td>'+thirtyFifthLtv+'%'+'</td><td>'+thirtyFifthLtv+'%'+'</td><td>'+fiftySixthLtv+'%';
+				text+='</td><td>'+persentLtv+'</td><td>'+secondLtv+'</td><td>'+thirdlyLtv+'</td><td>'+seventhLtv;
+				text+='</td><td>'+fourteenthLtv+'</td><td>'+twentyFirstLtv+'</td><td>'+twentyEighthLtv;
+				text+='</td><td>'+thirtyFifthLtv+'</td><td>'+thirtyFifthLtv+'</td><td>'+fiftySixthLtv;
 				text+='</td></tr>';
 			});
 		});
@@ -460,7 +458,7 @@ function divide(element,denominator){
 		return 0;
 	}
 	var divide = element/denominator;
-	return Math.round(divide*10000)/100;
+	return Math.round(divide*100)/100;
 }
 
 //初始化曲线图
