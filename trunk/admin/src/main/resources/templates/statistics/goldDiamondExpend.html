@@ -156,13 +156,14 @@ function initDate(){
 	    format : "yyyy-mm-dd",
 	    autoclose : true,
 	    todayBtn :true,
-	    endDate : new Date()
+	    endDate : new Date(),
+	    minView:"month",
 	});
 	$("#endDatetimepicker").datetimepicker({
 	    format : "yyyy-mm-dd",
 	    autoclose : true,
 	    todayBtn :true,
-	    endDate : new Date()
+	    minView:"month",
 	});
 	var date = new Date();
 	$("#endDatetimepicker").val(date.format("yyyy-MM-dd"));
