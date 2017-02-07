@@ -303,14 +303,23 @@ function checkNull(val){
 		return 0;
 	return Math.round(val*100)/100;
 }
-//两数相除 两位小数
-function divide(element,denominator){
+//两数相除 两位小数(百分比)
+function dividePercentage(element,denominator){
 	if(element==null || element==0 || denominator==null ||denominator==0){
 		return 0;
 	}
 	var divide = element/denominator;
 	return Math.round(divide*10000)/100;
 }
+//两数相除 两位小数
+function divide(element,denominator){
+	if(element==null || element==0 || denominator==null ||denominator==0){
+		return 0;
+	}
+	var divide = element/denominator;
+	return Math.round(divide*100)/100;
+}
+
 
 //初始化曲线图
 function initGraph(arppu,graph){
@@ -365,7 +374,7 @@ function initGraph(arppu,graph){
 			var arpuMap={};
 			var arpuMapArr=[];
 			arpuMap["name"]=packageId;
-			arpuMapArr.push(Math.round(data.sumPrice/data.num*100)/100);
+			arpuMapArr.push(divide(data.sumPrice,data.num));
 			arpuMap["data"]=arpuMapArr;
 			arpuSeries.push(arpuMap);
 			numTotal+=data.num;
@@ -380,12 +389,12 @@ function initGraph(arppu,graph){
 		$.each(packageData,function(packageId,data){
 			var numMap={};
 			numMap["name"]=packageId;
-			numMap["y"]=divide(data.num,numTotal);
+			numMap["y"]=dividePercentage(data.num,numTotal);
 			numSeries.push(numMap);
 			
 			var priceMap={};
 			priceMap["name"]=packageId;
-			priceMap["y"]=divide(data.sumPrice,priceTotal);
+			priceMap["y"]=dividePercentage(data.sumPrice,priceTotal);
 			priceSeries.push(priceMap);
 		});
 	});
