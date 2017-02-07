@@ -135,9 +135,6 @@ public class StageService extends GameSupport {
         lordRepository.save(lord);
         stageRepository.save(sc);
 
-        // 触发日常任务
-        missionService.trigerMissionForStage(1);
-
         Map<String, Object> map = new HashMap<String, Object>();
         Map<String, Stage> stageMap = new HashMap<String, Stage>();
         stageMap.put(stageId, stage);
@@ -524,6 +521,8 @@ public class StageService extends GameSupport {
 
         // 触发日常任务
         missionService.trigerMissionForStage(times);
+        // 触发主线任务
+        missionService.trigerMissionOnceForStage(stageId, times);
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("reward", responseList);
         responseMap.put("addExp", heroExp * times); // 英雄经验成长值

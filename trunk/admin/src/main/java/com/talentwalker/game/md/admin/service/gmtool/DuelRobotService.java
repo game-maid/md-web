@@ -97,11 +97,12 @@ public class DuelRobotService extends BaseService {
             int heroLevel = level * lvLimit;// 英雄等级
             DataConfig tacticlimitConfig = config.get("tacticLimit");
             Iterator limitIt = tacticlimitConfig.getJsonObject().keys();
-            int subListNum = 8; // 英雄截取数量
+            int subListNum = 1; // 英雄截取数量
             while (limitIt.hasNext()) {
                 String limitKey = limitIt.next().toString();
-                if (tacticlimitConfig.get(limitKey).getInteger("lv") >= level) {
+                if (tacticlimitConfig.get(limitKey).getInteger("lv") > level) {
                     subListNum = tacticlimitConfig.get(limitKey).getInteger("value");
+                    subListNum -= 1;
                     break;
                 }
             }
@@ -129,13 +130,7 @@ public class DuelRobotService extends BaseService {
                 if (heroList.size() > subListNum) {
                     heroList = heroList.subList(0, subListNum);
                 }
-                /*
-                 * DataConfig tacticLimit = config.get("tacticLimit"); Iterator itLimit =
-                 * tacticLimit.getJsonObject().keys(); while (itLimit.hasNext()) { int number =
-                 * Integer.parseInt(itLimit.next().toString()); if (tacticLimit.get(number + "").getInteger("lv") >
-                 * level) { int val = tacticLimit.get(number - 1 + "").getInteger("value"); heroList =
-                 * heroList.subList(0, val); break; } }
-                 */
+
                 List<String> equipGroup = rankGroup.get(index).get("equipgroup").getJsonArray();
                 int random1 = RandomUtils.randomInt(0, equipGroup.size() - 1);
                 String randomEquip = equipGroup.get(random1);
