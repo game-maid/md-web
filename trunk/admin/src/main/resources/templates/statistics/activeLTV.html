@@ -295,8 +295,6 @@ $("#select").click(function(){
 	}else if(dateType=="month"){
 		date=$("#month-date-input").val();
 	}
-	
-	
 	var dataArr = [];
 	$(".checked input[name='data-all']").each(function(){ 
 		dataArr.push($(this).val());
@@ -427,9 +425,9 @@ function callback(val,dataArr,isDetail){
 				}else{
 					text+='<tr><td>'+date+'</td><td>'+zoneId+'</td><td>'+packageId+'</td> '
 				}
-				text+='</td><td>'+persentLtv+'%'+'</td><td>'+secondLtv+'%'+'</td><td>'+thirdlyLtv+'%'+'</td><td>'+seventhLtv+'%';
-				text+='</td><td>'+fourteenthLtv+'%'+'</td><td>'+twentyFirstLtv+'%'+'</td><td>'+twentyEighthLtv+'%';
-				text+='</td><td>'+thirtyFifthLtv+'%'+'</td><td>'+thirtyFifthLtv+'%'+'</td><td>'+fiftySixthLtv+'%';
+				text+='</td><td>'+persentLtv+'</td><td>'+secondLtv+'</td><td>'+thirdlyLtv+'</td><td>'+seventhLtv;
+				text+='</td><td>'+fourteenthLtv+'</td><td>'+twentyFirstLtv+'</td><td>'+twentyEighthLtv;
+				text+='</td><td>'+thirtyFifthLtv+'</td><td>'+thirtyFifthLtv+'</td><td>'+fiftySixthLtv;
 				text+='</td></tr>';
 			});
 		});
@@ -453,12 +451,6 @@ function callback(val,dataArr,isDetail){
 	});
 	//初始化曲线图
 	initGraph(categories,series);
-}
-//检查参数是否为null,如果为null返回o
-function checkNull(val){
-	if(val==null||val==0)
-		return 0;
-	return val;
 }
 //两数相除 两位小数
 function divide(element,denominator){

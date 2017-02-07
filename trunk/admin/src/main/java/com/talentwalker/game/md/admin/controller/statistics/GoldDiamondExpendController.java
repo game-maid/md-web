@@ -8,6 +8,10 @@
 
 package com.talentwalker.game.md.admin.controller.statistics;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.annotation.Resource;
 
 import org.springframework.data.domain.Page;
@@ -17,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.talentwalker.game.md.admin.controller.BaseController;
 import com.talentwalker.game.md.admin.service.statistics.GoldDiamondExpendService;
-import com.talentwalker.game.md.core.domain.GameLog;
 import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 
 /**
@@ -53,10 +56,18 @@ public class GoldDiamondExpendController extends BaseController {
      */
     @GameResponse
     @RequestMapping(value = "findList", method = RequestMethod.POST)
-    public Page<GameLog> list(String startStr, String endStr, String zoneId, String itemType, Integer userType,
-            String lordId, Integer payType, Integer registerCondition, Integer function) {
-        goldDiamondExpendService.findList(startStr, endStr, zoneId, itemType, userType, lordId, payType,
-                registerCondition, function);
-        return null;
+    public Page<Map<String, Object>> list(String startStr, String endStr, String zoneId, String itemType,
+            Integer userType, String lordId, Integer payType, Integer registerCondition, Integer function) {
+        Page<Map<String, Object>> findList = goldDiamondExpendService.findList(startStr, endStr, zoneId, itemType,
+                userType, lordId, payType, registerCondition, function);
+
+        List<Map<String, Object>> content = findList.getContent();
+        for (Map<String, Object> map : content) {
+            Set<String> keySet = map.keySet();
+            for (String string : keySet) {
+                System.out.println(string + "---" + map.get(string));
+            }
+        }
+        return findList;
     }
 }

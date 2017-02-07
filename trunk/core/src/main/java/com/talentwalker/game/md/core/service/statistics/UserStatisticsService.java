@@ -95,8 +95,10 @@ public class UserStatisticsService {
                 zoneFlag = zoneId;
                 list.add(flag, newMap);
                 zoneTotal = 0;
-            } else if (!iterator.hasNext()) {
+            }
+            if (!iterator.hasNext()) {
                 Map<String, Object> preMap = list.get(flag);
+                zoneTotal += total;
                 preMap.put("zoneTotal", zoneTotal);
                 list.set(flag, preMap);
             }
@@ -108,6 +110,7 @@ public class UserStatisticsService {
             packageMap.put(packageId, total);
             map.put("package", packageMap);
             zoneTotal += total;
+
         }
         return list;
     }

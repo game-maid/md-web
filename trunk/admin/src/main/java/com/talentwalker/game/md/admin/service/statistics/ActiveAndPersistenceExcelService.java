@@ -93,12 +93,12 @@ public class ActiveAndPersistenceExcelService extends BaseService {
                     aape.setActivePayRate(divide(abp.getPayerNum(), abp.getActiveNum()) + "%");
                     aape.setArpu(divide(abp.getIncomeNum(), abp.getActiveNum()));
                     aape.setArppu(divide(abp.getIncomeNum(), abp.getPayerNum()));
-                    aape.setSecondPersistenceRate(divide(abp.getPreOnePersistence(), abp.getPreOneNewUserNum()) + "%");
-                    aape.setThirdlyPersistenceRate(divide(abp.getPreTwoPersistence(), abp.getPreTwoNewUserNum()) + "%");
-                    aape.setSeventhPersistenceRate(divide(abp.getPreSixPersistence(), abp.getPreSixNewUserNum()) + "%");
-                    aape.setSecondLtv(divide(abp.getPreOneIncomeNum(), abp.getPreOneNewUserNum()) + "%");
-                    aape.setThirdlyLtv(divide(abp.getPreTwoIncomeNum(), abp.getPreTwoNewUserNum()) + "%");
-                    aape.setSeventhLtv(divide(abp.getPreSixIncomeNum(), abp.getPreTwoNewUserNum()) + "%");
+                    aape.setSecondPersistenceRate(divide(abp.getPreOnePersistence(), abp.getNewUserNum()) + "%");
+                    aape.setThirdlyPersistenceRate(divide(abp.getPreTwoPersistence(), abp.getNewUserNum()) + "%");
+                    aape.setSeventhPersistenceRate(divide(abp.getPreSixPersistence(), abp.getNewUserNum()) + "%");
+                    aape.setSecondLtv(divide(abp.getPreOneIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setThirdlyLtv(divide(abp.getPreTwoIncomeNum(), abp.getNewUserNum()) + "%");
+                    aape.setSeventhLtv(divide(abp.getPreSixIncomeNum(), abp.getNewUserNum()) + "%");
                     excelList.add(aape);
                 }
             }
@@ -343,17 +343,16 @@ public class ActiveAndPersistenceExcelService extends BaseService {
                     aape.setDate(abd.getDate());
                     aape.setZoneId(zoneId);
                     aape.setPackageId(packageId);
-                    aape.setSecondPersistenceRate(divide(abp.getPreOnePersistence(), abp.getPreOneNewUserNum()) + "%");
-                    aape.setThirdlyPersistenceRate(divide(abp.getPreTwoPersistence(), abp.getPreTwoNewUserNum()) + "%");
-                    aape.setFourthPersistenceRate(
-                            divide(abp.getPreThreePersistence(), abp.getPreThreeNewUserNum()) + "%");
-                    aape.setFifthPersistenceRate(divide(abp.getPreFourPersistence(), abp.getPreFourNewUserNum()) + "%");
-                    aape.setSixthPersistenceRate(divide(abp.getPreFivePersistence(), abp.getPreFiveNewUserNum()) + "%");
-                    aape.setSeventhPersistenceRate(divide(abp.getPreSixPersistence(), abp.getPreSixNewUserNum()) + "%");
+                    aape.setSecondPersistenceRate(divide(abp.getPreOnePersistence(), abp.getNewUserNum()) + "%");
+                    aape.setThirdlyPersistenceRate(divide(abp.getPreTwoPersistence(), abp.getNewUserNum()) + "%");
+                    aape.setFourthPersistenceRate(divide(abp.getPreThreePersistence(), abp.getNewUserNum()) + "%");
+                    aape.setFifthPersistenceRate(divide(abp.getPreFourPersistence(), abp.getNewUserNum()) + "%");
+                    aape.setSixthPersistenceRate(divide(abp.getPreFivePersistence(), abp.getNewUserNum()) + "%");
+                    aape.setSeventhPersistenceRate(divide(abp.getPreSixPersistence(), abp.getNewUserNum()) + "%");
                     aape.setFifteenthPersistenceRate(
-                            divide(abp.getPreFourteenPersistence(), abp.getPreFourNewUserNum()) + "%");
+                            divide(abp.getPreFourteenPersistence(), abp.getNewUserNum()) + "%");
                     aape.setThirtiethPersistenceRate(
-                            divide(abp.getPreTwentyNinePersistence(), abp.getPreTwentyNineNewUserNum()) + "%");
+                            divide(abp.getPreTwentyNinePersistence(), abp.getNewUserNum()) + "%");
                     excelList.add(aape);
                 }
             }

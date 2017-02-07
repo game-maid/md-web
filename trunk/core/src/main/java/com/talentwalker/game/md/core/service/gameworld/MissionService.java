@@ -226,7 +226,9 @@ public class MissionService extends GameSupport {
             if (!mission.getMissions().get(missionId).isAccept()) {
                 JSONObject progress = config.getJSONObject(missionId).getJSONObject("progress");
                 if (progress.containsKey("stage") && progress.getString("stage").equals(stageId)) {
-                    mission.getMissions().get(missionId).setProgress(1);
+                    MissionStatus ms = mission.getMissions().get(missionId);
+                    ms.setProgress(1);
+                    mission.getMissions().put(missionId, ms);
                     isTriger = true;
                 }
             }
