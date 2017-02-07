@@ -864,7 +864,7 @@ public class DuelService extends GameSupport {
         int cost = this.getDataConfig().get("duel_VIPcost").get(Integer.toString(buyTimes)).getInteger("cost");
         duel.setBuyTimes(buyTimes);
         duel.setSurplusTimes(surplusTimes);
-        gainPayService.pay(lord, ItemID.GOLD, cost);
+        gainPayService.pay(lord, ItemID.DIAMOND, cost);
         duelRepository.save(duel);
         Map<String, Object> map = new HashMap<>();
         map.put("buyTimes", buyTimes);
