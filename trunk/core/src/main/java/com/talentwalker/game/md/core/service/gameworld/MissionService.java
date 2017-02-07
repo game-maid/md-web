@@ -216,7 +216,7 @@ public class MissionService extends GameSupport {
      * @Description: 触发主线关卡任务
      * @param stageId
      */
-    public void trigerMissionOnceForStage(String stageId) {
+    public void trigerMissionOnceForStage(String stageId, int count) {
         MissionOnce mission = getMissionOnce(this.getLord());
         Iterator<String> it = mission.getMissions().keySet().iterator();
         JSONObject config = this.getDataConfig().get("mission_once").getJsonObject();
@@ -226,9 +226,8 @@ public class MissionService extends GameSupport {
             if (!mission.getMissions().get(missionId).isAccept()) {
                 JSONObject progress = config.getJSONObject(missionId).getJSONObject("progress");
                 if (progress.containsKey("stage") && progress.getString("stage").equals(stageId)) {
-                    MissionStatus ms = mission.getMissions().get(missionId);
-                    ms.setProgress(1);
-                    mission.getMissions().put(missionId, ms);
+                    mission.getMissions().get(missionId)
+                            .setProgress(count + mission.getMissions().get(missionId).getProgress());
                     isTriger = true;
                 }
             }
