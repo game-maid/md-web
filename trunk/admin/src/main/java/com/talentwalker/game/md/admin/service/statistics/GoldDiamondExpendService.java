@@ -128,8 +128,12 @@ public class GoldDiamondExpendService extends BaseService {
 
         } else {// 整体用户 根据条件查询
             String lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition);// 符合要求的玩家id
-            System.out.println(lordIds);
-            String matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
+            String matchLordIds = "";
+            if (payType == 2 && registerCondition == 0) {
+                matchLordIds = "{$match:{player_id:{$nin:[" + lordIds + "]}}}";
+            } else {
+                matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
+            }
             // 分组 统计总数 count
             List<DBObject> countList = new ArrayList<>();
             String discountUri = "{$group:{_id:'$uri'}}";
@@ -202,7 +206,6 @@ public class GoldDiamondExpendService extends BaseService {
             map.put("functionName", uri);
             map.put("itemNum", num);
             map.put("expendTimes", expendTimes);
-            // System.out.println(uri + "-----" + num + "---------" + expendTimes);
         }
         // 消费人数 处理查询结果
         Iterator<DBObject> payIt = payOutPut.results().iterator();
@@ -216,9 +219,16 @@ public class GoldDiamondExpendService extends BaseService {
                     break;
                 }
             }
-            System.out.println(uri + "----------" + payerNum);
         }
         return new PageImpl<>(content, pageable, total);
+    }
+
+    private void countTotal() {
+        if (userType == 0) {// 单个用户 根据用户id查询
+
+        } else {// 整体用户 根据条件查询
+
+        }
     }
 
     /**
@@ -234,10 +244,10 @@ public class GoldDiamondExpendService extends BaseService {
         List<String> lordIdList = new ArrayList<>();
         String matchPayTime = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
         String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
-        String matchRegisterTime = "{$match:{$and:[{register_time:{$gt:" + startDate + "}},{register_time:{$lt:"
-                + endDate + "}}]}}";
-        String matchLoginTime = "{$match:{$and:[{login_time:{$gt:" + startDate + "}},{login_time:{$lt:" + endDate
-                + "}}]}}";
+        // 根据注册条件查询
+        List<String> registerLordIdList = new ArrayList<>();
+        findLordByRegister(registerCondition, zoneId, startDate, endDate, registerLordIdList);
+
         if (payType != 0) {
             List<String> payTypeLordList = new ArrayList<>();
             List<DBObject> payTypeList = new ArrayList<>();
@@ -252,49 +262,6 @@ public class GoldDiamondExpendService extends BaseService {
                 payTypeLordList.add(lordId);
             }
             if (registerCondition != 0) {// 注册条件
-                List<String> registerLordIdList = new ArrayList<>();
-                if (registerCondition == 1) {// 活跃用户
-                    List<DBObject> registerList = new ArrayList<>();
-                    registerList.add((DBObject) JSON.parse(matchLoginTime));
-                    registerList.add((DBObject) JSON.parse(matchZoneId));
-                    registerList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$lord_id'}}}"));
-                    AggregationOutput registerOutput = mongoTemplate.getCollection("game_login")
-                            .aggregate(registerList);
-                    Iterator<DBObject> registerIt = registerOutput.results().iterator();
-                    while (registerIt.hasNext()) {
-                        BasicDBObject next = (BasicDBObject) registerIt.next();
-                        String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
-                        registerLordIdList.add(lordId);
-                    }
-                } else if (registerCondition == 2) {// 新用户
-                    List<DBObject> registerList = new ArrayList<>();
-                    registerList.add((DBObject) JSON.parse(matchRegisterTime));
-                    registerList.add((DBObject) JSON.parse(matchZoneId));
-                    registerList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$_id'}}}"));
-                    AggregationOutput registerOutput = mongoTemplate.getCollection("game_register")
-                            .aggregate(registerList);
-                    Iterator<DBObject> registerIt = registerOutput.results().iterator();
-                    while (registerIt.hasNext()) {
-                        BasicDBObject next = (BasicDBObject) registerIt.next();
-                        String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
-                        registerLordIdList.add(lordId);
-                    }
-                } else if (registerCondition == 3) {// 老用户
-                    List<DBObject> registerList = new ArrayList<>();
-                    registerList.add((DBObject) JSON.parse("{$match:{$and:[{register_time:{$gte:" + endDate
-                            + "}},{register_time:{$lte:" + startDate + "}}]}}"));
-                    registerList.add((DBObject) JSON.parse(matchZoneId));
-                    registerList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$lord_id'}}}"));
-                    AggregationOutput registerOutput = mongoTemplate.getCollection("game_register")
-                            .aggregate(registerList);
-                    Iterator<DBObject> registerIt = registerOutput.results().iterator();
-                    while (registerIt.hasNext()) {
-                        BasicDBObject next = (BasicDBObject) registerIt.next();
-                        String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
-                        registerLordIdList.add(lordId);
-                    }
-                }
-
                 if (payType == 1) {// 付费用户
                     for (String lordId : payTypeLordList) {
                         if (!registerLordIdList.contains(lordId)) {
@@ -312,47 +279,9 @@ public class GoldDiamondExpendService extends BaseService {
                 }
             } else {
                 lordIdList = payTypeLordList;
-
             }
         } else if (registerCondition != 0) {// 没有付费条件 按注册条件查询
-            if (registerCondition == 1) {// 活跃用户
-                List<DBObject> registerList = new ArrayList<>();
-                registerList.add((DBObject) JSON.parse(matchLoginTime));
-                registerList.add((DBObject) JSON.parse(matchZoneId));
-                registerList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$lord_id'}}}"));
-                AggregationOutput registerOutput = mongoTemplate.getCollection("game_login").aggregate(registerList);
-                Iterator<DBObject> registerIt = registerOutput.results().iterator();
-                while (registerIt.hasNext()) {
-                    BasicDBObject next = (BasicDBObject) registerIt.next();
-                    String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
-                    lordIdList.add(lordId);
-                }
-            } else if (registerCondition == 2) {// 新用户
-                List<DBObject> registerList = new ArrayList<>();
-                registerList.add((DBObject) JSON.parse(matchRegisterTime));
-                registerList.add((DBObject) JSON.parse(matchZoneId));
-                registerList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$_id'}}}"));
-                AggregationOutput registerOutput = mongoTemplate.getCollection("game_register").aggregate(registerList);
-                Iterator<DBObject> registerIt = registerOutput.results().iterator();
-                while (registerIt.hasNext()) {
-                    BasicDBObject next = (BasicDBObject) registerIt.next();
-                    String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
-                    lordIdList.add(lordId);
-                }
-            } else if (registerCondition == 3) {// 老用户
-                List<DBObject> registerList = new ArrayList<>();
-                registerList.add((DBObject) JSON.parse("{$match:{$or:[{register_time:{$gte:" + endDate
-                        + "}},{register_time:{$lte:" + startDate + "}}]}}"));
-                registerList.add((DBObject) JSON.parse(matchZoneId));
-                registerList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$_id'}}}"));
-                AggregationOutput registerOutput = mongoTemplate.getCollection("game_register").aggregate(registerList);
-                Iterator<DBObject> registerIt = registerOutput.results().iterator();
-                while (registerIt.hasNext()) {
-                    BasicDBObject next = (BasicDBObject) registerIt.next();
-                    String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
-                    lordIdList.add(lordId);
-                }
-            }
+            lordIdList = registerLordIdList;
         } else {// 查询所有用户
             return null;
         }
@@ -365,4 +294,68 @@ public class GoldDiamondExpendService extends BaseService {
         return lordIds.toString();
     }
 
+    private void findLordByRegister(Integer registerCondition, String zoneId, long startDate, long endDate,
+            List<String> lordIdList) {
+        String matchRegisterTime = "{$match:{$and:[{register_time:{$gt:" + startDate + "}},{register_time:{$lt:"
+                + endDate + "}}]}}";
+        String matchLoginTime = "{$match:{$and:[{login_time:{$gt:" + startDate + "}},{login_time:{$lt:" + endDate
+                + "}}]}}";
+        String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
+        if (registerCondition == 1) {// 活跃用户
+            List<DBObject> registerList = new ArrayList<>();
+            registerList.add((DBObject) JSON.parse(matchLoginTime));
+            registerList.add((DBObject) JSON.parse(matchZoneId));
+            registerList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$lord_id'}}}"));
+            AggregationOutput registerOutput = mongoTemplate.getCollection("game_login").aggregate(registerList);
+            Iterator<DBObject> registerIt = registerOutput.results().iterator();
+            while (registerIt.hasNext()) {
+                BasicDBObject next = (BasicDBObject) registerIt.next();
+                String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
+                lordIdList.add(lordId);
+            }
+        } else if (registerCondition == 2) {// 新用户
+            List<DBObject> registerList = new ArrayList<>();
+            registerList.add((DBObject) JSON.parse(matchRegisterTime));
+            registerList.add((DBObject) JSON.parse(matchZoneId));
+            registerList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$_id'}}}"));
+            AggregationOutput registerOutput = mongoTemplate.getCollection("game_register").aggregate(registerList);
+            Iterator<DBObject> registerIt = registerOutput.results().iterator();
+            while (registerIt.hasNext()) {
+                BasicDBObject next = (BasicDBObject) registerIt.next();
+                String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
+                lordIdList.add(lordId);
+            }
+        } else if (registerCondition == 3) {// 老用户
+            List<DBObject> registerList = new ArrayList<>();
+            registerList.add((DBObject) JSON.parse("{$match:{$or:[{register_time:{$gte:" + endDate
+                    + "}},{register_time:{$lte:" + startDate + "}}]}}"));
+            registerList.add((DBObject) JSON.parse(matchZoneId));
+            registerList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$_id'}}}"));
+            AggregationOutput registerOutput = mongoTemplate.getCollection("game_register").aggregate(registerList);
+            Iterator<DBObject> registerIt = registerOutput.results().iterator();
+            while (registerIt.hasNext()) {
+                BasicDBObject next = (BasicDBObject) registerIt.next();
+                String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
+                lordIdList.add(lordId);
+            }
+        }
+    }
+
+    /**
+     * @Description:导出
+     * @param startStr
+     * @param endStr
+     * @param zoneId
+     * @param itemType
+     * @param userType
+     * @param lordId
+     * @param payType
+     * @param registerCondition
+     * @param function
+     * @throws
+     */
+    public void export(String startStr, String endStr, String zoneId, String itemType, Integer userType, String lordId,
+            Integer payType, Integer registerCondition, Integer function) {
+
+    }
 }

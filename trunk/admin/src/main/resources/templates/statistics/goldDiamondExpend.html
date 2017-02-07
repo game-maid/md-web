@@ -71,7 +71,7 @@
 							</button>
 						</div>
 						<div class="col-sm-1" style="float: right;">
-							<button class="btn btn-success" onclick="exportCDKey()" >
+							<button class="btn btn-success" onclick="exportExcel()" >
 								<i class="fa fa-download"></i>&nbsp;<span th:text="#{gmtool.cdk.export}">导出</span>&nbsp;
 							</button>
 						</div>
@@ -256,6 +256,24 @@ function search(){
 			gameBootstrapTable("/statistics/goldDiamondExpend/findList", params);
 		}
 	});
+}
+//导出
+function exportExcel(){
+	startStr:$("#startDatetimepicker").val(),
+	endStr:$("#endDatetimepicker").val(),
+	zoneId: $("#zone-select").val(),
+	itemType:$("#item-type-select").val(),
+	userType:$("#user-type-select").val(),
+	lordId:$("#lord_id").val(),
+	payType:$("#pay-type-select").val(),
+	registerCondition:$("#order-state-select").val(),
+	function:$("#function-select").val(),
+	/*<![CDATA[*/
+		var url ="/statistics/goldDiamondExpend?startStr="+$("#startDatetimepicker").val()+"&endStr="+$("#endDatetimepicker").val()+
+				"&zoneId="+$("#zone-select").val()+"$itemType="+$("#item-type-select").val()+"&userType="+$("#user-type-select").val()+
+				"&lordId="+$("#lord_id").val()+"&payType="+$("#pay-type-select").val()+"&registerCondition="+$("#order-state-select").val();
+    /*]]>*/
+    window.location.href=url;
 }
 </script>
 </html>
