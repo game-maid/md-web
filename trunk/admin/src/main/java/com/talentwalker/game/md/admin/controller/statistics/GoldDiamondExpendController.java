@@ -11,6 +11,8 @@ package com.talentwalker.game.md.admin.controller.statistics;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -64,9 +66,10 @@ public class GoldDiamondExpendController extends BaseController {
     @GameResponse
     @RequestMapping(value = "export", method = RequestMethod.GET)
     public void exportExcel(String startStr, String endStr, String zoneId, String itemType, Integer userType,
-            String lordId, Integer payType, Integer registerCondition, Integer function) {
+            String lordId, Integer payType, Integer registerCondition, Integer function, HttpServletRequest request,
+            HttpServletResponse response) {
         goldDiamondExpendService.export(startStr, endStr, zoneId, itemType, userType, lordId, payType,
-                registerCondition, function);
+                registerCondition, function, request, response);
     }
 
 }
