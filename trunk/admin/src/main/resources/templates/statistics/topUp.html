@@ -290,7 +290,7 @@ $("#select").click(function(){
 					price +=checkNull(zoneData.price);
 				});
 			});
-			text+='<tr><td>'+[[#{statistics.zone.total}]]+'</td><td>'+num+'</td><td>'+payNum+'</td><td>'+price+'</td></tr>';
+			text+='<tr><td>'+[[#{statistics.zone.total}]]+'</td><td>'+num+'</td><td>'+payNum+'</td><td>'+checkNull(price)+'</td></tr>';
 			$("#data-table-body").empty();
 			$("#data-table-body").append(text);
 		},
