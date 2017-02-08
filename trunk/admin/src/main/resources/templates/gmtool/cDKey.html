@@ -503,11 +503,12 @@ function initBootstrapTable(){
 						field : "status",
 						align : "center",
 						formatter:function(value){
+							console.log($(this));
 							if(value==0){
 								return '<b style="color:green">'+[[#{gmtool.cdk.status.using}]]+'</b>';
 							}else if(value==1){
 								return '<b style="color:gray">'+[[#{gmtool.cdk.status.used}]]+'</b>';
-							}else{
+							}else if(value==2){
 								return '<b style="color:red">'+[[#{gmtool.cdk.status.cancellation}]]+'</b>';
 							}
 						}
@@ -524,6 +525,9 @@ function initBootstrapTable(){
 						field : "batch",
 						align : "center",
 						formatter : function(value){
+							if(new Date().getTime()>value.endTime){
+								return new Date(value.endTime).format("yyyy-MM-dd hh:mm:ss")+'-'+'<b style="color:gray">'+[[#{gmtool.cdk.status.due}]]+'</b>';
+							}
 							return new Date(value.endTime).format("yyyy-MM-dd hh:mm:ss");
 						},
 					},{

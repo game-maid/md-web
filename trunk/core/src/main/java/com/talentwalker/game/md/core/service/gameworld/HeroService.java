@@ -141,7 +141,7 @@ public class HeroService extends GameSupport {
         if (dataConfig != null) {
             DataConfig attrConfig = dataConfig.get("attr");
             if (attrConfig != null) {
-                Integer increase = (Integer) attrConfig.getJsonObject().get("epx");
+                Integer increase = (Integer) attrConfig.getJsonObject().get("exp");
                 if (increase != null) {
                     exp *= (increase / 100 + 1);
                 }
