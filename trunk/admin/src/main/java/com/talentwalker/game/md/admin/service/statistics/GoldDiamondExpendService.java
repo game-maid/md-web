@@ -319,7 +319,7 @@ public class GoldDiamondExpendService extends BaseService {
             List<DBObject> payTypeList = new ArrayList<>();
             payTypeList.add((DBObject) JSON.parse(matchPayTime));
             payTypeList.add((DBObject) JSON.parse(matchZoneId));
-            payTypeList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$lord_id'}}}"));
+            payTypeList.add((DBObject) JSON.parse("{$group:{_id:{lord_id:'$lordId'}}}"));
             AggregationOutput payTypeOutput = mongoTemplate.getCollection("game_order").aggregate(payTypeList);
             Iterator<DBObject> payTypeIt = payTypeOutput.results().iterator();
             while (payTypeIt.hasNext()) {
