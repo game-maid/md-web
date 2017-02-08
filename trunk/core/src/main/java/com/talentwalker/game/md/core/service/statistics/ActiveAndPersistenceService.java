@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 
 import javax.annotation.Resource;
@@ -971,20 +970,6 @@ public class ActiveAndPersistenceService {
             long endLong = endCal.getTimeInMillis();
             while (cal.getTimeInMillis() < endLong) {
                 persistenceData(cal, zoneStr, zoneList, tableData, true);
-            }
-        }
-        for (ActiveBaseData abd : tableData) {
-            Map<String, Map<String, ActiveBasePackage>> zoneData = abd.getZoneData();
-            Set<String> keySet = zoneData.keySet();
-            for (String string : keySet) {
-                Map<String, ActiveBasePackage> map = zoneData.get(string);
-                Set<String> keySet2 = map.keySet();
-                for (String string2 : keySet2) {
-                    ActiveBasePackage abp = map.get(string2);
-                    System.out.println(
-                            string + "--" + string2 + "--" + abp.getNewUserNum() + "---" + abp.getPreOnePersistence());
-                }
-
             }
         }
         return tableData;
