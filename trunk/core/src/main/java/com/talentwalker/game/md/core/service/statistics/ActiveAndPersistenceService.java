@@ -498,128 +498,6 @@ public class ActiveAndPersistenceService {
     }
 
     /**
-     * @Description:收入次数
-     * @param startDate
-     * @param endDate
-     * @param zoneStr
-     * @param tableData
-     * @throws
-     */
-    private void incomeTimes(long startDate, long endDate, String zoneList, List<ActiveBaseData> tableData) {
-        List<DBObject> pipeline = new ArrayList<>();
-
-        String groupStr = "{$group:{_id:{zone_id:'$zone_id',package_id:'$package_id'},total:{$sum:1}}}";
-
-        String matchStr = "{$match:{$and:[{time:{$gt:" + startDate + "}},{time:{$lt:" + endDate + "}}]}}";
-
-        String matchZoneStr = "{$match:{zone_id:{$in:[" + zoneList + "]}}}";
-        DBObject match = (DBObject) JSON.parse(matchStr);
-        DBObject matchZone = (DBObject) JSON.parse(matchZoneStr);
-        DBObject group = (DBObject) JSON.parse(groupStr);
-        pipeline.add(match);
-        pipeline.add(matchZone);
-        pipeline.add(group);
-        AggregationOutput output = mongoTemplate.getCollection("game_order").aggregate(pipeline);
-        Iterator<DBObject> iterator = output.results().iterator();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-        String dateKey = sdf.format(new Date(startDate));
-
-        ActiveBaseData abd = null;
-        int index = -1;
-        for (int i = 0; i < tableData.size(); i++) {
-            ActiveBaseData temp = tableData.get(i);
-            if (temp.getDate().equals(dateKey)) {
-                abd = temp;
-                index = i;
-            }
-        }
-
-        if (abd == null) {
-            abd = new ActiveBaseData();
-            abd.setDate(dateKey);
-        }
-        Map<String, Map<String, ActiveBasePackage>> zoneData = abd.getZoneData();
-        if (zoneData == null) {
-            zoneData = new TreeMap<>();
-        }
-        // 天总计
-        Map<String, ActiveBasePackage> dayTotalData = zoneData.get(ActiveBaseData.DAY_TOTAL);
-        if (dayTotalData == null) {
-            dayTotalData = new TreeMap<>();
-            dayTotalData.put(ActiveBaseData.DAY_TOTAL, new ActiveBasePackage());
-        }
-
-        int zoneTotal = 0;// 区总计
-        int dayTotal = 0;// 天总计
-        String zoneFlag = "";// 标记区
-        int flag = 0;
-        while (iterator.hasNext()) {
-            BasicDBObject dbo = (BasicDBObject) iterator.next();
-            BasicDBObject keyValues = (BasicDBObject) dbo.get("_id");
-            String zoneId = keyValues.getString("zone_id");
-            String packageId = keyValues.getString("package_id");
-            int total = dbo.getInt("total");
-
-            Map<String, ActiveBasePackage> zoneMap = zoneData.get(zoneId);
-
-            if (zoneMap == null) {
-                zoneMap = new TreeMap<>();
-            }
-            ActiveBasePackage abp = zoneMap.get(packageId);
-            if (abp == null) {
-                abp = new ActiveBasePackage();
-            }
-            abp.setIncomeTimes(total);
-
-            zoneMap.put(packageId, abp);
-            zoneData.put(zoneId, zoneMap);
-
-            if (flag == 0) {
-                zoneFlag = zoneId;
-                flag++;
-            }
-
-            // 区总计 计算
-            if (!zoneFlag.equals(zoneId)) {
-                Map<String, ActiveBasePackage> preZoneMap = zoneData.get(zoneFlag);
-                // 区总计
-                ActiveBasePackage zoneTotalData = preZoneMap.get(ActiveBaseData.ZONE_TOTAL);
-                if (zoneTotalData == null) {
-                    zoneTotalData = new ActiveBasePackage();
-                }
-                zoneTotalData.setIncomeTimes(zoneTotal);
-                preZoneMap.put(ActiveBaseData.ZONE_TOTAL, zoneTotalData);
-                zoneData.put(zoneFlag, preZoneMap);
-                zoneTotal = 0;
-                zoneFlag = zoneId;
-            }
-            zoneTotal += total;
-            dayTotal += total;
-            if (!iterator.hasNext()) {
-                // 区总计
-                ActiveBasePackage zoneTotalData = zoneMap.get(ActiveBaseData.ZONE_TOTAL);
-                if (zoneTotalData == null) {
-                    zoneTotalData = new ActiveBasePackage();
-                }
-                zoneTotalData.setIncomeTimes(zoneTotal);
-                zoneMap.put(ActiveBaseData.ZONE_TOTAL, zoneTotalData);
-                zoneData.put(zoneFlag, zoneMap);
-                // 天总计
-                ActiveBasePackage activeBasePackage = dayTotalData.get(ActiveBaseData.DAY_TOTAL);
-                activeBasePackage.setIncomeTimes(dayTotal);
-                dayTotalData.put(ActiveBaseData.DAY_TOTAL, activeBasePackage);
-                zoneData.put(ActiveBaseData.DAY_TOTAL, dayTotalData);
-            }
-
-        }
-
-        abd.setZoneData(zoneData);
-        if (index == -1) {
-            tableData.add(abd);
-        }
-    }
-
-    /**
      * @Description:收入金额
      * @param startDate
      * @param endDate
@@ -1183,19 +1061,19 @@ public class ActiveAndPersistenceService {
         // 查询当天注册的用户从当天到次日为止的付费总数
         String matchPreOneIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + preOneEnd
                 + "}}]}}";
-        String matchLordsPreOneIncomeNum = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+        String matchLordsPreOneIncomeNum = "{$match:{lordId:{$in:[" + lordIdsStr + "]}}}";
         incomeNum(startDate, tableData, "game_order", "setPreOneIncomeNum", double.class, groupPrice, sortZoneId,
                 matchZoneStr, matchPreOneIncomeNum, matchLordsPreOneIncomeNum);
         // 注册两天后的付费总数
         String matchPreTwoIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + preTwoEnd
                 + "}}]}}";
-        String matchLordsPreTwoIncomeNum = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+        String matchLordsPreTwoIncomeNum = "{$match:{lordId:{$in:[" + lordIdsStr + "]}}}";
         incomeNum(startDate, tableData, "game_order", "setPreTwoIncomeNum", double.class, groupPrice, sortZoneId,
                 matchZoneStr, matchPreTwoIncomeNum, matchLordsPreTwoIncomeNum);
         // 注册六天后的付费总数
         String matchPreSixIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + preSixEnd
                 + "}}]}}";
-        String matchLordsPreSixIncomeNum = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+        String matchLordsPreSixIncomeNum = "{$match:{lordId:{$in:[" + lordIdsStr + "]}}}";
         incomeNum(startDate, tableData, "game_order", "setPreSixIncomeNum", double.class, groupPrice, sortZoneId,
                 matchZoneStr, matchPreSixIncomeNum, matchLordsPreSixIncomeNum);
         if (flag) {
@@ -1208,43 +1086,43 @@ public class ActiveAndPersistenceService {
             // 当天注册用户当天为止付费总数
             String matchPersentIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate
                     + "}}]}}";
-            String matchLordsPersentIncomeNum = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+            String matchLordsPersentIncomeNum = "{$match:{lordId:{$in:[" + lordIdsStr + "]}}}";
             incomeNum(startDate, tableData, "game_order", "setPersentIncomeNum", double.class, groupPrice, sortZoneId,
                     matchZoneStr, matchPersentIncomeNum, matchLordsPersentIncomeNum);
             // 注册十三天内的用户付费总数
             String matchPreThirteenIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:"
                     + preThirteenEnd + "}}]}}";
-            String matchLordsPreThirteenIncomeNum = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+            String matchLordsPreThirteenIncomeNum = "{$match:{lordId:{$in:[" + lordIdsStr + "]}}}";
             incomeNum(startDate, tableData, "game_order", "setPreThirteenIncomeNum", double.class, groupPrice,
                     sortZoneId, matchZoneStr, matchPreThirteenIncomeNum, matchLordsPreThirteenIncomeNum);
             // 注册二十天内的付费总数
             String matchPreTwentyIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:"
                     + preTwentyEnd + "}}]}}";
-            String matchLordsPreTwentyIncomeNum = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+            String matchLordsPreTwentyIncomeNum = "{$match:{lordId:{$in:[" + lordIdsStr + "]}}}";
             incomeNum(startDate, tableData, "game_order", "setPreTwentyIncomeNum", double.class, groupPrice, sortZoneId,
                     matchZoneStr, matchPreTwentyIncomeNum, matchLordsPreTwentyIncomeNum);
             // 注册二十七天内的付费总数
             String matchPreTwentySevenIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:"
                     + preTwentySevenEnd + "}}]}}";
-            String matchLordsPreTwentySevenIncomeNum = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+            String matchLordsPreTwentySevenIncomeNum = "{$match:{lordId:{$in:[" + lordIdsStr + "]}}}";
             incomeNum(startDate, tableData, "game_order", "setPreTwentySevenIncomeNum", double.class, groupPrice,
                     sortZoneId, matchZoneStr, matchPreTwentySevenIncomeNum, matchLordsPreTwentySevenIncomeNum);
             // 前三十四天注册的用户付费总数
             String matchPreThirtyFourIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:"
                     + preThirtyFourEnd + "}}]}}";
-            String matchLordsPreThirtyFourIncomeNum = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+            String matchLordsPreThirtyFourIncomeNum = "{$match:{lordId:{$in:[" + lordIdsStr + "]}}}";
             incomeNum(startDate, tableData, "game_order", "setPreThirtyFourIncomeNum", double.class, groupPrice,
                     sortZoneId, matchZoneStr, matchPreThirtyFourIncomeNum, matchLordsPreThirtyFourIncomeNum);
             // 前四十八天注册的付费总数
             String matchPreFortyEightIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:"
                     + preFortyEightEnd + "}}]}}";
-            String matchLordsPreFortyEightIncomeNum = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+            String matchLordsPreFortyEightIncomeNum = "{$match:{lordId:{$in:[" + lordIdsStr + "]}}}";
             incomeNum(startDate, tableData, "game_order", "setPreFortyEightIncomeNum", double.class, groupPrice,
                     sortZoneId, matchZoneStr, matchPreFortyEightIncomeNum, matchLordsPreFortyEightIncomeNum);
             // 前五十六天注册的付费总数
             String matchPreFiftyFiveIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:"
                     + preFiftyFiveEnd + "}}]}}";
-            String matchLordsPreFiftyFiveIncomeNum = "{$match:{lord_id:{$in:[" + lordIdsStr + "]}}}";
+            String matchLordsPreFiftyFiveIncomeNum = "{$match:{lordId:{$in:[" + lordIdsStr + "]}}}";
             incomeNum(startDate, tableData, "game_order", "setPreFiftyFiveIncomeNum", double.class, groupPrice,
                     sortZoneId, matchZoneStr, matchPreFiftyFiveIncomeNum, matchLordsPreFiftyFiveIncomeNum);
         }
