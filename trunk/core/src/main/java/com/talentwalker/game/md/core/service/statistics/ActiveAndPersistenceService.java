@@ -56,10 +56,6 @@ public class ActiveAndPersistenceService {
      * @throws
      */
     public List<ActiveBaseData> baseSelect(String dateType, String dateStr, String[] zoneArr) {
-        /**
-         * 测试
-         */
-
         List<ActiveBaseData> tableData = new ArrayList<>();
         List<String> zoneList = new ArrayList<>();
         zoneList.addAll(Arrays.asList(zoneArr));// 要查询的区
@@ -376,7 +372,6 @@ public class ActiveAndPersistenceService {
         Calendar cal = Calendar.getInstance();
         try {
             Date date = sdf.parse(sdf.format(cal.getTime()));
-            // Date date = sdf.parse("2017/01/24");
             cal.setTime(date);
         } catch (ParseException e) {
             e.printStackTrace();
