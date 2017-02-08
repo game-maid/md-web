@@ -560,6 +560,9 @@ public class FormHoldService extends GameSupport {
         boolean isChangeDuel = false;
         for (int i = 0; i < forms.size(); i++) {
             List<FormHold> formHolds = forms.get(i);
+            if (formHolds == null) {
+                continue;
+            }
             for (int j = 0; j < formHolds.size(); j++) {
                 FormHold formHold = formHolds.get(j);
                 List<String> skillUids = formHold.getSkillUid();
