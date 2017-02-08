@@ -429,13 +429,13 @@ function callback(val,dataArr,isDetail){
 				var payerNum = checkNull(packageData.payerNum);
 				var incomeNum =checkNull(packageData.incomeNum);
 				var incomeTimes = checkNull(packageData.incomeTimes);
-				var newPayerRate = divide(newPayerNum,newUserNum);
-				var activePayRate = divide(payerNum,activeNum);
+				var newPayerRate = dividePercentage(newPayerNum,newUserNum);
+				var activePayRate = dividePercentage(payerNum,activeNum);
 				var arpu = divide(incomeNum,activeNum);
 				var arppu = divide(incomeNum,payerNum);
-				var preOnePersistenceRate=divide(packageData.preOnePersistence,packageData.newUserNum);
-				var preTwoPersistenceRate = divide(packageData.preTwoPersistence,packageData.newUserNum);
-				var preSixPersistenceRate = divide(packageData.preSixPersistence,packageData.newUserNum);
+				var preOnePersistenceRate=dividePercentage(packageData.preOnePersistence,packageData.newUserNum);
+				var preTwoPersistenceRate = dividePercentage(packageData.preTwoPersistence,packageData.newUserNum);
+				var preSixPersistenceRate = dividePercentage(packageData.preSixPersistence,packageData.newUserNum);
 				var preOneLTV=divide(packageData.preOneIncomeNum,packageData.newUserNum);
 				var preTwoLTV=divide(packageData.preTwoIncomeNum,packageData.newUserNum);
 				var preSixLTV=divide(packageData.preSixIncomeNum,packageData.newUserNum);
@@ -476,8 +476,8 @@ function callback(val,dataArr,isDetail){
 				text+='<td>'+activeNum+'</td><td>'+newUserNum+'</td><td>'+newPayerNum;
 				text+='</td><td>'+payerNum+'</td><td>'+incomeNum+'</td><td>'+incomeTimes+'</td><td>'+newPayerRate+'%';
 				text+='</td><td>'+activePayRate+'%'+'</td><td>'+arpu+'</td><td>'+arppu+'</td><td>'+preOnePersistenceRate+'%';
-				text+='</td><td>'+preTwoPersistenceRate+'%'+'</td><td>'+preSixPersistenceRate+'%'+'</td><td>'+preOneLTV+'%';
-				text+='</td><td>'+preTwoLTV+'%'+'</td><td>'+preSixLTV+'%'+'</td></tr>';
+				text+='</td><td>'+preTwoPersistenceRate+'%'+'</td><td>'+preSixPersistenceRate+'%'+'</td><td>'+preOneLTV;
+				text+='</td><td>'+preTwoLTV+'</td><td>'+preSixLTV+'</td></tr>';
 			});
 		});
 	});
@@ -517,13 +517,21 @@ function checkNull(val){
 		return 0;
 	return Math.round(val*100)/100;
 }
+//两数相除 两位小数(百分比)
+function dividePercentage(element,denominator){
+	if(element==null || element==0 || denominator==null ||denominator==0){
+		return 0;
+	}
+	var divide = element/denominator;
+	return Math.round(divide*10000)/100;
+}
 //两数相除 两位小数
 function divide(element,denominator){
 	if(element==null || element==0 || denominator==null ||denominator==0){
 		return 0;
 	}
 	var divide = element/denominator;
-	return Math.round(divide*10000)/100;
+	return Math.round(divide*100)/100;
 }
 
 //初始化曲线图
