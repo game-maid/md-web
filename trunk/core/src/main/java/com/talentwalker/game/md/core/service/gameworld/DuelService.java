@@ -41,7 +41,6 @@ import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.gameworld.Mail;
 import com.talentwalker.game.md.core.domain.gameworld.Skill;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
-import com.talentwalker.game.md.core.repository.GameUserRepository;
 import com.talentwalker.game.md.core.repository.GameZoneRepository;
 import com.talentwalker.game.md.core.repository.gameworld.DuelRepository;
 import com.talentwalker.game.md.core.repository.gameworld.MailRepository;
@@ -63,8 +62,6 @@ public class DuelService extends GameSupport {
     private DuelRepository duelRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
-    @Autowired
-    private GameUserRepository gameUserRepository;
     @Autowired
     private GameZoneRepository gameZoneRepository;
     @Autowired
@@ -866,6 +863,7 @@ public class DuelService extends GameSupport {
         duel.setSurplusTimes(surplusTimes);
         gainPayService.pay(lord, ItemID.DIAMOND, cost);
         duelRepository.save(duel);
+        lordRepository.save(lord);
         Map<String, Object> map = new HashMap<>();
         map.put("buyTimes", buyTimes);
         map.put("surplusTimes", surplusTimes);
