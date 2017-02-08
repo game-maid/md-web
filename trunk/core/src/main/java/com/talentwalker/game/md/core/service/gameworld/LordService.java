@@ -334,7 +334,8 @@ public class LordService extends GameSupport {
         register.setPackageId(gameUser.getPackageId());
         register.setZoneId(gameUser.getGameZoneId());
         registerRepository.save(register);
-
+        // 记录玩家（活跃度）
+        recordLogin(lord);
         return lord;
     }
 
