@@ -56,6 +56,10 @@ public class ActiveAndPersistenceService {
      * @throws
      */
     public List<ActiveBaseData> baseSelect(String dateType, String dateStr, String[] zoneArr) {
+        /**
+         * 测试
+         */
+
         List<ActiveBaseData> tableData = new ArrayList<>();
         List<String> zoneList = new ArrayList<>();
         zoneList.addAll(Arrays.asList(zoneArr));// 要查询的区
@@ -372,6 +376,7 @@ public class ActiveAndPersistenceService {
         Calendar cal = Calendar.getInstance();
         try {
             Date date = sdf.parse(sdf.format(cal.getTime()));
+            // Date date = sdf.parse("2017/01/24");
             cal.setTime(date);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -390,7 +395,7 @@ public class ActiveAndPersistenceService {
         String matchNewUserNum = "{$match:{$and:[{register_time:{$gt:" + startDate + "}},{register_time:{$lt:" + endDate
                 + "}}]}}";
         getNum(startDate, tableData, "game_register", "setNewUserNum", int.class, group, sortZoneId, matchNewUserNum);
-        // 新增付费用户
+        // 新增付费用户(首冲用户)
         String matchNewPayerNum = "{$match:{$and:[{create_time:{$gt:" + startDate + "}},{create_time:{$lt:" + endDate
                 + "}}]}}";
         getNum(startDate, tableData, "game_topup_first_record", "setNewPayerNum", int.class, group, sortZoneId,
@@ -400,12 +405,15 @@ public class ActiveAndPersistenceService {
         getNum(startDate, tableData, "game_payer", "setPayerNum", int.class, group, sortZoneId, matchPayerNum);
         // 收入金额
         String groupPrice = "{$group:{_id:{zone_id:'$zone_id',package_id:'$package_id'},total:{$sum:'$price'}}}";
-        String matchIncomeNum = "{$match:{$and:[{time:{$gt:" + startDate + "}},{time:{$lt:" + endDate + "}}]}}";
+        String matchIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
         incomeNum(startDate, tableData, "game_order", "setIncomeNum", double.class, groupPrice, sortZoneId,
                 matchIncomeNum);
         // 收入次数
         String matchIncomeTimes = "{$match:{$and:[{time:{$gt:" + startDate + "}},{time:{$lt:" + endDate + "}}]}}";
         getNum(startDate, tableData, "game_order", "setIncomeTimes", int.class, group, sortZoneId, matchIncomeTimes);
+
+        ActiveBaseData activeBaseData = tableData.get(0);
+        activeBaseDataReposistory.save(activeBaseData);
     }
 
     /**
@@ -444,7 +452,7 @@ public class ActiveAndPersistenceService {
                 matchPayerNum);
         // 收入金额
         String groupPrice = "{$group:{_id:{zone_id:'$zone_id',package_id:'$package_id'},total:{$sum:'$price'}}}";
-        String matchIncomeNum = "{$match:{$and:[{time:{$gt:" + startDate + "}},{time:{$lt:" + endDate + "}}]}}";
+        String matchIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
         incomeNum(startDate, tableData, "game_order", "setIncomeNum", double.class, groupPrice, sortZoneId,
                 matchZoneStr, matchIncomeNum);
         // 收入次数
