@@ -403,7 +403,8 @@ public class ActiveAndPersistenceService {
         incomeNum(startDate, tableData, "game_order", "setIncomeNum", double.class, groupPrice, sortZoneId,
                 matchIncomeNum);
         // 收入次数
-        String matchIncomeTimes = "{$match:{$and:[{time:{$gt:" + startDate + "}},{time:{$lt:" + endDate + "}}]}}";
+        String matchIncomeTimes = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate
+                + "}}]}}";
         getNum(startDate, tableData, "game_order", "setIncomeTimes", int.class, group, sortZoneId, matchIncomeTimes);
 
         ActiveBaseData activeBaseData = tableData.get(0);
@@ -450,7 +451,8 @@ public class ActiveAndPersistenceService {
         incomeNum(startDate, tableData, "game_order", "setIncomeNum", double.class, groupPrice, sortZoneId,
                 matchZoneStr, matchIncomeNum);
         // 收入次数
-        String matchIncomeTimes = "{$match:{$and:[{time:{$gt:" + startDate + "}},{time:{$lt:" + endDate + "}}]}}";
+        String matchIncomeTimes = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate
+                + "}}]}}";
         getNum(startDate, tableData, "game_order", "setIncomeTimes", int.class, group, sortZoneId, matchZoneStr,
                 matchIncomeTimes);
     }
