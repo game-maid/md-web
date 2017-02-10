@@ -37,7 +37,7 @@ public class ActiveBaseData extends BaseDomain {
      * zoneId , packageId, 详细数据
      */
     @Field("zone_data")
-    private Map<String, Map<String, ActiveBasePackage>> zoneData;
+    private TreeMap<String, Map<String, ActiveBasePackage>> zoneData;
 
     public String getDate() {
         return date;
@@ -47,14 +47,17 @@ public class ActiveBaseData extends BaseDomain {
         this.date = date;
     }
 
-    public Map<String, Map<String, ActiveBasePackage>> getZoneData() {
-        if (zoneData == null) {
-            zoneData = new TreeMap<>();
-        }
+    /**
+     * @return zoneData
+     */
+    public TreeMap<String, Map<String, ActiveBasePackage>> getZoneData() {
         return zoneData;
     }
 
-    public void setZoneData(Map<String, Map<String, ActiveBasePackage>> zoneData) {
+    /**
+     * @param zoneData 要设置的 zoneData
+     */
+    public void setZoneData(TreeMap<String, Map<String, ActiveBasePackage>> zoneData) {
         this.zoneData = zoneData;
     }
 

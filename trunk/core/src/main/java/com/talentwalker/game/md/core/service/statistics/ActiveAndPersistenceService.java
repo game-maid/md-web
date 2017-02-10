@@ -268,7 +268,7 @@ public class ActiveAndPersistenceService {
         for (ActiveBaseData activeBaseData : tableData) {
             if (activeBaseData == null)
                 continue;
-            Map<String, Map<String, ActiveBasePackage>> zoneData = activeBaseData.getZoneData();
+            TreeMap<String, Map<String, ActiveBasePackage>> zoneData = activeBaseData.getZoneData();
             Iterator<Entry<String, Map<String, ActiveBasePackage>>> iterator = zoneData.entrySet().iterator();
             Map<String, ActiveBasePackage> dayTotal = new HashMap<>();
             ActiveBasePackage abp = new ActiveBasePackage();
@@ -300,7 +300,9 @@ public class ActiveAndPersistenceService {
             int newUserPayer = 0;
             while (iterator.hasNext()) {
                 String zoneId = iterator.next().getKey();
+                System.out.println(zoneId);
                 Map<String, ActiveBasePackage> packageData = zoneData.get(zoneId);
+                System.out.println(packageData);
                 if (!zoneList.contains(zoneId)) {
                     iterator.remove();
                     continue;
@@ -540,7 +542,7 @@ public class ActiveAndPersistenceService {
             abd = new ActiveBaseData();
             abd.setDate(dateKey);
         }
-        Map<String, Map<String, ActiveBasePackage>> zoneData = abd.getZoneData();
+        TreeMap<String, Map<String, ActiveBasePackage>> zoneData = abd.getZoneData();
         if (zoneData == null) {
             zoneData = new TreeMap<>();
         }
@@ -690,7 +692,7 @@ public class ActiveAndPersistenceService {
             abd = new ActiveBaseData();
             abd.setDate(dateKey);
         }
-        Map<String, Map<String, ActiveBasePackage>> zoneData = abd.getZoneData();
+        TreeMap<String, Map<String, ActiveBasePackage>> zoneData = abd.getZoneData();
         if (zoneData == null) {
             zoneData = new TreeMap<>();
         }
