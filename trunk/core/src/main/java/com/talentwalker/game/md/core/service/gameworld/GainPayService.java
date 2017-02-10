@@ -158,6 +158,8 @@ public class GainPayService extends GameSupport {
                         up += ((JSONObject) config.get(i + "")).getInt("score");
                         if (score >= up) {
                             lord.setVipLevel(i);
+                            Map<Integer, Integer> dailyVipReward = lord.getDailyVipReward();
+                            dailyVipReward.put(i, 0);
                         }
                     }
                     lord.setVipScore(score);

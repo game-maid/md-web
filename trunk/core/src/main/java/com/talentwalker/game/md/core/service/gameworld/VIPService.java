@@ -81,7 +81,6 @@ public class VIPService extends GameSupport {
             GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_35001, "该奖励已领取");
         }
         DataConfig dailyReward = getDataConfig().get(VIP_AWARD).get(level + "").get("dayAward");
-        System.out.println(dailyReward);
         for (int i = 1; i <= 4; i++) {
             DataConfig dataConfig = dailyReward.get(i + "");
             if (dataConfig == null)

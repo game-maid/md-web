@@ -125,7 +125,7 @@ public class TopUpStatisticsService {
         } else if ("2".equals(itemType)) {// 月卡
             payNumPipeline.add((DBObject) JSON.parse("{$match:{product_type:{$ne:" + 1 + "}}}"));
         }
-        payNumPipeline.add((DBObject) JSON.parse("{$group:{_id:{package_id:'$package_id',lord_id:'$lord_id'}}}"));
+        payNumPipeline.add((DBObject) JSON.parse("{$group:{_id:{package_id:'$package_id',lord_id:'$lordId'}}}"));
         payNumPipeline.add((DBObject) JSON.parse("{$group:{_id:{package_id:'$_id.package_id'},payNum:{$sum:1}}}"));
         AggregationOutput payNumOutput = mongoTemplate.getCollection("game_order").aggregate(payNumPipeline);
         Iterator<DBObject> payNumIt = payNumOutput.results().iterator();
@@ -315,7 +315,7 @@ public class TopUpStatisticsService {
         } else if ("2".equals(itemType)) {// 月卡
             payNumPipeline.add((DBObject) JSON.parse("{$match:{product_type:{$ne:" + 1 + "}}}"));
         }
-        payNumPipeline.add((DBObject) JSON.parse("{$group:{_id:{zone_id:'$zone_id',lord_id:'$lord_id'}}}"));
+        payNumPipeline.add((DBObject) JSON.parse("{$group:{_id:{zone_id:'$zone_id',lord_id:'$lordId'}}}"));
         payNumPipeline.add((DBObject) JSON.parse("{$group:{_id:{zone_id:'$_id.zone_id'},payNum:{$sum:1}}}"));
         AggregationOutput payNumOutput = mongoTemplate.getCollection("game_order").aggregate(payNumPipeline);
         Iterator<DBObject> payNumIt = payNumOutput.results().iterator();

@@ -65,7 +65,6 @@ public class Order extends BaseDomain {
     /**
      * 玩家id
      */
-    @Field("lord_id")
     private String lordId;
     /**
      * 充值时玩家的等级

@@ -173,7 +173,6 @@ public class CashShopForTgame {
     * @return 过滤后的map
     */
     private static Map<String, String> paraFilterPush(Map<String, Object> map) {
-
         Map<String, String> result = new HashMap<String, String>();
         if (map == null || map.size() <= 0) {
             return result;
