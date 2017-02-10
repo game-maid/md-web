@@ -334,7 +334,8 @@ public class LordService extends GameSupport {
         register.setPackageId(gameUser.getPackageId());
         register.setZoneId(gameUser.getGameZoneId());
         registerRepository.save(register);
-
+        // 记录玩家（活跃度）
+        recordLogin(lord);
         return lord;
     }
 
@@ -995,13 +996,13 @@ public class LordService extends GameSupport {
         SignInRecord signInRecord = null;
         Date curDate = cal.getTime();
         String month = cal.get(Calendar.MONTH) + 1 + "";
-
         String key = month.length() == 1 ? "0" + month + "_" + times : cal.get(Calendar.MONTH) + 1 + "_" + times;
         DataConfig rewardConfig = getDataConfig().get(LordService.SIGN_IN_REWARD).get(key);
         int multiple = rewardConfig.getInteger("VIP" + lord.getVipLevel());// 奖励倍数
         String itemId = rewardConfig.getString("rewardsID");
         int amount = rewardConfig.getInteger("quantity");
         int replenishSignTimes = lord.getReplenishSignTimes();
+
         if ((signInRecord = signInRecords.get(times)) != null) {
             // 检查是否是今天领取的 && 检查是否已经领取vip奖励 && 检查vip等级
             long time = signInRecord.getTime();
@@ -1032,18 +1033,16 @@ public class LordService extends GameSupport {
             signInRecord.setStatus(status);
             signInRecord.setTime(curDate.getTime());
         }
+
         signInRecords.put(times, signInRecord);
         lord.setSignInRecords(signInRecords);
-
         Map<String, Object> map = (Map) this.gameModel.getModel(ResponseKey.LORD);
         if (map == null) {
             map = new HashMap<>();
         }
         map.put("signInRecords", signInRecords);
         map.put("replenishSignTimes", replenishSignTimes);
-
         this.gameModel.addObject(ResponseKey.LORD, map);
-
         lordRepository.save(lord);
     }
 

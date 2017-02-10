@@ -41,7 +41,6 @@ import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.gameworld.Mail;
 import com.talentwalker.game.md.core.domain.gameworld.Skill;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
-import com.talentwalker.game.md.core.repository.GameUserRepository;
 import com.talentwalker.game.md.core.repository.GameZoneRepository;
 import com.talentwalker.game.md.core.repository.gameworld.DuelRepository;
 import com.talentwalker.game.md.core.repository.gameworld.MailRepository;
@@ -63,8 +62,6 @@ public class DuelService extends GameSupport {
     private DuelRepository duelRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
-    @Autowired
-    private GameUserRepository gameUserRepository;
     @Autowired
     private GameZoneRepository gameZoneRepository;
     @Autowired
@@ -317,7 +314,7 @@ public class DuelService extends GameSupport {
             if (duelRank.getRank() != rank) {
                 Duel duel2 = duelRepository.findOne(duelRank.getId());
                 Lord lord2 = lordRepository.findOne(duelRank.getId());
-                heroService.setFormHoldFP(lord2);
+                heroService.setFormHoldFP(lord2, duel2);
                 if (duel2 == null || lord2 == null) {
                     return null;
                 }
@@ -351,7 +348,7 @@ public class DuelService extends GameSupport {
                 rankMap.put("FP", FP);
                 rankMap.put("heros", heroList);
             } else {
-                heroService.setFormHoldFP(lord);
+                heroService.setFormHoldFP(lord, duel);
                 rankMap.put("id", lord.getId());
                 rankMap.put("name", lord.getName());
                 rankMap.put("level", lord.getLevel());
@@ -864,8 +861,9 @@ public class DuelService extends GameSupport {
         int cost = this.getDataConfig().get("duel_VIPcost").get(Integer.toString(buyTimes)).getInteger("cost");
         duel.setBuyTimes(buyTimes);
         duel.setSurplusTimes(surplusTimes);
-        gainPayService.pay(lord, ItemID.GOLD, cost);
+        gainPayService.pay(lord, ItemID.DIAMOND, cost);
         duelRepository.save(duel);
+        lordRepository.save(lord);
         Map<String, Object> map = new HashMap<>();
         map.put("buyTimes", buyTimes);
         map.put("surplusTimes", surplusTimes);
@@ -1169,8 +1167,8 @@ public class DuelService extends GameSupport {
                     rankKey);
             rank = duelRrank.getRank();
             if (rank > index) {
+                responseMap.put("rank", index);
                 if (duel.getHrank() > index) {
-                    responseMap.put("rank", index);
                     responseMap.put("uprank", duel.getHrank() - index);
                     responseMap.put("hrank", index);
                     duel.setHrank(index);

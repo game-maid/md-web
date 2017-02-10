@@ -56,8 +56,8 @@
                         </div>
                         <div class="col-sm-1" style="float:left;">
                         	<select class="form-control" id="order-state-select">
-                        		<option value="" selected="selected" th:text="#{statistics.top.up.all}">所有</option>
-                        		<option value="0" th:text="#{statistics.top.up.order.state.success}">支付成功</option>
+                        		<option value=""  th:text="#{statistics.top.up.all}">所有</option>
+                        		<option value="0" selected="selected" th:text="#{statistics.top.up.order.state.success}">支付成功</option>
                         		<option value="1" th:text="#{statistics.top.up.order.state.ing}">未支付</option>
 							</select>
                         </div>
@@ -102,8 +102,8 @@
 					</div>
 				</div>
 			</div>
-			<div class="ibox-content">
-				<div class="form-horizontal">
+			<div class="ibox-content" >
+				<div class="form-horizontal" id="graph-top-div">
 					<div class="form-group">
 					<!-- ARPU占比 -->
 						<div id="arpu-graph-div" class="col-sm-4" style="float: left;">
@@ -118,31 +118,16 @@
 				</div>
 				
 				<!-- 曲线图 -->
-				<div id="graph-div"></div>
+				<div id="graph-div" style="width:90%"></div>
 				<!-- 统计表格 -->
 				<div id="data-table-div">
 					<table  class="table bordered" id="data-table">
 						<thead>
 							<tr>
-							<th width="5.2%" th:text="#{statistics.active.date}"></th>
-							<th width="5.2%" th:text="#{statistics.active.zone}"></th>
-							<th width="5.2%" th:text="#{statistics.active.pacakge}"></th>
-							<th width="5.2%" th:text="#{statistics.active.num}"></th>
-							<th width="5.2%" th:text="#{statistics.active.new.user.num}"></th>
-							<th width="5.2%" th:text="#{statistics.active.new.payer.num}"></th>
-							<th width="5.2%" th:text="#{statistics.active.payer.num}"></th>
-							<th width="5.2%" th:text="#{statistics.active.income.num}"></th>
-							<th width="5.2%" th:text="#{statistics.active.income.times}"></th>
-							<th width="5.2%" th:text="#{statistics.active.new.pay.rate}"></th>
-							<th width="5.2%" th:text="#{statistics.active.active.pay.rate}"></th>
-							<th width="5.2%" th:text="#{statistics.active.ARPU}"></th>
-							<th width="5.2%" th:text="#{statistics.active.ARPPU}"></th>
-							<th width="5.2%" th:text="#{statistics.active.second.persistence.rate}"></th>
-							<th width="5.2%" th:text="#{statistics.active.thirdly.persistence.rate}"></th>
-							<th width="5.2%" th:text="#{statistics.active.seventh.persistence.rate}"></th>
-							<th width="5.2%" th:text="#{statistics.active.second.LTV}"></th>
-							<th width="5.2%" th:text="#{statistics.active.thirdly.LTV}"></th>
-							<th width="5.2%" th:text="#{statistics.active.seventh.LTV}"></th>
+							<th width="25%" th:text="#{statistics.top.up.zone}"></th>
+							<th width="25%" th:text="#{statistics.active.income.times}"></th>
+							<th width="25%" th:text="#{statistics.active.payer.num}"></th>
+							<th width="25%" th:text="#{statistics.top.up.pay.income.total}"></th>
 							</tr>
 						</thead>
 						<tbody id="data-table-body">
@@ -156,8 +141,6 @@
 			</div>
 		</div>
 	</div>
-	
-	
 </body>
 
 <script type="text/javascript" th:inline="javascript">
@@ -175,6 +158,16 @@ $(function(){
 	//初始化时间
 	initDate();
 	
+	//获取cashShop_config配置信息
+	simpleGameAjax({
+		'url':'/statistics/topUp/config',
+		'callback':function(val){
+			window.cashShop={};
+			$.each(val,function(key,data){
+				cashShop[key]=data.desp;
+			});
+		},
+	});
 })
 
 //初始化时间(日/周/月)
@@ -184,17 +177,15 @@ function initDate(){
 	    format : "yyyy-mm-dd hh:ii:ss",
 	    autoclose : true,
 	    todayBtn :true,
-	    endDate : new Date()
 	});
 	$("#endDatetimepicker").datetimepicker({
 	    format : "yyyy-mm-dd hh:ii:ss",
 	    autoclose : true,
 	    todayBtn :true,
-	    endDate : new Date()
 	});
 	var date = new Date();
 	$("#endDatetimepicker").val(date.format("yyyy-MM-dd hh:mm:ss"));
-	date.setDate(date.getDate()-7);
+	date.setDate(date.getDate()-6);
 	$("#startDatetimepicker").val(date.format("yyyy-MM-dd 00:00:00"));
 }
 //初始化包
@@ -239,30 +230,6 @@ $("#date-type").change(function(){
 
 //查询
 $("#select").click(function(){
-	var data="";
-	var dateType=$("#date-type").val();
-	dateType=="day"?$("#graph-div").hide():$("#graph-div").show();
-	$("#data-table-div").show();
-	var date={};
-	if(dateType=="day"){
-		date=$("#day-date-input").val();
-	}else if(dateType=="week"){
-		date=$("#week-date-input").val();
-	}else if(dateType=="month"){
-		date=$("#month-date-input").val();
-	}
-	
-	
-	var dataArr = [];
-	$(".checked input[name='data-all']").each(function(){ 
-		dataArr.push($(this).val());
-    });
-	//是否查询全部区服
-	var zoneAll =false;
-	if($("#zone-all-input").is(':checked')){
-		zoneAll=true;
-	}
-	
     var zoneArr=[];
 	$(".checked input[name='zone-all']").each(function(){
 		zoneArr.push($(this).val());
@@ -271,196 +238,78 @@ $("#select").click(function(){
 		swal("",[[#{statistics.active.zone.null}]],"warning");
 		return;
 	}
-	
+	var zoneArr=[];
+	$(".checked input[name='zone-all']").each(function(){
+		zoneArr.push($(this).val());
+	});
 	/*<![CDATA[*/
-        var isDetail=$("#is-detail").val();
-		data+="dateType="+dateType+"&date="+date+"&isDetail="+isDetail+"&zoneArr="+zoneArr;	           
-	/*]]>*/
-	/* gameAjax({
-		url:"/active/base/select",
-		data:data,
-		callback:function(val){
-			callback(val,dataArr,isDetail);
-		},
-	});  */
+		var data="packageId="+$("#package-select").val()+"&orderState="+$("#order-state-select").val()+
+				"&itemType="+$("#item-type-select").val()+"&zoneList[]="+zoneArr+"&startStr="+$("#startDatetimepicker").val()+
+				"&endStr="+$("#endDatetimepicker").val();
+    /*]]>*/
 	//初始化分页表格
-	var flag=0;
-	if(flag==0){
-		initPanelTable();
-		flag++;
-	}else{
-		$("#panelTable").bootstrapTable("refresh");
-	}
-});
-
-function callback(val,dataArr,isDetail){
-	var text='';
-	var categories =[];
-	var series=[];
-	var activeNumData={};
-	activeNumData.name=[[#{statistics.active.num}]];
-	var actvieNumDataData=[];
-	activeNumData.data=actvieNumDataData;
-	var newUserNumData={};
-	newUserNumData.name=[[#{statistics.active.new.user.num}]];
-	var newUserNumDataData=[];
-	newUserNumData.data=newUserNumDataData;
-	var newPayerNumData={};
-	newPayerNumData.name=[[#{statistics.active.new.payer.num}]];
-	var newPayerNumDataData=[];
-	newPayerNumData.data=newPayerNumDataData;
-	var payerNumData={};
-	payerNumData.name=[[#{statistics.active.payer.num}]];
-	var payerNumDataData=[];
-	payerNumData.data=payerNumDataData;
-	var icomeNumData={};
-	icomeNumData.name=[[#{statistics.active.income.num}]];
-	var icomeNumDataData =[];
-	icomeNumData.data=icomeNumDataData;
-	var incomeTimesData={};
-	incomeTimesData.name=[[#{statistics.active.income.times}]];
-	var incomeTimesDataData=[];
-	incomeTimesData.data=incomeTimesDataData;
-	var  newPayRateData={};
-	newPayRateData.name=[[#{statistics.active.new.pay.rate}]];
-	var newPayRateDataData=[];
-	newPayRateData.data=newPayRateDataData;
-	var payRateData ={};
-	payRateData.name=[[#{statistics.active.active.pay.rate}]];
-	var payRateDataData=[];
-	payRateData.data=payRateDataData;
-	var arpuData={};
-	arpuData.name=[[#{statistics.active.ARPU}]];
-	var arpuDataData=[];
-	arpuData.data=arpuDataData;
-	var arppuData={};
-	arppuData.name=[[#{statistics.active.ARPPU}]];
-	var arppuDataData=[];
-	arppuData.data=arppuDataData;
-	var secondPersistenceRateData={};
-	secondPersistenceRateData.name=[[#{statistics.active.second.persistence.rate}]];
-	var secondPersistenceRateDataData=[];
-	secondPersistenceRateData.data=secondPersistenceRateDataData;
-	var thirdlyPersistenceRateData={};
-	thirdlyPersistenceRateData.name=[[#{statistics.active.thirdly.persistence.rate}]];
-	var thirdlyPersistenceRateDataData=[];
-	thirdlyPersistenceRateData.data=thirdlyPersistenceRateDataData;
-	var seventhPersistenceRateData={};
-	seventhPersistenceRateData.name=[[#{statistics.active.seventh.persistence.rate}]];
-	var seventhPersistenceRateDataData=[];
-	seventhPersistenceRateData.data=seventhPersistenceRateDataData;
-	var secondLtvData={};
-	secondLtvData.name=[[#{statistics.active.second.LTV}]];
-	var secondLtvDataData= [];
-	secondLtvData.data=secondLtvDataData;
-	var thirdlyLtvData={};
-	thirdlyLtvData.name=[[#{statistics.active.thirdly.LTV}]];
-	var thirdlyLtvDataData=[];
-	thirdlyLtvData.data=thirdlyLtvDataData;
-	var seventhLtvData={};
-	seventhLtvData.name=[[#{statistics.active.seventh.LTV}]];
-	var seventhLtvDataData=[];
-	seventhLtvData.data=seventhLtvDataData;
-	/*<![CDATA[*/
-	$.each(val ,function(index,dayData){
-		if(dayData==null)return true;
-		var date = dayData.date;
-		categories.push(date);
-		$.each(dayData.zoneData,function(zoneId,zoneData){
-			$.each(zoneData,function(packageId,packageData){
-				var activeNum= checkNull(packageData.activeNum);
-				var newUserNum = checkNull(packageData.newUserNum);
-				var newPayerNum=checkNull(packageData.newPayerNum);
-				var payerNum = checkNull(packageData.payerNum);
-				var incomeNum =checkNull(packageData.incomeNum);
-				var incomeTimes = checkNull(packageData.incomeTimes);
-				var newPayerRate = divide(newPayerNum,newUserNum);
-				var activePayRate = divide(payerNum,activeNum);
-				var arpu = divide(incomeNum,activeNum);
-				var arppu = divide(incomeNum,payerNum);
-				var preOnePersistenceRate=divide(packageData.preOnePersistence,packageData.preOneNewUserNum);
-				var preTwoPersistenceRate = divide(packageData.preTwoPersistence,packageData.preTwoNewUserNum);
-				var preSixPersistenceRate = divide(packageData.preSixPersistence,packageData.preSixNewUserNum);
-				var preOneLTV=divide(packageData.preOneIncomeNum,packageData.preOneNewUserNum);
-				var preTwoLTV=divide(packageData.preTwoIncomeNum,packageData.preTwoNewUserNum);
-				var preSixLTV=divide(packageData.preSixIncomeNum,packageData.preSixNewUserNum);
-				//初始化曲线图数据
-				if(packageId=='zzzdayTotal'){
-					$.each(dataArr,function(index,data){
-						switch(data){
-							case 'activeNum':actvieNumDataData.push(activeNum);break;
-							case 'userNum':newUserNumDataData.push(newUserNum);break;
-							case 'newPayerNum':newPayerNumDataData.push(newPayerNum);break;
-							case 'payerNum':payerNumDataData.push(payerNum);;break;
-							case 'icomeNum':icomeNumDataData.push(incomeNum);break;
-							case 'incomeTimes':incomeTimesDataData.push(incomeTimes);break;
-							case 'newPayRate':newPayRateDataData.push(newPayerRate);break;
-							case 'payRate':payRateDataData.push(activePayRate);break;
-							case 'arpu':arpuDataData.push(arpu);break;
-							case 'arppu':arppuDataData.push(arppu);break;
-							case 'secondPersistenceRate':secondPersistenceRateDataData.push(preOnePersistenceRate);break;
-							case 'thirdlyPersistenceRate':thirdlyPersistenceRateDataData.push(preTwoPersistenceRate);break;
-							case 'seventhPersistenceRate':seventhPersistenceRateDataData.push(preSixPersistenceRate);break;
-							case 'secondLtv':secondLtvDataData.push(preOneLTV);break;
-							case 'thirdlyLtv':thirdlyLtvDataData.push(preTwoLTV);break;
-							case 'seventhLtv':seventhLtvDataData.push(preSixLTV);break;
-						}
-					});
-				}
-				
-				//初始化表单数据
-				if(isDetail==0&&packageId!='zzzdayTotal')return true;
-				if(isDetail==1&&packageId!='zoneTotal'&&packageId!='zzzdayTotal')return true; 
-				if(packageId=='zoneTotal'){
-					text+='<tr style="color:#0000FF" ><td>'+date+'</td><td>'+zoneId+'</td><td>'+[[#{statistics.zone.total}]]+'</td> '
-				}else if(packageId=='zzzdayTotal'){
-					text+='<tr style="color:#FF0000" ><td>'+date+'</td><td>'+[[#{statistics.total}]]+'</td><td>'+[[#{statistics.total}]]+'</td> '
-				}else{
-					text+='<tr><td>'+date+'</td><td>'+zoneId+'</td><td>'+packageId+'</td> '
-				}
-				text+='<td>'+activeNum+'</td><td>'+newUserNum+'</td><td>'+newPayerNum;
-				text+='</td><td>'+payerNum+'</td><td>'+incomeNum+'</td><td>'+incomeTimes+'</td><td>'+newPayerRate+'%';
-				text+='</td><td>'+activePayRate+'%'+'</td><td>'+arpu+'</td><td>'+arppu+'</td><td>'+preOnePersistenceRate+'%';
-				text+='</td><td>'+preTwoPersistenceRate+'%'+'</td><td>'+preSixPersistenceRate+'%'+'</td><td>'+preOneLTV+'%';
-				text+='</td><td>'+preTwoLTV+'%'+'</td><td>'+preSixLTV+'%'+'</td></tr>';
+	initPanelTable();
+	$("#panelTable").bootstrapTable("refresh");
+	//arpu
+	var arppu={};
+	gameAjax({
+		url:"/statistics/topUp/arpu",
+		data:data,
+		async:false,
+		callback:function(val){
+			arppu=val;
+		},
+	});
+	//折线图
+	var graph={};
+	gameAjax({
+		url:"/statistics/topUp/dailyIncome",
+		data:data,
+		async:false,
+		callback:function(val){
+			graph=val;
+		},
+	});
+	initGraph(arppu,graph);
+	//区服充值统计
+	
+	gameAjax({
+		url:"/statistics/topUp/zone/topUp",
+		data:data,
+		async:false,
+		callback:function(val){
+			var text ='';
+			var num=0;
+			var payNum=0;
+			var price=0;
+			$.each(val,function(index,data){
+				$.each(data,function(zoneId,zoneData){
+					text+='<tr><td>'+zoneMap[zoneId]+'</td><td>'+zoneData.num+'</td><td>'+zoneData.payNum+'</td><td>'+checkNull(zoneData.price)+'</td></tr>';
+					num+=zoneData.num;
+					payNum+=zoneData.payNum;
+					price +=checkNull(zoneData.price);
+				});
 			});
-		});
+			text+='<tr><td>'+[[#{statistics.zone.total}]]+'</td><td>'+num+'</td><td>'+payNum+'</td><td>'+checkNull(price)+'</td></tr>';
+			$("#data-table-body").empty();
+			$("#data-table-body").append(text);
+		},
 	});
-	$("#data-table-body").empty();
-	$("#data-table-body").append(text);
-	/*]]>*/
-	$.each(dataArr,function(index,data){
-		switch(data){
-		case 'activeNum':series.push(activeNumData);break;
-		case 'userNum':series.push(newUserNumData);break;
-		case 'newPayerNum':series.push(newPayerNumData);break;
-		case 'payerNum':series.push(payerNumData);;break;
-		case 'icomeNum':series.push(icomeNumData);break;
-		case 'incomeTimes':series.push(incomeTimesData);break;
-		case 'newPayRate':series.push(newPayRateData);break;
-		case 'payRate':series.push(payRateData);break;
-		case 'arpu':series.push(arpuData);break;
-		case 'arppu':series.push(arppuData);break;
-		case 'secondPersistenceRate':series.push(secondPersistenceRateData);break;
-		case 'thirdlyPersistenceRate':series.push(thirdlyPersistenceRateData);break;
-		case 'seventhPersistenceRate':series.push(seventhPersistenceRateData);break;
-		case 'secondLtv':series.push(secondLtvData);break;
-		case 'thirdlyLtv':series.push(thirdlyLtvData);break;
-		case 'seventhLtv':series.push(seventhLtvData);break;
-		}
-	});
-	//初始化曲线图
-	initGraph(categories,series);
-}
-
-
-
-
+	$("#data-table-div").show();
+});
 //检查参数是否为null,如果为null返回o
 function checkNull(val){
 	if(val==null||val==0)
 		return 0;
-	return val;
+	return Math.round(val*100)/100;
+}
+//两数相除 两位小数(百分比)
+function dividePercentage(element,denominator){
+	if(element==null || element==0 || denominator==null ||denominator==0){
+		return 0;
+	}
+	var divide = element/denominator;
+	return Math.round(divide*10000)/100;
 }
 //两数相除 两位小数
 function divide(element,denominator){
@@ -471,15 +320,27 @@ function divide(element,denominator){
 	return Math.round(divide*100)/100;
 }
 
+
 //初始化曲线图
-function initGraph(categories,series){
+function initGraph(arppu,graph){
+	var categories=[];
+	var series =[];
+	var map={};
+	series.push(map);
+	var dataArr=[];
+	map["data"]=dataArr
+	map["name"]=[[#{statistics.top.up.pay.income}]];
+	$.each(graph,function(index,data){
+		categories.push(new Date(data.date).format("yyyy-MM-dd"));
+		dataArr.push(checkNull(data.price));
+	});
 	$('#graph-div').highcharts({
 		credits:{
 			href:"",
 			text:"TalentWalker",
 		},
         title: {
-            text: [[#{statistics.active.graph.title}]],
+            text: [[#{statistics.top.up.daily.pay.income}]],
             x: -20 //center
         },
         xAxis: {
@@ -500,44 +361,70 @@ function initGraph(categories,series){
         },
         series:  series
     });
+	$('#graph-div').show();
+	//计算arpu/渠道人数/渠道金额
+	var arpuSeries=[];
+	var numSeries=[];
+	var priceSeries=[];
+	$.each(arppu,function(index,packageData){
+		var numTotal=0;
+		var priceTotal=0;
+		var flag=true;
+		$.each(packageData,function(packageId,data){
+			var arpuMap={};
+			var arpuMapArr=[];
+			arpuMap["name"]=packageId;
+			arpuMapArr.push(divide(data.sumPrice,data.num));
+			arpuMap["data"]=arpuMapArr;
+			arpuSeries.push(arpuMap);
+			numTotal+=data.num;
+			priceTotal+=data.sumPrice;
+			flag=false;
+		});
+		if(flag){
+			$("#graph-top-div").hide();
+		}else{
+			$("#graph-top-div").show();
+		}
+		$.each(packageData,function(packageId,data){
+			var numMap={};
+			numMap["name"]=packageId;
+			numMap["y"]=dividePercentage(data.num,numTotal);
+			numSeries.push(numMap);
+			
+			var priceMap={};
+			priceMap["name"]=packageId;
+			priceMap["y"]=dividePercentage(data.sumPrice,priceTotal);
+			priceSeries.push(priceMap);
+		});
+	});
 	//arpu柱状图
 	$("#arpu-graph-div").highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
         chart: {
             type: 'column'
         },
         title: {
-            text: 'Monthly Average Rainfall'
-        },
-        subtitle: {
-            text: 'Source: WorldClimate.com'
+            text: [[#{statistics.top.up.arppu.proportion}]]
         },
         xAxis: {
-            categories: [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec'
-            ],
+            categories: [[#{statistics.top.up.arppu.proportion}]],
             crosshair: true
         },
         yAxis: {
             min: 0,
+            allowDecimals:true,
             title: {
-                text: 'Rainfall (mm)'
+                text: [[#{statistics.top.up.arpu.unit}]]
             }
         },
         tooltip: {
             headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
             pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
-            '<td style="padding:0"><b>{point.y:.1f} mm</b></td></tr>',
+            '<td style="padding:0"><b>{point.y:.2f}</b></td></tr>',
             footerFormat: '</table>',
             shared: true,
             useHTML: true
@@ -548,32 +435,25 @@ function initGraph(categories,series){
                 borderWidth: 0
             }
         },
-        series: [{
-            name: 'Tokyo',
-            data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
-        }, {
-            name: 'New York',
-            data: [83.6, 78.8, 98.5, 93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3]
-        }, {
-            name: 'London',
-            data: [48.9, 38.8, 39.3, 41.4, 47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2]
-        }, {
-            name: 'Berlin',
-            data: [42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1]
-        }]
+        series: arpuSeries
     });
+	$("#arpu-graph-div").show();
 	//包充值人数占比扇形图
 	$("#num-graph-div").highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
         chart: {
             plotBackgroundColor: null,
             plotBorderWidth: null,
             plotShadow: false
         },
         title: {
-            text: 'Browser market shares at a specific website, 2014'
+            text: [[#{statistics.top.up.pay.num.proportion}]]
         },
         tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
         },
         plotOptions: {
             pie: {
@@ -581,40 +461,32 @@ function initGraph(categories,series){
                 cursor: 'pointer',
                 dataLabels: {
                     enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
                 }
             }
         },
         series: [{
             type: 'pie',
             name: 'Browser share',
-            data: [
-                ['Firefox',   45.0],
-                ['IE',       26.8],
-                {
-                    name: 'Chrome',
-                    y: 12.8,
-                    sliced: true,
-                    selected: true
-                },
-                ['Safari',    8.5],
-                ['Opera',     6.2],
-                ['Others',   0.7]
-            ]
+            data: numSeries
         }]
     });
 	//包充值总额占比扇形图
 	$("#total-graph-div").highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
         chart: {
             plotBackgroundColor: null,
             plotBorderWidth: null,
             plotShadow: false
         },
         title: {
-            text: 'Browser market shares at a specific website, 2014'
+            text:[[#{statistics.top.up.pay.price.proportion}]]
         },
         tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
         },
         plotOptions: {
             pie: {
@@ -622,30 +494,18 @@ function initGraph(categories,series){
                 cursor: 'pointer',
                 dataLabels: {
                     enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
                 }
             }
         },
         series: [{
             type: 'pie',
             name: 'Browser share',
-            data: [
-                ['Firefox',   45.0],
-                ['IE',       26.8],
-                {
-                    name: 'Chrome',
-                    y: 12.8,
-                    sliced: true,
-                    selected: true
-                },
-                ['Safari',    8.5],
-                ['Opera',     6.2],
-                ['Others',   0.7]
-            ]
+            data: priceSeries
         }]
     });
 }
-
+//分页统计（最下面的表格）
 function initPanelTable(zoneArr){
 	var condition={};
 	$("#panelTable").bootstrapTable({
@@ -671,14 +531,13 @@ function initPanelTable(zoneArr){
 				itemType:$("#item-type-select").val(),
 				zoneList:zoneArr,
 			};
-			console.log(zoneArr)
 			return query;
 		},
 		pagination : true,
 		singleSelect : false,
 		uniqueId : "id",
 		sidePagination : "server",
-		detailView:true,
+		detailView:false,
 		columns : [
 					{
 						title : [[#{statistics.top.up.order}]],
@@ -690,7 +549,7 @@ function initPanelTable(zoneArr){
 						field : "productId",
 						align : "center",
 						formatter : function(value){
-							return value;
+							return cashShop[value];
 						},
 					},
 					{
@@ -730,14 +589,14 @@ function initPanelTable(zoneArr){
 						field : "zoneId",
 						align : "center",
 						formatter : function(value){
-							return value;
+							return zoneMap[value];
 						},
 					},{
 						title : [[#{statistics.top.up.package}]],
 						field : "packageId",
 						align : "center",
 						formatter : function(value){
-							return value;
+							return packageMap[value];
 						},
 					},{
 						title : [[#{statistics.top.up.price}]],
@@ -751,7 +610,7 @@ function initPanelTable(zoneArr){
 						field : "state",
 						align : "center",
 						formatter : function(value){
-							return value;
+							return value==0?[[#{statistics.top.up.order.state.success}]]:[[#{statistics.top.up.order.state.ing}]];
 						},
 					},{
 						title : [[#{statistics.top.up.create.time}]],
@@ -790,7 +649,7 @@ function initPanelTable(zoneArr){
 						field : "productType",
 						align : "center",
 						formatter : function(value){
-							return value;
+							return value==1?[[#{statistics.top.up.item.type.diamond}]]:[[#{statistics.top.up.item.type.month.card}]];
 						},
 					},{
 						title : [[#{statistics.top.up.current.vip.score}]],
@@ -813,19 +672,7 @@ function initPanelTable(zoneArr){
 
 //导出
 function exportCDKey(){
-	var data="";
-	var dateType=$("#date-type").val();
-	dateType=="day"?$("#graph-div").hide():$("#graph-div").show();
-	$("#data-table-div").show();
-	var date={};
-	if(dateType=="day"){
-		date=$("#day-date-input").val();
-	}else if(dateType=="week"){
-		date=$("#week-date-input").val();
-	}else if(dateType=="month"){
-		date=$("#month-date-input").val();
-	}
-    var zoneArr=[];
+	var zoneArr=[];
 	$(".checked input[name='zone-all']").each(function(){
 		zoneArr.push($(this).val());
 	});
@@ -833,9 +680,20 @@ function exportCDKey(){
 		swal("",[[#{statistics.active.zone.null}]],"warning");
 		return;
 	}
+	var zoneArr=[];
+	$(".checked input[name='zone-all']").each(function(){
+		zoneArr.push($(this).val());
+	});
+	/*<![CDATA[*/
+		var data="packageId="+$("#package-select").val()+"&orderState="+$("#order-state-select").val()+
+				"&itemType="+$("#item-type-select").val()+"&zoneList[]="+zoneArr+"&startStr="+$("#startDatetimepicker").val()+
+				"&endStr="+$("#endDatetimepicker").val();
+    /*]]>*/
 	
 	/*<![CDATA[*/
-		data+="/active/base/export?dateType="+dateType+"&date="+date+"&zoneArr="+zoneArr+"&isDetail="+$("#is-detail").val();	           
+		var data="/statistics/topUp/export?packageId="+$("#package-select").val()+"&orderState="+$("#order-state-select").val()+
+				"&itemType="+$("#item-type-select").val()+"&zoneList[]="+zoneArr+"&startStr="+$("#startDatetimepicker").val()+
+				"&endStr="+$("#endDatetimepicker").val();	           
 	/*]]>*/
 	window.location.href=data;
 	

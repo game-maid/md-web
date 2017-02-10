@@ -348,6 +348,7 @@ $("#select").click(function(){
 });
 
 function callback(val,dataArr,isDetail){
+	console.log(1);
 	var text='';
 	var categories =[];
 	var series=[];
@@ -428,16 +429,16 @@ function callback(val,dataArr,isDetail){
 				var payerNum = checkNull(packageData.payerNum);
 				var incomeNum =checkNull(packageData.incomeNum);
 				var incomeTimes = checkNull(packageData.incomeTimes);
-				var newPayerRate = divide(newPayerNum,newUserNum);
-				var activePayRate = divide(payerNum,activeNum);
+				var newPayerRate = dividePercentage(newPayerNum,newUserNum);
+				var activePayRate = dividePercentage(payerNum,activeNum);
 				var arpu = divide(incomeNum,activeNum);
 				var arppu = divide(incomeNum,payerNum);
-				var preOnePersistenceRate=divide(packageData.preOnePersistence,packageData.preOneNewUserNum);
-				var preTwoPersistenceRate = divide(packageData.preTwoPersistence,packageData.preTwoNewUserNum);
-				var preSixPersistenceRate = divide(packageData.preSixPersistence,packageData.preSixNewUserNum);
-				var preOneLTV=divide(packageData.preOneIncomeNum,packageData.preOneNewUserNum);
-				var preTwoLTV=divide(packageData.preTwoIncomeNum,packageData.preTwoNewUserNum);
-				var preSixLTV=divide(packageData.preSixIncomeNum,packageData.preSixNewUserNum);
+				var preOnePersistenceRate=dividePercentage(packageData.preOnePersistence,packageData.newUserNum);
+				var preTwoPersistenceRate = dividePercentage(packageData.preTwoPersistence,packageData.newUserNum);
+				var preSixPersistenceRate = dividePercentage(packageData.preSixPersistence,packageData.newUserNum);
+				var preOneLTV=divide(packageData.preOneIncomeNum,packageData.newUserNum);
+				var preTwoLTV=divide(packageData.preTwoIncomeNum,packageData.newUserNum);
+				var preSixLTV=divide(packageData.preSixIncomeNum,packageData.newUserNum);
 				//初始化曲线图数据
 				if(packageId=='zzzdayTotal'){
 					$.each(dataArr,function(index,data){
@@ -475,8 +476,8 @@ function callback(val,dataArr,isDetail){
 				text+='<td>'+activeNum+'</td><td>'+newUserNum+'</td><td>'+newPayerNum;
 				text+='</td><td>'+payerNum+'</td><td>'+incomeNum+'</td><td>'+incomeTimes+'</td><td>'+newPayerRate+'%';
 				text+='</td><td>'+activePayRate+'%'+'</td><td>'+arpu+'</td><td>'+arppu+'</td><td>'+preOnePersistenceRate+'%';
-				text+='</td><td>'+preTwoPersistenceRate+'%'+'</td><td>'+preSixPersistenceRate+'%'+'</td><td>'+preOneLTV+'%';
-				text+='</td><td>'+preTwoLTV+'%'+'</td><td>'+preSixLTV+'%'+'</td></tr>';
+				text+='</td><td>'+preTwoPersistenceRate+'%'+'</td><td>'+preSixPersistenceRate+'%'+'</td><td>'+preOneLTV;
+				text+='</td><td>'+preTwoLTV+'</td><td>'+preSixLTV+'</td></tr>';
 			});
 		});
 	});
@@ -514,7 +515,15 @@ function callback(val,dataArr,isDetail){
 function checkNull(val){
 	if(val==null||val==0)
 		return 0;
-	return val;
+	return Math.round(val*100)/100;
+}
+//两数相除 两位小数(百分比)
+function dividePercentage(element,denominator){
+	if(element==null || element==0 || denominator==null ||denominator==0){
+		return 0;
+	}
+	var divide = element/denominator;
+	return Math.round(divide*10000)/100;
 }
 //两数相除 两位小数
 function divide(element,denominator){

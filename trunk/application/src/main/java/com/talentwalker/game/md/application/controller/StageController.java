@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.talentwalker.game.md.core.response.GameModel;
+import com.talentwalker.game.md.core.service.gameworld.MissionService;
 import com.talentwalker.game.md.core.service.gameworld.StageService;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
@@ -31,6 +32,8 @@ public class StageController extends GameSupport {
 
     @Autowired
     private StageService stageService;
+    @Autowired
+    private MissionService missionService;
 
     @GameResponse
     @RequestMapping("data")
@@ -60,6 +63,12 @@ public class StageController extends GameSupport {
     @RequestMapping("settle/{stageId}/{star}")
     public GameModel stageSettle(@PathVariable String stageId, @PathVariable int star) {
         stageService.settle(stageId, star);
+        if (star > 0) {
+            // 触发日常任务
+            missionService.trigerMissionForStage(1);
+            // 触发主线任务
+            missionService.trigerMissionOnceForStage(stageId, 1);
+        }
         return this.gameModel;
     }
 

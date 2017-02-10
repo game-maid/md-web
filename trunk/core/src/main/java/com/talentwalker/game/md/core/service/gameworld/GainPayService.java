@@ -277,8 +277,11 @@ public class GainPayService extends GameSupport {
             } else if (StringUtils.startsWith(itemId, ItemID.HERO)) { // 英雄
                 Map<String, Hero> heros = lord.getHeros();
                 if (number > 0) {
-                    // 图鉴
+                    // 武将图鉴
                     lordService.heroHandbook(ItemID.HERO, itemId, lord);
+                    // 技能图鉴
+                    String skillId = getDataConfig().get("heroConfig").get(itemId).getString("skillult");
+                    lordService.heroHandbook(ItemID.SKILL, skillId, lord);
                     if (heros.size() + number > lord.getHeroLimit()) {
                         int diff = lord.getHeroLimit() - heros.size();
                         // 发邮件补(number - diff)个道具

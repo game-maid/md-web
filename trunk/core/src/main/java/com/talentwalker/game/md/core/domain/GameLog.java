@@ -7,6 +7,8 @@
 
 package com.talentwalker.game.md.core.domain;
 
+import java.util.List;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -82,6 +84,11 @@ public class GameLog extends BaseDomain {
 
     @Field("post_vipscore")
     private int postVipscore;
+    /**
+     * 消耗的道具
+     */
+    @Field("expend_items")
+    private List<String> expendItems;
 
     /**
      * @return playerId
@@ -403,6 +410,20 @@ public class GameLog extends BaseDomain {
      */
     public void setClientVersion(String clientVersion) {
         this.clientVersion = clientVersion;
+    }
+
+    /**
+     * @return expendItems
+     */
+    public List<String> getExpendItems() {
+        return expendItems;
+    }
+
+    /**
+     * @param expendItems 要设置的 expendItems
+     */
+    public void setExpendItems(List<String> expendItems) {
+        this.expendItems = expendItems;
     }
 
 }

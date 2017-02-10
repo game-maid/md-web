@@ -108,20 +108,6 @@ public class CashShopForTgame {
             }
         }
 
-        /*
-         * GameUser gameUser = gameUserRepository.findDistinctBySsoIdAndPlatformIdAndGameZoneId(order.getUserId(),
-         * PushOrderTgame.PLATFORM_ID, order.getExtInfo()); if (checkSign(order, appKey.get(gameUser.getPackageId()))) {
-         * Order orderRecord = orderRepository.findOne(order.getOrderId()); if (orderRecord == null) { DataConfig config
-         * = configManager.getTest(); Double price = config.get(ConfigKey.CASH_SHOP_CONFIG).get(order.getProductId())
-         * .getDouble(ConfigKey.CASH_SHOP_CONFIG_PRICE); Lord lord = lordRepository.findOne(gameUser.getId());
-         * topUpCardService.topUp(lord, order.getProductId(), gameUser); orderRecord = new Order();
-         * orderRecord.setId(order.getOrderId()); orderRecord.setGameUser(gameUser); orderRecord.setLord(lord);
-         * orderRecord.setProductId(order.getProductId()); orderRecord.setQuantity(order.getProductNum());
-         * orderRecord.setCustomId(extInfo); orderRecord.setZoneId(gameUser.getGameZoneId());
-         * orderRecord.setPackageId(gameUser.getPackageId()); orderRecord.setPrice(price);
-         * orderRecord.setLordId(lord.getId()); orderRepository.save(orderRecord); // 后台统计 statistics(gameUser, lord); }
-         * else {// 已经处理过了 } }
-         */
         return "success";
 
     }
@@ -187,7 +173,6 @@ public class CashShopForTgame {
     * @return 过滤后的map
     */
     private static Map<String, String> paraFilterPush(Map<String, Object> map) {
-
         Map<String, String> result = new HashMap<String, String>();
         if (map == null || map.size() <= 0) {
             return result;
