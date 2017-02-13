@@ -429,7 +429,7 @@ function callback(val,dataArr,isDetail){
 				var payerNum = checkNull(packageData.payerNum);
 				var incomeNum =checkNull(packageData.incomeNum);
 				var incomeTimes = checkNull(packageData.incomeTimes);
-				var newPayerRate = dividePercentage(newPayerNum,newUserNum);
+				var newPayerRate = dividePercentage(packageData.newUserPayer,newUserNum);
 				var activePayRate = dividePercentage(payerNum,activeNum);
 				var arpu = divide(incomeNum,activeNum);
 				var arppu = divide(incomeNum,payerNum);
@@ -437,6 +437,7 @@ function callback(val,dataArr,isDetail){
 				var preTwoPersistenceRate = dividePercentage(packageData.preTwoPersistence,packageData.newUserNum);
 				var preSixPersistenceRate = dividePercentage(packageData.preSixPersistence,packageData.newUserNum);
 				var preOneLTV=divide(packageData.preOneIncomeNum,packageData.newUserNum);
+				console.log(zoneId+"后一天的ltv:"+packageData.preOneIncomeNum+"-----"+packageData.newUserNum)
 				var preTwoLTV=divide(packageData.preTwoIncomeNum,packageData.newUserNum);
 				var preSixLTV=divide(packageData.preSixIncomeNum,packageData.newUserNum);
 				//初始化曲线图数据
