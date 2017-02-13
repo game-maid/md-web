@@ -85,31 +85,20 @@ public class ActiveAndPersistenceService {
         }
         // 日
         if (dateType.equals("day")) {
-            if (DateUtils.isSameDay(date, cur.getTime())) {// 查询当天数据
-                baseData(cur, zoneStr, zoneList, tableData);
-            } else {
-                tableData.add(activeBaseDataReposistory.findByDate(dateStr));
-                checkZone(tableData, zoneList);
-            }
+            baseData(cal, zoneStr, zoneList, tableData);
+            cal.setTime(date);
             persistenceData(cal, zoneStr, zoneList, tableData, false);
             cal.setTime(date);
             ltvData(cal, zoneStr, zoneList, tableData, false);
             // 周
         } else if (dateType.equals("week")) {
-            cal.add(Calendar.DAY_OF_MONTH, 7);
-            if (DateUtils.isSameDay(date, cur.getTime())) {// 查询当前周 且今天为周一 即查询当日数据
-                baseData(cur, zoneStr, zoneList, tableData);
-            } else if (cal.getTimeInMillis() > cur.getTimeInMillis()) {// 查询当前周 但今天不是周一
-                tableData = activeBaseDataReposistory.findByDate(dateStr, sdf.format(cur.getTime()));
-                checkZone(tableData, zoneList);
-                baseData(cur, zoneStr, zoneList, tableData);
-            } else {// 查询非当前周
-                tableData = activeBaseDataReposistory.findByDate(dateStr, sdf.format(cal.getTime()));
-                checkZone(tableData, zoneList);
+            long endLong = cal.getTimeInMillis() + DateUtils.MILLIS_PER_DAY * 7;
+            while (cal.getTimeInMillis() < endLong) {
+                baseData(cal, zoneStr, zoneList, tableData);
             }
+            cal.setTime(date);
             Calendar startCal = Calendar.getInstance();
             startCal.setTime(date);
-            long endLong = cal.getTimeInMillis();
             while (startCal.getTimeInMillis() < endLong) {
                 persistenceData(startCal, zoneStr, zoneList, tableData, true);
             }
@@ -119,20 +108,16 @@ public class ActiveAndPersistenceService {
             }
             // 月
         } else {
-            cal.add(Calendar.MONTH, 1);
-            if (DateUtils.isSameDay(date, cur.getTime())) {// 查询当前月 且今天为一号 即查询当日数据
-                baseData(cur, zoneStr, zoneList, tableData);
-            } else if (cal.getTimeInMillis() > cur.getTimeInMillis()) {// 查询当前月 但今天不是一号
-                tableData = activeBaseDataReposistory.findByDate(dateStr, sdf.format(cur.getTime()));
-                checkZone(tableData, zoneList);
-                baseData(cur, zoneStr, zoneList, tableData);
-            } else {// 查询非当前月
-                tableData = activeBaseDataReposistory.findByDate(dateStr, sdf.format(cal.getTime()));
-                checkZone(tableData, zoneList);
+            Calendar endCal = Calendar.getInstance();
+            endCal.setTime(cal.getTime());
+            endCal.add(Calendar.MONTH, 1);
+            long endLong = endCal.getTimeInMillis();
+            while (cal.getTimeInMillis() < endLong) {
+                baseData(cal, zoneStr, zoneList, tableData);
             }
+            cal.setTime(date);
             Calendar startCal = Calendar.getInstance();
             startCal.setTime(date);
-            long endLong = cal.getTimeInMillis();
             while (startCal.getTimeInMillis() < endLong) {
                 persistenceData(startCal, zoneStr, zoneList, tableData, true);
             }
@@ -183,37 +168,21 @@ public class ActiveAndPersistenceService {
         }
         // 日
         if (dateType.equals("day")) {
-            if (DateUtils.isSameDay(calDate, cur.getTime())) {// 查询当天数据
-                payData(cur, zoneStr, zoneList, tableData);
-            } else {
-                tableData.add(activeBaseDataReposistory.findByDate(dateStr));
-                checkZone(tableData, zoneList);
-            }
+            payData(cal, zoneStr, zoneList, tableData);
             // 周
         } else if (dateType.equals("week")) {
-            cal.add(Calendar.DAY_OF_MONTH, 7);
-            if (DateUtils.isSameDay(calDate, cur.getTime())) {// 查询当前周 且今天为周一 即查询当日数据
-                payData(cur, zoneStr, zoneList, tableData);
-            } else if (cal.getTimeInMillis() > cur.getTimeInMillis()) {// 查询当前周 但今天不是周一
-                tableData = activeBaseDataReposistory.findByDate(dateStr, sdf.format(cur.getTime()));
-                checkZone(tableData, zoneList);
-                payData(cur, zoneStr, zoneList, tableData);
-            } else {// 查询非当前周
-                tableData = activeBaseDataReposistory.findByDate(dateStr, sdf.format(cal.getTime()));
-                checkZone(tableData, zoneList);
+            long endLong = cal.getTimeInMillis() + DateUtils.MILLIS_PER_DAY * 7;
+            while (cal.getTimeInMillis() < endLong) {
+                payData(cal, zoneStr, zoneList, tableData);
             }
             // 月
         } else {
-            cal.add(Calendar.MONTH, 1);
-            if (DateUtils.isSameDay(calDate, cur.getTime())) {// 查询当前月 且今天为一号 即查询当日数据
-                payData(cur, zoneStr, zoneList, tableData);
-            } else if (cal.getTimeInMillis() > cur.getTimeInMillis()) {// 查询当前月 但今天不是一号
-                tableData = activeBaseDataReposistory.findByDate(dateStr, sdf.format(cur.getTime()));
-                checkZone(tableData, zoneList);
-                payData(cur, zoneStr, zoneList, tableData);
-            } else {// 查询非当前月
-                tableData = activeBaseDataReposistory.findByDate(dateStr, sdf.format(cal.getTime()));
-                checkZone(tableData, zoneList);
+            Calendar endCal = Calendar.getInstance();
+            endCal.setTime(cal.getTime());
+            endCal.add(Calendar.MONTH, 1);
+            long endLong = endCal.getTimeInMillis();
+            while (cal.getTimeInMillis() < endLong) {
+                payData(cal, zoneStr, zoneList, tableData);
             }
         }
         return tableData;
@@ -300,9 +269,7 @@ public class ActiveAndPersistenceService {
             int newUserPayer = 0;
             while (iterator.hasNext()) {
                 String zoneId = iterator.next().getKey();
-                System.out.println(zoneId);
                 Map<String, ActiveBasePackage> packageData = zoneData.get(zoneId);
-                System.out.println(packageData);
                 if (!zoneList.contains(zoneId)) {
                     iterator.remove();
                     continue;
@@ -457,6 +424,14 @@ public class ActiveAndPersistenceService {
                 + "}}]}}";
         getNum(startDate, tableData, "game_order", "setIncomeTimes", int.class, group, sortZoneId, matchZoneStr,
                 matchIncomeTimes);
+        // 当天注册用户
+        String registerIds = queryNewLordIdsStr(startDate, endDate, zoneList);
+        // 新注册付费用户
+        String matchCreateTimeStr = "{$match:{$and:[{create_time:{$gt:" + startDate + "}},{create_time:{$lt:" + endDate
+                + "}}]}}";
+        String matchlordIds = "{$match:{_id:{$in:[" + registerIds + "]}}}";
+        getNum(startDate, tableData, "game_topup_first_record", "setNewUserPayer", int.class, group, sortZoneId,
+                matchCreateTimeStr, matchlordIds);
     }
 
     /**
