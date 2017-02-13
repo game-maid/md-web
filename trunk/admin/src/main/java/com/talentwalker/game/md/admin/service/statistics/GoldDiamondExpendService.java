@@ -29,6 +29,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -68,7 +69,7 @@ public class GoldDiamondExpendService extends BaseService {
      * @throws
      */
     public Page<Map<String, Object>> findList(String startStr, String endStr, String zoneId, String itemType,
-            Integer userType, String lordId, Integer payType, Integer registerCondition, Integer function) {
+            Integer userType, String lordId, Integer payType, Integer registerCondition, String function) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         long startDate = 0L;
         long endDate = 0L;
@@ -104,13 +105,13 @@ public class GoldDiamondExpendService extends BaseService {
      * @throws
      */
     private long countTotal(long startDate, long endDate, String zoneId, String itemType, Integer userType,
-            String lordId, Integer payType, Integer registerCondition, Integer function) {
+            String lordId, Integer payType, Integer registerCondition, String function) {
         AggregationOutput totalOutPut = null;
         String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
         String matchTime = "{$match:{$and:[{request_time:{$gte:" + startDate + "}},{request_time:{$lt:" + endDate
                 + "}}]}}";
         String matchItemType = "{$match:{expend_items:{$in:['" + itemType + "']}}}";
-
+        String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
         if (userType == 0) {// 单个用户 根据用户id查询
             // 分组 统计总数 count
             List<DBObject> countList = new ArrayList<>();
@@ -142,6 +143,9 @@ public class GoldDiamondExpendService extends BaseService {
             if (payType != 0 || registerCondition != 0) {
                 countList.add((DBObject) JSON.parse(matchLordIds));
             }
+            if (!StringUtils.isEmpty(function)) {
+                countList.add((DBObject) JSON.parse(matchUri));
+            }
             countList.add((DBObject) JSON.parse(discountUri));
             countList.add((DBObject) JSON.parse(groupNum));
             totalOutPut = mongoTemplate.getCollection("game_log").aggregate(countList);
@@ -172,7 +176,7 @@ public class GoldDiamondExpendService extends BaseService {
      * @throws
      */
     private void findContent(long startDate, long endDate, String zoneId, String itemType, Integer userType,
-            String lordId, Integer payType, Integer registerCondition, Integer function, Pageable pageable,
+            String lordId, Integer payType, Integer registerCondition, String function, Pageable pageable,
             List<Map<String, Object>> content) {
         String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
         String matchTime = "{$match:{$and:[{request_time:{$gte:" + startDate + "}},{request_time:{$lt:" + endDate
@@ -230,6 +234,7 @@ public class GoldDiamondExpendService extends BaseService {
             } else {
                 matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
             }
+            String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
             // 道具数量 、消费次数
             List<DBObject> selectList = new ArrayList<>();
             String groupItemNum = "{$group:{_id:{uri:'$uri'},expendTimes:{$sum:1},num:{$sum:'$result.pay.lord."
@@ -240,6 +245,9 @@ public class GoldDiamondExpendService extends BaseService {
             selectList.add((DBObject) JSON.parse(matchItemType));
             if (payType != 0 || registerCondition != 0) {
                 selectList.add((DBObject) JSON.parse(matchLordIds));
+            }
+            if (!StringUtils.isEmpty(function)) {
+                selectList.add((DBObject) JSON.parse(matchUri));
             }
             selectList.add((DBObject) JSON.parse(groupItemNum));
             selectList.add((DBObject) JSON.parse(sortByUri));
@@ -258,6 +266,9 @@ public class GoldDiamondExpendService extends BaseService {
             payList.add((DBObject) JSON.parse(matchItemType));
             if (payType != 0 || registerCondition != 0) {
                 payList.add((DBObject) JSON.parse(matchLordIds));
+            }
+            if (!StringUtils.isEmpty(function)) {
+                payList.add((DBObject) JSON.parse(matchUri));
             }
             payList.add((DBObject) JSON.parse(discountLordId));
             payList.add((DBObject) JSON.parse(groupPayNum));
@@ -421,7 +432,7 @@ public class GoldDiamondExpendService extends BaseService {
      * @throws
      */
     public void export(String startStr, String endStr, String zoneId, String itemType, Integer userType, String lordId,
-            Integer payType, Integer registerCondition, Integer function, HttpServletRequest request,
+            Integer payType, Integer registerCondition, String function, HttpServletRequest request,
             HttpServletResponse response) {
         // 查询
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
