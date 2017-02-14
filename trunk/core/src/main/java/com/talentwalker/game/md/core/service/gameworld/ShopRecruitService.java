@@ -20,7 +20,6 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.talentwalker.game.md.core.config.ConfigKey;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.domain.config.ShopRecruitConfig;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
@@ -31,6 +30,7 @@ import com.talentwalker.game.md.core.repository.GameUserRepository;
 import com.talentwalker.game.md.core.repository.config.ShopRecruitConfigRepository;
 import com.talentwalker.game.md.core.repository.gameworld.ShopRecruitRepository;
 import com.talentwalker.game.md.core.response.ResponseKey;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.RandomUtils;

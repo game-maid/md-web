@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.talentwalker.game.md.core.config.ConfigKey;
 import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.domain.gameworld.Duel;
@@ -32,6 +31,7 @@ import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.gameworld.Skill;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.response.ResponseKey;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.UuidUtils;
