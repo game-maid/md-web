@@ -1,5 +1,5 @@
 
-package com.talentwalker.game.md.core.config;
+package com.talentwalker.game.md.core.util;
 
 /**
  * @ClassName: ConfigKey
