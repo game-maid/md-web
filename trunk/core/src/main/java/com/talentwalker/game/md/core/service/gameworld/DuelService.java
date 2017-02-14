@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.talentwalker.game.md.core.config.ConfigKey;
 import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.domain.gameworld.Duel;
@@ -119,6 +121,11 @@ public class DuelService extends GameSupport {
      * 显示英雄数量
      */
     // private static final int HERO_SHOW_COUNT = 3;
+    /**
+     * 结算奖励随机数量
+     */
+    private static final int AWARD_AMOUNT = 3;
+
     /**
      * 
      * @Description:登陆时调用
@@ -1180,7 +1187,17 @@ public class DuelService extends GameSupport {
                 mongoTemplate.save(enemyDuelRrank, rankKey);
                 mongoTemplate.save(duelRrank, rankKey);
             }
+            // 结算缓存
+            if (duel.getAward() == null) {
+                List<Map<String, Integer>> awardList = this.getAwardList();
+                duel.setAward(awardList);
+            }
+            responseMap.put("award", duel.getAward());
+
             duelRepository.save(duel);
+
+        } else {
+            responseMap.put("award", null);
         }
 
         if (!isNPC(enemyDuelRrank.getId())) {
@@ -1194,6 +1211,29 @@ public class DuelService extends GameSupport {
 
         this.gameModel.addObject(ResponseKey.DUEL, responseMap);
         missionService.trigerMissionForPVP(1);
+    }
+
+    /**
+     * @Description:获取结算随机奖励列表
+     * @return
+     * @throws
+     */
+    private List<Map<String, Integer>> getAwardList() {
+        DataConfig config = this.getDataConfig().get(ConfigKey.DUEL_DRAW);
+        Iterator<String> it = config.getJsonObject().keys();
+        Map<String, Integer> weightMap = new HashMap<String, Integer>();
+        List<Map<String, Integer>> awardList = new ArrayList<>();
+        while (it.hasNext()) {
+            String key = it.next();
+            Integer weight = config.get(key).getInteger(ConfigKey.WEIGHT);
+            weightMap.put(key, weight);
+        }
+        for (int i = 0; i < AWARD_AMOUNT; i++) {
+            String index = RandomUtils.randomTable(weightMap);
+            awardList.add(config.get(index).get("item").getJsonObject());
+            weightMap.remove(index);
+        }
+        return awardList;
     }
 
     /**
@@ -1362,7 +1402,40 @@ public class DuelService extends GameSupport {
         this.checkEnergy(lord);
         // 检验挑战次数
         this.checkBattleTimes(duel);
+
         lordRepository.save(lord);
         duelRepository.save(duel);
+    }
+
+    /**
+     * @Description:结算翻牌奖励
+     * @param index
+     * @throws
+     */
+    public void getAward(Integer index) {
+        Lord lord = this.getLord();
+        Duel duel = duelRepository.findOne(lord.getId());
+        if (duel.getAward() == null) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_26008, "没有缓存奖励");
+        }
+        if (!duel.getAward().contains(index)) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_26008, "没有缓存奖励");
+        }
+        Map<String, Integer> award = duel.getAward().get(index);
+        Set<String> itemAll = award.keySet();
+        for (String itemId : itemAll) {
+            gainPayService.gain(lord, itemId, award.get(itemId));
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        // map.put("awardList", duel.getAward());
+        // map.put("isChecked", index);
+        // 清空缓存奖励
+        duel.setAward(null);
+        map.put("award", duel.getAward());
+
+        lordRepository.save(lord);
+
+        this.gameModel.addObject(ResponseKey.DUEL, map);
     }
 }

@@ -74,6 +74,10 @@ public class Duel extends BaseDomain {
      * 商店
      */
     protected DuelStore store;
+    /**
+     * 奖励缓存
+     */
+    protected List<Map<String, Integer>> award;
 
     /**
      * @return times
@@ -216,6 +220,20 @@ public class Duel extends BaseDomain {
      */
     public void setStore(DuelStore store) {
         this.store = store;
+    }
+
+    /**
+     * @return award
+     */
+    public List<Map<String, Integer>> getAward() {
+        return award;
+    }
+
+    /**
+     * @param award 要设置的 award
+     */
+    public void setAward(List<Map<String, Integer>> award) {
+        this.award = award;
     }
 
 }

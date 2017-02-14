@@ -102,4 +102,14 @@ public class ConfigKey {
     /**********************突破计算*****************************/
     public static final String RANK_UP = "rankUp";
 
+    /**********************擂台*****************************/
+    /**
+     * 结算奖励
+     */
+    public static final String DUEL_DRAW = "duel_draw";
+
+    /**********************其他*****************************/
+
+    public static final String WEIGHT = "weight";
+
 }

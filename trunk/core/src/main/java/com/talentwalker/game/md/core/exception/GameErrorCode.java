@@ -387,6 +387,10 @@ public class GameErrorCode extends ErrorCode {
      * 未找到挑战对手
      */
     public static final Integer GAME_ERROR_26007 = 26007;
+    /**
+     * 没有缓存奖励
+     */
+    public static final Integer GAME_ERROR_26008 = 26008;
     /*********************** 关卡 **********************/
     /**
      * 关卡ID不存在

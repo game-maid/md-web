@@ -151,6 +151,13 @@ public class DuelController extends GameSupport {
     }
 
     @GameResponse
+    @RequestMapping(value = "getAward/{index}")
+    public Object getAward(@PathVariable Integer index) {
+        duelService.getAward(index);
+        return this.gameModel;
+    }
+
+    @GameResponse
     @RequestMapping(value = "log")
     public Object battleLog() {
         duelService.battleLog();
