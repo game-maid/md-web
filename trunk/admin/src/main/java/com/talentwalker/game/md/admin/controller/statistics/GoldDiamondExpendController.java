@@ -57,7 +57,7 @@ public class GoldDiamondExpendController extends BaseController {
     @GameResponse
     @RequestMapping(value = "findList", method = RequestMethod.POST)
     public Page<Map<String, Object>> list(String startStr, String endStr, String zoneId, String itemType,
-            Integer userType, String lordId, Integer payType, Integer registerCondition, Integer function) {
+            Integer userType, String lordId, Integer payType, Integer registerCondition, String function) {
         Page<Map<String, Object>> findList = goldDiamondExpendService.findList(startStr, endStr, zoneId, itemType,
                 userType, lordId, payType, registerCondition, function);
         return findList;
@@ -66,7 +66,7 @@ public class GoldDiamondExpendController extends BaseController {
     @GameResponse
     @RequestMapping(value = "export", method = RequestMethod.GET)
     public void exportExcel(String startStr, String endStr, String zoneId, String itemType, Integer userType,
-            String lordId, Integer payType, Integer registerCondition, Integer function, HttpServletRequest request,
+            String lordId, Integer payType, Integer registerCondition, String function, HttpServletRequest request,
             HttpServletResponse response) {
         goldDiamondExpendService.export(startStr, endStr, zoneId, itemType, userType, lordId, payType,
                 registerCondition, function, request, response);
