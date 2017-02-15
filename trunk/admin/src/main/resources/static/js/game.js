@@ -298,4 +298,19 @@ var queryLordInfoById = function(lordIds){
 		}
 	})
 } 
+//获取功能名称
+var queryFunctionName=function(){
+	gameAjax({
+		url : "/statistics/functionName",
+		async : false,
+		type : "get",
+		callback : function(data) {
+			window.functionNameMap={};
+			$.each(data,function(index,val){
+				functionNameMap[val.value]=val.name;
+			});
+		}
+	});
+};
+
 

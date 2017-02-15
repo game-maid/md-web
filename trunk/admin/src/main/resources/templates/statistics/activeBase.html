@@ -348,7 +348,6 @@ $("#select").click(function(){
 });
 
 function callback(val,dataArr,isDetail){
-	console.log(1);
 	var text='';
 	var categories =[];
 	var series=[];
@@ -437,7 +436,6 @@ function callback(val,dataArr,isDetail){
 				var preTwoPersistenceRate = dividePercentage(packageData.preTwoPersistence,packageData.newUserNum);
 				var preSixPersistenceRate = dividePercentage(packageData.preSixPersistence,packageData.newUserNum);
 				var preOneLTV=divide(packageData.preOneIncomeNum,packageData.newUserNum);
-				console.log(zoneId+"后一天的ltv:"+packageData.preOneIncomeNum+"-----"+packageData.newUserNum)
 				var preTwoLTV=divide(packageData.preTwoIncomeNum,packageData.newUserNum);
 				var preSixLTV=divide(packageData.preSixIncomeNum,packageData.newUserNum);
 				//初始化曲线图数据
