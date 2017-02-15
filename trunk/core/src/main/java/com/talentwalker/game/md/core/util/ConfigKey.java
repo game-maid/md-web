@@ -111,5 +111,7 @@ public class ConfigKey {
     /**********************其他*****************************/
 
     public static final String WEIGHT = "weight";
+    /*******************功能名称表（uri 翻译表）***************************/
+    public static final String FUNCTION_NAME = "functionName";
 
 }

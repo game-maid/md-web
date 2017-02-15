@@ -128,11 +128,7 @@ public class GoldDiamondExpendService extends BaseService {
         } else {// 整体用户 根据条件查询
             String lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition);// 符合要求的玩家id
             String matchLordIds = "";
-            if (payType == 2 && registerCondition == 0) {
-                matchLordIds = "{$match:{player_id:{$nin:[" + lordIds + "]}}}";
-            } else {
-                matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
-            }
+            matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
             // 分组 统计总数 count
             List<DBObject> countList = new ArrayList<>();
             String discountUri = "{$group:{_id:'$uri'}}";
@@ -140,7 +136,7 @@ public class GoldDiamondExpendService extends BaseService {
             countList.add((DBObject) JSON.parse(matchZoneId));
             countList.add((DBObject) JSON.parse(matchTime));
             countList.add((DBObject) JSON.parse(matchItemType));
-            if (payType != 0 || registerCondition != 0) {
+            if (payType != 0) {
                 countList.add((DBObject) JSON.parse(matchLordIds));
             }
             if (!StringUtils.isEmpty(function)) {
@@ -229,11 +225,7 @@ public class GoldDiamondExpendService extends BaseService {
         } else {// 整体用户 根据条件查询
             String lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition);// 符合要求的玩家id
             String matchLordIds = "";
-            if (payType == 2 && registerCondition == 0) {
-                matchLordIds = "{$match:{player_id:{$nin:[" + lordIds + "]}}}";
-            } else {
-                matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
-            }
+            matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
             String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
             // 道具数量 、消费次数
             List<DBObject> selectList = new ArrayList<>();
@@ -243,7 +235,7 @@ public class GoldDiamondExpendService extends BaseService {
             selectList.add((DBObject) JSON.parse(matchZoneId));
             selectList.add((DBObject) JSON.parse(matchTime));
             selectList.add((DBObject) JSON.parse(matchItemType));
-            if (payType != 0 || registerCondition != 0) {
+            if (payType != 0) {
                 selectList.add((DBObject) JSON.parse(matchLordIds));
             }
             if (!StringUtils.isEmpty(function)) {
@@ -264,7 +256,7 @@ public class GoldDiamondExpendService extends BaseService {
             payList.add((DBObject) JSON.parse(matchZoneId));
             payList.add((DBObject) JSON.parse(matchTime));
             payList.add((DBObject) JSON.parse(matchItemType));
-            if (payType != 0 || registerCondition != 0) {
+            if (payType != 0) {
                 payList.add((DBObject) JSON.parse(matchLordIds));
             }
             if (!StringUtils.isEmpty(function)) {
@@ -338,29 +330,23 @@ public class GoldDiamondExpendService extends BaseService {
                 String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
                 payTypeLordList.add(lordId);
             }
-            if (registerCondition != 0) {// 注册条件
-                if (payType == 1) {// 付费用户
-                    for (String lordId : payTypeLordList) {
-                        if (!registerLordIdList.contains(lordId)) {
-                            payTypeLordList.remove(lordId);
-                        }
+            if (payType == 1) {// 付费用户
+                for (String lordId : payTypeLordList) {
+                    if (!registerLordIdList.contains(lordId)) {
+                        payTypeLordList.remove(lordId);
                     }
-                    lordIdList = payTypeLordList;
-                } else {// 未付费用户
-                    for (String lordId : registerLordIdList) {
-                        if (payTypeLordList.contains(lordId)) {
-                            registerLordIdList.remove(lordId);
-                        }
-                    }
-                    lordIdList = registerLordIdList;
                 }
-            } else {
                 lordIdList = payTypeLordList;
+            } else {// 未付费用户
+                for (String lordId : registerLordIdList) {
+                    if (payTypeLordList.contains(lordId)) {
+                        registerLordIdList.remove(lordId);
+                    }
+                }
+                lordIdList = registerLordIdList;
             }
-        } else if (registerCondition != 0) {// 没有付费条件 按注册条件查询
+        } else {// 没有付费条件 按注册条件查询
             lordIdList = registerLordIdList;
-        } else {// 查询所有用户
-            return null;
         }
         for (int i = 0; i < lordIdList.size(); i++) {
             lordIds.append("'").append(lordIdList.get(i)).append("'");

@@ -108,7 +108,6 @@
                     </div>
                     <div class="col-sm-1" style="float:left;">
                         <select class="form-control" id="order-state-select">
-                       		<option value="0" th:text="#{statisitcs.gold.all.user}">全部用户</option>
                        		<option value="1" th:text="#{statisitcs.gold.active.user}">活跃用户</option>
                        		<option value="2" th:text="#{statisitcs.gold.new.user}">新用户</option>
                        		<option value="3" th:text="#{statisitcs.gold.old.user}">老用户</option>
@@ -134,8 +133,6 @@
                        		<option value="game/duel/refreshStore" th:text="#{statisitcs.gold.duel.refreshStore}">刷新擂台商店</option>
                        		<option value="game/store/soul/refresh" th:text="#{statisitcs.gold.soul.refreshStore}">刷新魂商店</option>
                        		<option value="game/lord/buyStrength" th:text="#{statisitcs.gold.buy.strength}">购买体力</option>
-                       		
-                       		
 						</select>
                     </div>
                     <div id="gold-function-div" class="col-sm-1" style="float:left;">
@@ -175,7 +172,7 @@ $(function(){
 	$("#ibox-content").hide();
 	$("#gold-function-div").hide();
 	//获取功能名称
-	
+	queryFunctionName();
 });
 
 //初始化时间(日/周/月)
@@ -259,6 +256,11 @@ function initTable(){
 				field : "functionName",
 				align : "center",
 				formatter:function(value){
+					$.each(functionNameMap,function(uri,name){
+						if(new RegExp(uri).test(value)){
+							value=name+"--"+value
+						}
+					});
 					return value;
 				}
 			},
