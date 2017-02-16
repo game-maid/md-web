@@ -57,6 +57,8 @@ public class ShopRecruitService extends GameSupport {
 
     public void recruitMain() {
         Lord lord = this.getLord();
+        // 等级校验
+        this.isLevelOpen(ConfigKey.HERO_RECRUITSOUL, lord, true);
         ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
         List<Recruit> recruit = this.getShopRecruit(shopRecruit, lord);
         Map<String, List<Recruit>> map = new HashMap<String, List<Recruit>>();
@@ -241,6 +243,8 @@ public class ShopRecruitService extends GameSupport {
      */
     private void singleExtract(String recruitKey, DataConfig config) {
         Lord lord = this.getLord();
+        // 等级校验
+        this.isLevelOpen(ConfigKey.HERO_RECRUITSOUL, lord, true);
         // 剧情引导记录步数
         guide(lord);
         ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
@@ -396,6 +400,8 @@ public class ShopRecruitService extends GameSupport {
      */
     private void tenTimesConfigRecruit(String recruitKey, DataConfig config) {
         Lord lord = this.getLord();
+        // 等级校验
+        this.isLevelOpen(ConfigKey.HERO_RECRUITSOUL, lord, true);
         ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
         Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
         Recruit recruit = recruitMap.get(recruitKey);
@@ -437,6 +443,8 @@ public class ShopRecruitService extends GameSupport {
      */
     private void tenTimesActivityRecruit(String recruitKey) {
         Lord lord = this.getLord();
+        // 等级校验
+        this.isLevelOpen(ConfigKey.HERO_RECRUITSOUL, lord, true);
         ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
         Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
         ShopRecruitConfig config = shopRecruitConfigRepository.findOne(new ObjectId(recruitKey));
@@ -478,6 +486,8 @@ public class ShopRecruitService extends GameSupport {
      */
     private void activityRecruit(String recruitKey) {
         Lord lord = this.getLord();
+        // 等级校验
+        this.isLevelOpen(ConfigKey.HERO_RECRUITSOUL, lord, true);
         ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
         Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
         ShopRecruitConfig config = shopRecruitConfigRepository.findOne(new ObjectId(recruitKey));

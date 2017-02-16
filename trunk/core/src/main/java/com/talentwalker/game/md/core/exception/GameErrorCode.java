@@ -702,5 +702,10 @@ public class GameErrorCode extends ErrorCode {
      * 不能领取该天的奖励
      */
     public static final Integer GAME_ERROR_38002 = 38002;
+    /*******************其它*************************/
+    /**
+     * 未达到开启等级
+     */
+    public static final Integer GAME_ERROR_39001 = 39001;
 
 }

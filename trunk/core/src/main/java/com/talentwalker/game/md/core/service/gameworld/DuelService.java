@@ -132,6 +132,9 @@ public class DuelService extends GameSupport {
      * @throws
      */
     public Duel getMain(Lord lord) {
+        if (this.isLevelOpen(ConfigKey.DUEL, lord, false)) {
+            return null;
+        }
         Duel duel = getDuel(lord);
         return duel;
     }
@@ -143,6 +146,7 @@ public class DuelService extends GameSupport {
     public void duelMain() {
         Lord lord = this.getLord();
         // 校验等级
+        this.isLevelOpen(ConfigKey.DUEL, lord, true);
         Duel duel = getDuel(lord);
         this.getRankList(duel, lord);
         // duel.setStore(null);

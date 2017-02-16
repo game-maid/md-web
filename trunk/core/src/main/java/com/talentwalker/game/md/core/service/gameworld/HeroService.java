@@ -216,6 +216,8 @@ public class HeroService extends GameSupport {
 
     public void breakHero(String heroUid, List<String> cost) {
         Lord lord = this.getLord();
+        // 校验等级
+        this.isLevelOpen(ConfigKey.HERO_BREAK, lord, true);
         this.isHave(lord, heroUid);
 
         Map<String, Hero> heros = lord.getHeros();
@@ -283,6 +285,8 @@ public class HeroService extends GameSupport {
 
     public void awake(String heroUid, List<String> cost) {
         Lord lord = this.getLord();
+        // 校验等级
+        this.isLevelOpen(ConfigKey.AWAVE, lord, true);
         this.isHave(lord, heroUid);
 
         Map<String, Hero> heros = lord.getHeros();
