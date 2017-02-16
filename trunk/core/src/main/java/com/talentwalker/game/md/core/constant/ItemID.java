@@ -58,5 +58,9 @@ public class ItemID {
      * 技能经验道具类型
      */
     public final static String SKILL_TYPE = "expSkill";
+    /**
+     * 好感度经验
+     */
+    public final static String ROMANCE_EXP = "romanceExp";
 
 }

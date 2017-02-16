@@ -349,6 +349,10 @@ public class GameErrorCode extends ErrorCode {
     * 武将好感度已经满
     */
     public static final Integer GAME_ERROR_24020 = 24020;
+    /**
+     * 武将好感度等级不够
+     */
+    public static final Integer GAME_ERROR_24021 = 24021;
     /*********************** 技能************************/
     /**
      * 技能等级达到满级，不能升级

@@ -459,6 +459,9 @@ public class LordService extends GameSupport {
         this.gameModel.addObject(ResponseKey.TOP_UP_FIRST_RECORD, topUpFirstRecordRepository.findOne(lord.getId()));
         this.gameModel.addObject(ResponseKey.TOP_UP_FIRST_AWARD, lord.isTopUpFirstAward());
         this.gameModel.addObject(ResponseKey.ZONE_CREATE_TIME, lord.getRegisterTime());
+        this.gameModel.addObject(ResponseKey.ROMANCE, lord.getRomance());
+        this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY, lord.getRomanceRandomStory());
+        this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY_RECORD, lord.getRomanceRandomStoryRecord());
 
     }
 
