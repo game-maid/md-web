@@ -311,11 +311,23 @@ public class GameSupport extends BaseGameSupport {
      */
     private void randomStory(Lord lord, List<FormHold> formHoldList, String type) {
         Map<String, Hero> heros = lord.getHeros();
-        DataConfig theaterConfig = getDataConfig().get(ConfigKey.ROMANCE_THEATERID);// 剧情配置
+        DataConfig randomTheaterConfig = getDataConfig().get(ConfigKey.ROMANCE_THEATERID);// 剧情配置
         for (FormHold formHold : formHoldList) {
             String heroUid = formHold.getHeroUid();
             String heroId = heros.get(heroUid).getHeroId();
+            if (randomTheaterConfig.get(heroId) != null) {
+                DataConfig heroTheaterConfig = randomTheaterConfig.get(heroId).get(ConfigKey.ROMANCE_THEATERID_THEATER);
+                for (int index = 1;; index++) {
+                    DataConfig theaterConfig = heroTheaterConfig.get(index + "");
+                    if (theaterConfig == null) {
+                        break;
+                    }
+                    if (!type.equals(theaterConfig.getString(type))) {
+                        continue;
+                    }
 
+                }
+            }
         }
 
     }
