@@ -57,6 +57,11 @@ public class ConfigKey {
      * type 道具类型
      */
     public static final String ITEM_TYPE = "type";
+    /**
+     * rank 道具品质
+     */
+    public static final String ITEM_RANK = "rank";
+
     /********************guide_other*****************************/
     /**
      * guide_other 新手引导 战斗奖励
@@ -113,5 +118,42 @@ public class ConfigKey {
     public static final String WEIGHT = "weight";
     /*******************功能名称表（uri 翻译表）***************************/
     public static final String FUNCTION_NAME = "functionName";
-
+    /*****************新好感度配置（第二版）*********************/
+    public static final String ROMANCE_BASE = "romance_base";
+    /**
+     * 字段romance
+     */
+    public static final String ROMANCE_BASE_ROMANCE = "romance";
+    /**
+     * 剧情奖励
+     */
+    public static final String ROMANCE_BASE_AWARD = "award";
+    /**
+     * 好感度等级上限
+     */
+    public static final String ROMANCE_BASE_MAXLV = "romanceMaxLv";
+    /**
+     * 可使用的好感度经验道具
+     */
+    public static final String ROMANCE_BASE_ITEM = "item";
+    /**
+     * 升级需要的好感度经验值
+     */
+    public static final String ROMANCE_BASE_COST = "cost";
+    /*********************随机剧情触发概率参数配置***************************/
+    public static final String ROMANCE_THEATER_PROBABILITY = "romance_theaterProbability";
+    /**
+     * 触发概率
+     */
+    public static final String ROMANCE_THEATER_PROBABILITY_TRIGGERPRO = "triggerPro";
+    /**
+     * 触发间隔
+     */
+    public static final String ROMANCE_THEATER_PROBABILITY_TRIGGERTIMING = "triggerTiming";
+    /*******************好感度剧情表*********************************/
+    public static final String ROMANCE_THEATERID = "romance_theaterID";
+    /**
+     * 剧情
+     */
+    public static final String ROMANCE_THEATERID_THEATER = "theater";
 }
