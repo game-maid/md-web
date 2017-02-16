@@ -24,10 +24,12 @@ import com.talentwalker.game.md.core.domain.gameworld.Hero;
 import com.talentwalker.game.md.core.domain.gameworld.LeagueLord;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.gameworld.Mail;
+import com.talentwalker.game.md.core.domain.gameworld.Romance;
 import com.talentwalker.game.md.core.domain.gameworld.Skill;
 import com.talentwalker.game.md.core.domain.gameworld.SoulStore;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.response.ResponseKey;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
 
@@ -282,6 +284,8 @@ public class GainPayService extends GameSupport {
                     // 技能图鉴
                     String skillId = getDataConfig().get("heroConfig").get(itemId).getString("skillult");
                     lordService.heroHandbook(ItemID.SKILL, skillId, lord);
+                    // 好感度
+                    heroService.romanceAddHero(itemId, lord);
                     if (heros.size() + number > lord.getHeroLimit()) {
                         int diff = lord.getHeroLimit() - heros.size();
                         // 发邮件补(number - diff)个道具
@@ -305,6 +309,37 @@ public class GainPayService extends GameSupport {
                     }
                 }
                 lord.setHeros(heros);
+            } else if (itemId.startsWith(ItemID.ROMANCE_EXP)) {// 好感度经验
+                if (number > 0) {
+                    String[] items = itemId.split("--");
+                    itemId = items[1];
+                    Romance romance = lord.getRomance().get(itemId);
+                    int romanceLevel = romance.getLevel();
+                    DataConfig romanceConfig = getDataConfig().get(ConfigKey.ROMANCE_BASE).get(itemId)
+                            .get(ConfigKey.ROMANCE_BASE_ROMANCE).get(romanceLevel + 1 + "");
+                    Integer romanceExpCost = romanceConfig.getInteger(ConfigKey.ROMANCE_BASE_COST);
+                    int romanceMaxLv = getDataConfig().get(ConfigKey.ROMANCE_BASE).get(itemId)
+                            .getInteger(ConfigKey.ROMANCE_BASE_MAXLV);
+                    while (number >= romanceExpCost) {// 升级
+                        Map<Integer, Integer> storyMap = romance.getStory();
+                        if (storyMap == null) {
+                            storyMap = new HashMap<>();
+                            romance.setStory(storyMap);
+                        }
+                        romanceLevel++;
+                        storyMap.put(romanceLevel, Romance.STORY_STATE_LOCK);
+                        number -= romanceExpCost;
+                        if (romanceMaxLv <= romanceLevel) {
+                            break;
+                        }
+                        romanceExpCost = romanceConfig.getInteger(ConfigKey.ROMANCE_BASE_COST);
+                    }
+                    romance.setExp(number);
+                    romance.setLevel(romanceLevel);
+                    HashMap<Object, Object> updateRomanceMap = new HashMap<>();
+                    updateRomanceMap.put(itemId, romance);
+                    this.gameModel.addObject(ResponseKey.ROMANCE, updateRomanceMap);
+                }
             } else if (StringUtils.startsWith(itemId, ItemID.SOUL)) { // 魂
                 Map<String, Integer> souls = lord.getSouls();
                 int count = 0;

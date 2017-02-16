@@ -34,6 +34,7 @@ import com.talentwalker.game.md.core.repository.gameworld.StageRepository;
 import com.talentwalker.game.md.core.response.ResponseKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
+import com.talentwalker.game.md.core.util.RandomStoryType;
 import com.talentwalker.game.md.core.util.RandomUtils;
 
 import net.sf.json.JSONArray;
@@ -69,7 +70,6 @@ public class StageService extends GameSupport {
     public void enter(String stageId) {
         Lord lord = this.getLord();
         StageComposite sc = getStageComposite(lord);
-
         // 校验
         checkStage(lord, sc, stageId);
 
@@ -87,10 +87,8 @@ public class StageService extends GameSupport {
     public void settle(String stageId, int star) {
         Lord lord = this.getLord();
         StageComposite sc = getStageComposite(lord);
-
         // 校验
         checkStage(lord, sc, stageId);
-
         // 计算结果
         Stage stage = sc.getStage(stageId);
         int heroExp = this.getDataConfig().get("stage_stage").get(stageId).getInteger("exp");
@@ -100,7 +98,6 @@ public class StageService extends GameSupport {
 
             int strength = this.getDataConfig().get("stage_stage").get(stageId).get("strength").getInteger("end");
             gainPayService.pay(lord, ItemID.STRENGTH, strength);
-
             // 添加奖励
             Map<String, Integer> reward = getStageReward(sc, stageId);
             Iterator<String> it = reward.keySet().iterator();
@@ -108,7 +105,6 @@ public class StageService extends GameSupport {
                 String itemId = it.next();
                 gainPayService.gain(lord, itemId, reward.get(itemId));
             }
-
             // 增加金币
             int gold = this.getDataConfig().get("stage_stage").get(stageId).getInteger("gold");
             gainPayService.gain(lord, ItemID.GOLD, gold);
@@ -118,23 +114,21 @@ public class StageService extends GameSupport {
             if (star > stage.getStar()) {
                 stage.setStar(star);
             }
-
+            romanceRandomStroy(lord, RandomStoryType.PVE_WIN);
         } else { // 战斗失败，添加部分英雄经验
             double mul = this.getDataConfig().get("stage_other").get("loseexp").getDouble("value");
             heroExp = (int) Math.floor(mul * heroExp);
+            romanceRandomStroy(lord, RandomStoryType.PVE_LOSE);
         }
         stage.setLastTime(System.currentTimeMillis());
         Map<String, Stage> stages = sc.getStages();
         stages.put(stageId, stage);
         sc.setStages(stages);
-
         // 添加武将经验
         addHeroExp(lord, heroExp);
-
         // save
         lordRepository.save(lord);
         stageRepository.save(sc);
-
         Map<String, Object> map = new HashMap<String, Object>();
         Map<String, Stage> stageMap = new HashMap<String, Stage>();
         stageMap.put(stageId, stage);
@@ -160,12 +154,6 @@ public class StageService extends GameSupport {
         if (step < 999) {
             lord.setGuidanceStep(++step);
         }
-        // 新手引导战斗增加额外固定奖励
-        /*
-         * if (stageId.equals(GUIDE_STAGE_ID)) { String itemId =
-         * getDataConfig().get(ConfigKey.GUIDE_OTHER).get(lord.getGuidanceHeroId())
-         * .getString(ConfigKey.GUIDE_OTHER_EQUIP_ID); gainPayService.gain(lord, itemId, 1); }
-         */
     }
 
     private void addHeroExp(Lord lord, int exp) {

@@ -280,6 +280,30 @@ public class Lord extends BaseDomain {
     protected int guidanceRcruit;
 
     /**
+     * 好感度
+     * Map<武将id，好感度>
+     */
+    protected Map<String, Romance> romance;
+    /**
+     * 当前随机好感度剧情（状态）
+     * Map<heroId,Map<第几个剧情，剧情完成状态>>（）
+     */
+    @Field("romance_random_story")
+    protected Map<String, Map<Integer, Integer>> romanceRandomStory;
+
+    /**
+     * 随机好感度剧情记录
+     * Map<heroId,第几个剧情>
+     */
+    @Field("romance_random_story_record")
+    protected Map<String, List<Integer>> romanceRandomStoryRecord;
+    /**
+     * 随机好感度剧情生成时间
+     */
+    @Field("romance_story_time")
+    protected long romanceStoryTime;
+
+    /**
      * 每天第一次免费体力开始领取的时间
      */
     @Transient
@@ -946,6 +970,62 @@ public class Lord extends BaseDomain {
      */
     public void setGuidanceRcruit(int guidanceRcruit) {
         this.guidanceRcruit = guidanceRcruit;
+    }
+
+    /**
+     * @return romance
+     */
+    public Map<String, Romance> getRomance() {
+        return romance;
+    }
+
+    /**
+     * @param romance 要设置的 romance
+     */
+    public void setRomance(Map<String, Romance> romance) {
+        this.romance = romance;
+    }
+
+    /**
+     * @return romanceRandomStory
+     */
+    public Map<String, Map<Integer, Integer>> getRomanceRandomStory() {
+        return romanceRandomStory;
+    }
+
+    /**
+     * @param romanceRandomStory 要设置的 romanceRandomStory
+     */
+    public void setRomanceRandomStory(Map<String, Map<Integer, Integer>> romanceRandomStory) {
+        this.romanceRandomStory = romanceRandomStory;
+    }
+
+    /**
+     * @return romanceRandomStoryRecord
+     */
+    public Map<String, List<Integer>> getRomanceRandomStoryRecord() {
+        return romanceRandomStoryRecord;
+    }
+
+    /**
+     * @param romanceRandomStoryRecord 要设置的 romanceRandomStoryRecord
+     */
+    public void setRomanceRandomStoryRecord(Map<String, List<Integer>> romanceRandomStoryRecord) {
+        this.romanceRandomStoryRecord = romanceRandomStoryRecord;
+    }
+
+    /**
+     * @return romanceStoryTime
+     */
+    public long getRomanceStoryTime() {
+        return romanceStoryTime;
+    }
+
+    /**
+     * @param romanceStoryTime 要设置的 romanceStoryTime
+     */
+    public void setRomanceStoryTime(long romanceStoryTime) {
+        this.romanceStoryTime = romanceStoryTime;
     }
 
 }
