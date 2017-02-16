@@ -307,11 +307,18 @@ public class GameSupport extends BaseGameSupport {
     private void randomStory(Lord lord, List<FormHold> formHoldList, String type) {
         Map<String, Hero> heros = lord.getHeros();
         DataConfig randomTheaterConfig = getDataConfig().get(ConfigKey.ROMANCE_THEATERID);// 剧情配置
+        Map<String, Map<Integer, Integer>> heroWeightMap = new HashMap<>();
+        Map<String, Map<Integer, Integer>> randomStoryMap = new HashMap<>();
+        lord.setRomanceRandomStory(randomStoryMap);
+        // 权重总和
+        int weightTotal = 0;
         for (FormHold formHold : formHoldList) {
             String heroUid = formHold.getHeroUid();
             String heroId = heros.get(heroUid).getHeroId();
             if (randomTheaterConfig.get(heroId) != null) {
                 DataConfig heroTheaterConfig = randomTheaterConfig.get(heroId).get(ConfigKey.ROMANCE_THEATERID_THEATER);
+                Map<Integer, Integer> weightMap = new HashMap<>();
+                heroWeightMap.put(heroId, weightMap);
                 for (int index = 1;; index++) {
                     DataConfig theaterConfig = heroTheaterConfig.get(index + "");
                     if (theaterConfig == null) {
@@ -321,11 +328,29 @@ public class GameSupport extends BaseGameSupport {
                     if (!type.equals(configType)) {
                         continue;
                     }
-
+                    int weight = theaterConfig.getInteger(ConfigKey.ROMANCE_THEATERID_WEIGHT);
+                    weightTotal += weight;
+                    weightMap.put(index, weight);
                 }
             }
         }
-
+        // 计算随机数
+        int randomInt = RandomUtils.randomInt(0, weightTotal);
+        // 计算随机剧情
+        int tempTotal = 0;
+        for (String heroId : heroWeightMap.keySet()) {
+            Map<Integer, Integer> weightMap = heroWeightMap.get(heroId);
+            for (Integer index : weightMap.keySet()) {
+                Integer weight = weightMap.get(index);
+                tempTotal += weight;
+                if (tempTotal > randomInt) {
+                    // 产生随机剧情
+                    Map<Integer, Integer> stateMap = new HashMap<>();
+                    randomStoryMap.put(heroId, stateMap);
+                    stateMap.put(index, Romance.STORY_STATE_END);
+                }
+            }
+        }
     }
 
 }

@@ -156,4 +156,8 @@ public class ConfigKey {
      * 剧情
      */
     public static final String ROMANCE_THEATERID_THEATER = "theater";
+    /**
+     *权重
+     */
+    public static final String ROMANCE_THEATERID_WEIGHT = "weight";
 }
