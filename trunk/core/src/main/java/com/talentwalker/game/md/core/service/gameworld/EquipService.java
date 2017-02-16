@@ -23,6 +23,7 @@ import com.talentwalker.game.md.core.domain.gameworld.Equip;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.response.ResponseKey;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.RandomUtils;
@@ -64,6 +65,8 @@ public class EquipService extends GameSupport {
 
     public void strengthen(String equipUid) {
         Lord lord = this.getLord();
+        // 校验等级
+        this.isLevelOpen(ConfigKey.EQUIP_UPDATE, lord, true);
         // 校验是否有这件装备
         Map<String, Equip> equips = lord.getEquips();
         if (!equips.containsKey(equipUid)) {
@@ -102,6 +105,8 @@ public class EquipService extends GameSupport {
     @SuppressWarnings("unchecked")
     public void refine(String equipUid, JSONObject items) {
         Lord lord = this.getLord();
+        // 校验等级
+        this.isLevelOpen(ConfigKey.EQUIP_REFINE, lord, true);
         // 校验是否有这件装备
         Map<String, Equip> equips = lord.getEquips();
         if (!equips.containsKey(equipUid)) {

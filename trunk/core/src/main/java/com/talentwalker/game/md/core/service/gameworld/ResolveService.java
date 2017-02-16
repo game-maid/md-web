@@ -26,6 +26,7 @@ import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.gameworld.SoulStore;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.repository.gameworld.SoulStoreRepository;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.RandomUtils;
@@ -140,6 +141,7 @@ public class ResolveService extends GameSupport {
      */
     public void instantResolveSoul() {
         Lord lord = this.getLord();
+        this.isLevelOpen(ConfigKey.RESOLVEALL, lord, true);
         DataConfig config = this.getDataConfig().get("heroSoul");
         double resolve = 0; // 突破币
         double iconValue = 0; // 魂币
@@ -185,6 +187,7 @@ public class ResolveService extends GameSupport {
      */
     public void instantResolveHero() {
         Lord lord = this.getLord();
+        this.isLevelOpen(ConfigKey.RESOLVEALL, lord, true);
         DataConfig config = this.getDataConfig().get("heroConfig");
         int resolve = 0; // 突破币
         int iconValue = 0; // 魂币

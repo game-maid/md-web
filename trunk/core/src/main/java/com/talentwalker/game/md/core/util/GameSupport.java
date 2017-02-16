@@ -240,6 +240,28 @@ public class GameSupport extends BaseGameSupport {
     }
 
     /**
+     * @Description:功能是否开启
+     * @param functionName
+     * @param lord
+     * @param isError 是否抛出异常
+     * @return true 开启；false 关闭
+     * @throws
+     */
+    public boolean isLevelOpen(String functionName, Lord lord, boolean isError) {
+        DataConfig config = this.getDataConfig().get(ConfigKey.FUNCTION_LEVEL_OPEN);
+        if (config.get(functionName).getInteger("control") == 1) {
+            if (config.get(functionName).getJsonObject().containsKey("openlevel")
+                    && lord.getLevel() < config.get(functionName).getInteger("openlevel")) {
+                if (isError) {
+                    GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_39001);
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * @Description:随机产生触发剧情
      * @param lord
      * @param type 触发剧情的条件

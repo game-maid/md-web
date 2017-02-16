@@ -114,10 +114,60 @@ public class ConfigKey {
     public static final String DUEL_DRAW = "duel_draw";
 
     /**********************其他*****************************/
-
+    /**
+     * 权重
+     */
     public static final String WEIGHT = "weight";
+
     /*******************功能名称表（uri 翻译表）***************************/
     public static final String FUNCTION_NAME = "functionName";
+
+    /*******************功能开启等级限制***************************/
+    /**
+     * 功能开启等级限制
+     */
+    public static final String FUNCTION_LEVEL_OPEN = "function_levelopen";
+    /**
+     * 擂台
+     */
+    public static final String DUEL = "duel";
+    /**
+     * 关卡
+     */
+    public static final String STAGE = "stage";
+    /**
+     * 装备-强化
+     */
+    public static final String EQUIP_UPDATE = "equip_update";
+    /**
+     * 英雄-招募
+     */
+    public static final String HERO_RECRUITSOUL = "hero_recruitSoul";
+    /**
+     * 英雄-突破
+     */
+    public static final String HERO_BREAK = "hero_break";
+    /**
+     * 联盟
+     */
+    public static final String LEAGUE = "league";
+    /**
+     * 啦啦队
+     */
+    public static final String FORMSEVEN = "formSeven";
+    /**
+     * 装备-精炼
+     */
+    public static final String EQUIP_REFINE = "equip_refine";
+    /**
+     * 英雄觉醒
+     */
+    public static final String AWAVE = "awave";
+    /**
+     * 一键分解
+     */
+    public static final String RESOLVEALL = "resolveAll";
+
     /*****************新好感度配置（第二版）*********************/
     public static final String ROMANCE_BASE = "romance_base";
     /**
@@ -160,4 +210,5 @@ public class ConfigKey {
      *权重
      */
     public static final String ROMANCE_THEATERID_WEIGHT = "weight";
+
 }
