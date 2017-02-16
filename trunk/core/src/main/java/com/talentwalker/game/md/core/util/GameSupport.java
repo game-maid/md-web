@@ -15,11 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
@@ -58,8 +56,6 @@ public class GameSupport extends BaseGameSupport {
     protected GameUserRepository gameUserRepository;
     @Autowired
     private GameZoneRepository gameZoneRepository;
-    @Resource
-    protected final static Logger LOGGER = Logger.getLogger(GameSupport.class);
 
     /**
      * @Description:获得当前的GameUser对象
@@ -262,7 +258,6 @@ public class GameSupport extends BaseGameSupport {
         int timeMin = timeList.get(0);
         int timeMax = timeList.get(1);
         int timeLimit = RandomUtils.randomInt(timeMin, timeMax);
-        LOGGER.info("随机剧情触发间隔：" + timeLimit);
         // 检查是否有随机剧情
         Map<String, Map<Integer, Integer>> romanceRandomStory = lord.getRomanceRandomStory();
         if (romanceRandomStory != null) {
@@ -322,7 +317,8 @@ public class GameSupport extends BaseGameSupport {
                     if (theaterConfig == null) {
                         break;
                     }
-                    if (!type.equals(theaterConfig.getString(type))) {
+                    String configType = theaterConfig.getString(type);
+                    if (!type.equals(configType)) {
                         continue;
                     }
 
