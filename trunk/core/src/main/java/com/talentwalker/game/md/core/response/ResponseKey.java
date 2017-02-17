@@ -144,8 +144,4 @@ public class ResponseKey {
      * 当前随机好感度剧情
      */
     public static final String ROMANCE_RANDOM_STORY = "romanceRandomStory";
-    /**
-     * 随机好感度剧情完成记录
-     */
-    public static final String ROMANCE_RANDOM_STORY_RECORD = "romanceRandomStoryRecord";
 }

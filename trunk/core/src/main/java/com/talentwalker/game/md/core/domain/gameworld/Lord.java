@@ -292,12 +292,6 @@ public class Lord extends BaseDomain {
     protected Map<String, Map<Integer, Integer>> romanceRandomStory;
 
     /**
-     * 随机好感度剧情记录
-     * Map<heroId,第几个剧情>
-     */
-    @Field("romance_random_story_record")
-    protected Map<String, List<Integer>> romanceRandomStoryRecord;
-    /**
      * 随机好感度剧情生成时间
      */
     @Field("romance_story_time")
@@ -998,20 +992,6 @@ public class Lord extends BaseDomain {
      */
     public void setRomanceRandomStory(Map<String, Map<Integer, Integer>> romanceRandomStory) {
         this.romanceRandomStory = romanceRandomStory;
-    }
-
-    /**
-     * @return romanceRandomStoryRecord
-     */
-    public Map<String, List<Integer>> getRomanceRandomStoryRecord() {
-        return romanceRandomStoryRecord;
-    }
-
-    /**
-     * @param romanceRandomStoryRecord 要设置的 romanceRandomStoryRecord
-     */
-    public void setRomanceRandomStoryRecord(Map<String, List<Integer>> romanceRandomStoryRecord) {
-        this.romanceRandomStoryRecord = romanceRandomStoryRecord;
     }
 
     /**

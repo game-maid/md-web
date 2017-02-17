@@ -888,18 +888,20 @@ public class HeroService extends GameSupport {
      */
     private void recordRomanceRandomStory(Lord lord) {
         Map<String, Map<Integer, Integer>> curStory = lord.getRomanceRandomStory();
-        Map<String, List<Integer>> storyRecord = lord.getRomanceRandomStoryRecord();
-        for (String curHeroId : curStory.keySet()) {
-            for (Integer curIndex : curStory.get(curHeroId).keySet()) {
-                if (storyRecord.containsKey(curHeroId)) {
-                    List<Integer> indexList = storyRecord.get(curHeroId);
-                    if (!indexList.contains(curIndex)) {
-                        indexList.add(curIndex);
+        Map<String, Romance> romanceMap = lord.getRomance();
+        for (String heroId : curStory.keySet()) {
+            Map<Integer, Integer> stateMap = curStory.get(heroId);
+            for (Integer index : stateMap.keySet()) {
+                if (stateMap.get(index) == Romance.STORY_STATE_END) {
+                    Romance romance = romanceMap.get(heroId);
+                    List<Integer> randomStoryRecord = romance.getRandomStoryRecord();
+                    if (randomStoryRecord == null) {
+                        randomStoryRecord = new ArrayList<>();
+                        romance.setRandomStoryRecord(randomStoryRecord);
                     }
-                } else {
-                    List<Integer> indexList = new ArrayList<>();
-                    indexList.add(curIndex);
-                    storyRecord.put(curHeroId, indexList);
+                    if (!randomStoryRecord.contains(index)) {
+                        randomStoryRecord.add(index);
+                    }
                 }
             }
         }

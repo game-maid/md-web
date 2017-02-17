@@ -9,6 +9,7 @@
 package com.talentwalker.game.md.core.domain.gameworld;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,6 +19,11 @@ import java.util.Map;
  */
 
 public class Romance implements Serializable {
+    /**
+     * @Fields serialVersionUID : Description
+     */
+
+    private static final long serialVersionUID = 1L;
     /**
      * 剧情状态 0 锁定
      */
@@ -53,6 +59,10 @@ public class Romance implements Serializable {
      * 0,1,2三种状态 0未解锁，1开始剧情后中途退出，2完成剧情（同时解锁该级立绘）
      */
     private Map<Integer, Integer> story;
+    /**
+     * 随机剧情记录
+     */
+    private List<Integer> randomStoryRecord;
     /**
      * 当前使用(那个等级)的立绘
      */
@@ -112,6 +122,20 @@ public class Romance implements Serializable {
      */
     public void setAddpic(int addpic) {
         this.addpic = addpic;
+    }
+
+    /**
+     * @return randomStoryRecord
+     */
+    public List<Integer> getRandomStoryRecord() {
+        return randomStoryRecord;
+    }
+
+    /**
+     * @param randomStoryRecord 要设置的 randomStoryRecord
+     */
+    public void setRandomStoryRecord(List<Integer> randomStoryRecord) {
+        this.randomStoryRecord = randomStoryRecord;
     }
 
 }
