@@ -258,6 +258,8 @@ public class GameSupport extends BaseGameSupport {
                 }
                 return false;
             }
+        } else {
+            return false;
         }
         return true;
     }

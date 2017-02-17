@@ -134,6 +134,21 @@ public class LeagueService extends GameSupport {
     private static final String EXIT = "exit";
 
     /**
+     * @Description:登陆获取公会数据
+     * @throws
+     */
+    public void loginInfo(Lord lord) {
+        LeagueLord leagueLord = this.getLeagueLord(lord);
+        League league = null;
+        if (leagueLord.getLeagueId() != null) {
+            league = leagueRepository.findOne(leagueLord.getLeagueId());
+        }
+        leagueLordRepository.save(leagueLord);
+        this.gameModel.addObject(ResponseKey.LEAGUE, league);
+        this.gameModel.addObject(ResponseKey.LEAGUE_LORD, leagueLord);
+    }
+
+    /**
      * 
      * @Description:
      * @throws
