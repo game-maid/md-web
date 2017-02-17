@@ -453,7 +453,6 @@ public class LordService extends GameSupport {
         this.gameModel.addObject(ResponseKey.MISSION_ONCE, missionService.getOnceMissions(lord));
         this.gameModel.addObject(ResponseKey.HANDBOOK, this.getHandbook(lord));
         this.gameModel.addObject(ResponseKey.MAIL, mailService.getMailNCP());
-        this.gameModel.addObject(ResponseKey.LEAGUE_LORD, leagueService.getLeagueLord(lord));
         this.gameModel.addObject(ResponseKey.DUEL, duelService.getMain(lord));
         this.gameModel.addObject(ResponseKey.SOUL_STORE, soulStoreService.getSoulStore(lord));
         this.gameModel.addObject(ResponseKey.TOP_UP_FIRST_RECORD, topUpFirstRecordRepository.findOne(lord.getId()));
@@ -462,6 +461,8 @@ public class LordService extends GameSupport {
         this.gameModel.addObject(ResponseKey.ROMANCE, lord.getRomance());
         this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY, lord.getRomanceRandomStory());
         this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY_RECORD, lord.getRomanceRandomStoryRecord());
+        // 公会数据
+        leagueService.loginInfo(lord);
 
     }
 
