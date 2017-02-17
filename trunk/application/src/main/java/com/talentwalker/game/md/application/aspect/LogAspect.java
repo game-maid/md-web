@@ -11,6 +11,7 @@ package com.talentwalker.game.md.application.aspect;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -42,6 +43,8 @@ public class LogAspect extends GameSupport {
 
     @Autowired
     private GameLogRepository gameLogRepository;
+    @Autowired
+    private final static Logger LOGGER = Logger.getLogger(LogAspect.class);
 
     @Pointcut("execution(* com.talentwalker.game.md.application.controller..*(..))")
     public void logPoincut() {
@@ -74,7 +77,9 @@ public class LogAspect extends GameSupport {
             throw e;
         } finally {
             log.setCost(System.currentTimeMillis() - start);
+            long startTime = System.currentTimeMillis();
             gameLogRepository.insert(log);
+            LOGGER.info("游戏日志保存耗时：" + (System.currentTimeMillis() - startTime));
         }
         return result;
     }
