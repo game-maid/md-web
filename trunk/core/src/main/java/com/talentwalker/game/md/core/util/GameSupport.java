@@ -34,10 +34,11 @@ import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.repository.GameUserRepository;
 import com.talentwalker.game.md.core.repository.GameZoneRepository;
 import com.talentwalker.game.md.core.repository.gameworld.LordRepository;
+import com.talentwalker.game.md.core.response.ResponseKey;
 import com.talentwalker.game.md.core.service.IGameUserServiceRemote;
 import com.talentwalker.game.md.core.service.gameworld.TopUpCardService;
 
-import net.sf.json.JSONObject;
+import net.sf.json.JSONArray;
 
 /**
  * @ClassName: GameSupport
@@ -274,11 +275,10 @@ public class GameSupport extends BaseGameSupport {
          */
         DataConfig probabilityConfig = getDataConfig().get(ConfigKey.ROMANCE_THEATER_PROBABILITY).get(lordLevel + "");
         Double limitPro = probabilityConfig.getDouble(ConfigKey.ROMANCE_THEATER_PROBABILITY_TRIGGERPRO);// 触发概率
-        JSONObject timeConfig = probabilityConfig.get(ConfigKey.ROMANCE_THEATER_PROBABILITY_TRIGGERTIMING)
-                .getJsonObject();
-        List<Integer> timeList = (List<Integer>) JSONObject.toBean(timeConfig);
-        int timeMin = timeList.get(0);
-        int timeMax = timeList.get(1);
+        JSONArray timeJson = probabilityConfig.get(ConfigKey.ROMANCE_THEATER_PROBABILITY_TRIGGERTIMING).getJsonArray();
+
+        int timeMin = timeJson.getInt(0);
+        int timeMax = timeJson.getInt(1);
         int timeLimit = RandomUtils.randomInt(timeMin, timeMax);
         // 检查是否有随机剧情
         Map<String, Map<Integer, Integer>> romanceRandomStory = lord.getRomanceRandomStory();
@@ -295,10 +295,10 @@ public class GameSupport extends BaseGameSupport {
             }
         }
         // 检查剧情时间限制
-        long romanceStoryTime = lord.getRomanceStoryTime();
-        if (System.currentTimeMillis() < (romanceStoryTime + DateUtils.MILLIS_PER_MINUTE * timeLimit)) {
-            return;
-        }
+        // long romanceStoryTime = lord.getRomanceStoryTime();
+        // if (System.currentTimeMillis() < (romanceStoryTime + DateUtils.MILLIS_PER_MINUTE * timeLimit)) {
+        // return;
+        // }
         // 根据概率计算是否触发随机剧情
         if (Math.random() > limitPro) {
             return;
@@ -317,7 +317,6 @@ public class GameSupport extends BaseGameSupport {
         } else if (type == RandomStoryType.PVP_LOSE) {
             System.out.println(type.getType());
         }
-        lord.setRomanceStoryTime(System.currentTimeMillis());
     }
 
     /**
@@ -331,7 +330,7 @@ public class GameSupport extends BaseGameSupport {
         DataConfig randomTheaterConfig = getDataConfig().get(ConfigKey.ROMANCE_THEATERID);// 剧情配置
         Map<String, Map<Integer, Integer>> heroWeightMap = new HashMap<>();
         Map<String, Map<Integer, Integer>> randomStoryMap = new HashMap<>();
-        lord.setRomanceRandomStory(randomStoryMap);
+
         // 权重总和
         int weightTotal = 0;
         for (FormHold formHold : formHoldList) {
@@ -360,6 +359,7 @@ public class GameSupport extends BaseGameSupport {
         int randomInt = RandomUtils.randomInt(0, weightTotal);
         // 计算随机剧情
         int tempTotal = 0;
+        boolean flag = false;
         for (String heroId : heroWeightMap.keySet()) {
             Map<Integer, Integer> weightMap = heroWeightMap.get(heroId);
             for (Integer index : weightMap.keySet()) {
@@ -370,9 +370,17 @@ public class GameSupport extends BaseGameSupport {
                     Map<Integer, Integer> stateMap = new HashMap<>();
                     randomStoryMap.put(heroId, stateMap);
                     stateMap.put(index, Romance.STORY_STATE_END);
+                    lord.setRomanceStoryTime(System.currentTimeMillis());
+                    flag = true;
+                    break;
                 }
             }
+            if (flag) {
+                break;
+            }
         }
+        lord.setRomanceRandomStory(randomStoryMap);
+        this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY, randomStoryMap);
     }
 
 }
