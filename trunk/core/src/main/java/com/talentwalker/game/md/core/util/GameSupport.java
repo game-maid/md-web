@@ -367,7 +367,7 @@ public class GameSupport extends BaseGameSupport {
             for (Integer index : weightMap.keySet()) {
                 Integer weight = weightMap.get(index);
                 tempTotal += weight;
-                if (tempTotal > randomInt) {
+                if (tempTotal >= randomInt) {
                     // 产生随机剧情
                     Map<Integer, Integer> stateMap = new HashMap<>();
                     randomStoryMap.put(heroId, stateMap);
