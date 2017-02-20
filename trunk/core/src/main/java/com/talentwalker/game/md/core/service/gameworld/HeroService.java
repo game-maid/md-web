@@ -35,6 +35,7 @@ import com.talentwalker.game.md.core.response.ResponseKey;
 import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
+import com.talentwalker.game.md.core.util.RandomUtils;
 import com.talentwalker.game.md.core.util.UuidUtils;
 
 import net.sf.json.JSONArray;
@@ -870,7 +871,7 @@ public class HeroService extends GameSupport {
             for (Integer index : storyStateSet) {
                 if (state == Romance.STORY_STATE_END && storyState.get(index) != Romance.STORY_STATE_END) {
                     // 发送奖励
-
+                    getRomanceTHeaterAward(lord);
                     // 记录随机剧情历史记录
                     recordRomanceRandomStory(lord);
                 }
@@ -879,6 +880,44 @@ public class HeroService extends GameSupport {
             this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY, randomStory);
         }
         lordRepository.save(lord);
+    }
+
+    /**
+     * @Description:计算好感度随机剧情，通过奖励
+     * @param lord
+     * @throws
+     */
+    private void getRomanceTHeaterAward(Lord lord) {
+        int weightTotal = 0;
+        DataConfig awardsConfig = getDataConfig().get(ConfigKey.ROMANCE_THRETER_AWARD).get(lord.getLevel() + "")
+                .get(ConfigKey.ROMANCE_THRETER_AWARD_AND_WEIGHT);
+        List<Map<String, Object>> awardAndWeightList = new ArrayList<>();
+        for (int i = 1;; i++) {
+            DataConfig weightConfig = awardsConfig.get(i + "");
+            if (weightConfig == null) {
+                break;
+            }
+            Map<String, Object> awardAndWeightMap = new HashMap<>();
+            awardAndWeightMap.put(ConfigKey.ROMANCE_THRETER_AWARD_ITEMID,
+                    weightConfig.getString(ConfigKey.ROMANCE_THRETER_AWARD_ITEMID));
+            awardAndWeightMap.put(ConfigKey.ROMANCE_THEATERID_WEIGHT,
+                    weightConfig.getInteger(ConfigKey.ROMANCE_THEATERID_WEIGHT));
+            awardAndWeightMap.put(ConfigKey.ROMANCE_THRETER_AWARD_NUM,
+                    weightConfig.getInteger(ConfigKey.ROMANCE_THRETER_AWARD_NUM));
+            weightTotal += weightConfig.getInteger(ConfigKey.ROMANCE_THRETER_AWARD_WEIGHT);
+            awardAndWeightList.add(awardAndWeightMap);
+        }
+        // 随机数
+        int random = RandomUtils.randomInt(0, weightTotal);
+        weightTotal = 0;
+        for (Map<String, Object> map : awardAndWeightList) {
+            weightTotal += (int) map.get(ConfigKey.ROMANCE_THRETER_AWARD_WEIGHT);
+            if (weightTotal >= random) {
+                gainPayService.gain(lord, (String) map.get(ConfigKey.ROMANCE_THRETER_AWARD_ITEMID),
+                        (int) map.get(ConfigKey.ROMANCE_THRETER_AWARD_NUM));
+                break;
+            }
+        }
     }
 
     /**
