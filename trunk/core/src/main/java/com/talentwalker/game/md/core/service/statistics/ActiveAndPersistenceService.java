@@ -218,8 +218,10 @@ public class ActiveAndPersistenceService {
                 matchZoneStr, matchNewPayerNum);
         // 付费人数
         String matchPayerNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
-        getNum(startDate, tableData, "game_payer", "setPayerNum", int.class, group, sortZoneId, matchZoneStr,
-                matchPayerNum);
+        String distinctLord = "{$group:{_id:{zone_id:'$zone_id',package_id:'$package_id',lordId:'$lordId'}}}";
+        String groupPayerNum = "{$group:{_id:{zone_id:'$_id.zone_id',package_id:'$_id.package_id'},total:{$sum:1}}}";
+        getNum(startDate, tableData, "game_order", "setPayerNum", int.class, groupPayerNum, sortZoneId, matchZoneStr,
+                matchPayerNum, distinctLord);
         // 新增用户数
         String matchNewUserNum = "{$match:{$and:[{register_time:{$gt:" + startDate + "}},{register_time:{$lt:" + endDate
                 + "}}]}}";
@@ -365,7 +367,10 @@ public class ActiveAndPersistenceService {
                 matchNewPayerNum);
         // 付费人数
         String matchPayerNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
-        getNum(startDate, tableData, "game_payer", "setPayerNum", int.class, group, sortZoneId, matchPayerNum);
+        String distinctLord = "{$group:{_id:{zone_id:'$zone_id',package_id:'$package_id',lordId:'$lordId'}}}";
+        String groupPayerNum = "{$group:{_id:{zone_id:'$_id.zone_id',package_id:'$_id.package_id'},total:{$sum:1}}}";
+        getNum(startDate, tableData, "game_order", "setPayerNum", int.class, groupPayerNum, sortZoneId, matchPayerNum,
+                distinctLord);
         // 收入金额
         String groupPrice = "{$group:{_id:{zone_id:'$zone_id',package_id:'$package_id'},total:{$sum:'$price'}}}";
         String matchIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
@@ -412,8 +417,11 @@ public class ActiveAndPersistenceService {
                 matchZoneStr, matchNewPayerNum);
         // 付费人数
         String matchPayerNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
-        getNum(startDate, tableData, "game_payer", "setPayerNum", int.class, group, sortZoneId, matchZoneStr,
-                matchPayerNum);
+        String distinctLord = "{$group:{_id:{zone_id:'$zone_id',package_id:'$package_id',lord_id:'$lordId'}}}";
+        String groupPayerNum = "{$group:{_id:{zone_id:'$_id.zone_id',package_id:'$_id.package_id'},total:{$sum:1}}}";
+
+        getNum(startDate, tableData, "game_order", "setPayerNum", int.class, groupPayerNum, sortZoneId, matchZoneStr,
+                matchPayerNum, distinctLord);
         // 收入金额
         String groupPrice = "{$group:{_id:{zone_id:'$zone_id',package_id:'$package_id'},total:{$sum:'$price'}}}";
         String matchIncomeNum = "{$match:{$and:[{pay_time:{$gt:" + startDate + "}},{pay_time:{$lt:" + endDate + "}}]}}";
