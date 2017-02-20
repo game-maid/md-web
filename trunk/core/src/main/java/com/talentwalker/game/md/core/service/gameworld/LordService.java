@@ -460,7 +460,6 @@ public class LordService extends GameSupport {
         this.gameModel.addObject(ResponseKey.ZONE_CREATE_TIME, lord.getRegisterTime());
         this.gameModel.addObject(ResponseKey.ROMANCE, lord.getRomance());
         this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY, lord.getRomanceRandomStory());
-        this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY_RECORD, lord.getRomanceRandomStoryRecord());
         // 公会数据
         leagueService.loginInfo(lord);
 
