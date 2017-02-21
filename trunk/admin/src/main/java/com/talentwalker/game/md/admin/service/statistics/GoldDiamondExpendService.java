@@ -331,18 +331,34 @@ public class GoldDiamondExpendService extends BaseService {
                 payTypeLordList.add(lordId);
             }
             if (payType == 1) {// 付费用户
-                for (String lordId : payTypeLordList) {
+                Iterator<String> it = payTypeLordList.iterator();
+                while (it.hasNext()) {
+                    String lordId = it.next();
                     if (!registerLordIdList.contains(lordId)) {
-                        payTypeLordList.remove(lordId);
+                        it.remove();
                     }
                 }
+
+                // for (String lordId : payTypeLordList) {
+                // if (!registerLordIdList.contains(lordId)) {
+                // payTypeLordList.remove(lordId);
+                // }
+                // }
                 lordIdList = payTypeLordList;
             } else {// 未付费用户
-                for (String lordId : registerLordIdList) {
+                Iterator<String> it = registerLordIdList.iterator();
+                while (it.hasNext()) {
+                    String lordId = it.next();
                     if (payTypeLordList.contains(lordId)) {
-                        registerLordIdList.remove(lordId);
+                        it.remove();
                     }
                 }
+
+                // for (String lordId : registerLordIdList) {
+                // if (payTypeLordList.contains(lordId)) {
+                // registerLordIdList.remove(lordId);
+                // }
+                // }
                 lordIdList = registerLordIdList;
             }
         } else {// 没有付费条件 按注册条件查询
@@ -354,6 +370,7 @@ public class GoldDiamondExpendService extends BaseService {
                 lordIds.append(",");
             }
         }
+        System.out.println(lordIds.toString());
         return lordIds.toString();
     }
 
