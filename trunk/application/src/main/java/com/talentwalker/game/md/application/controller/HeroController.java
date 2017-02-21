@@ -81,15 +81,15 @@ public class HeroController extends GameSupport {
      * @Description:好感度等级剧情
      * @param state 剧情的状态： 0：未进入剧情   1：进入剧情中间退出     2：剧情完成（解锁该等级立绘）
      * @param romanceLevel 好感度等级 
-     * @param heroId 英雄uid
+     * @param heroId 英雄Id
      * @return
      * @throws
      */
     @GameResponse
-    @RequestMapping(value = "romance/story/{state}/{romanceLevel}/{heroUid}")
+    @RequestMapping(value = "romance/story/{state}/{romanceLevel}/{heroId}")
     public GameModel romanceStory(@PathVariable Integer state, @PathVariable Integer romanceLevel,
-            @PathVariable String heroUid) {
-        heroService.romanceStory(Romance.STORY_TYPE_LEVEL, state, romanceLevel, heroUid);
+            @PathVariable String heroId) {
+        heroService.romanceStory(Romance.STORY_TYPE_LEVEL, state, romanceLevel, heroId);
         return this.gameModel;
     }
 
@@ -108,29 +108,29 @@ public class HeroController extends GameSupport {
 
     /**
      * @Description: 使用提升武将好感度
-     * @param heroUid
+     * @param heroId
      * @param items
      * @return
      * @throws
      */
     @GameResponse
-    @RequestMapping(value = "romance/addExp/{heroUid}")
-    public GameModel romanceAddExp(@PathVariable String heroUid, @RequestBody JSONObject items) {
-        heroService.addHeroRomanceExp(heroUid, items);
+    @RequestMapping(value = "romance/addExp/{heroId}")
+    public GameModel romanceAddExp(@PathVariable String heroId, @RequestBody JSONObject items) {
+        heroService.addHeroRomanceExp(heroId, items);
         return this.gameModel;
     }
 
     /**
      * @Description:选择武将默认立绘图
      * @param level
-     * @param heroUid
+     * @param heroId
      * @return
      * @throws
      */
     @GameResponse
-    @RequestMapping(value = "romance/addpic/{level}/{heroUid}")
-    public GameModel romanceAddpic(@PathVariable Integer level, @PathVariable String heroUid) {
-        heroService.romanceAddpic(level, heroUid);
+    @RequestMapping(value = "romance/addpic/{level}/{heroId}")
+    public GameModel romanceAddpic(@PathVariable Integer level, @PathVariable String heroId) {
+        heroService.romanceAddpic(level, heroId);
         return this.gameModel;
     }
 }

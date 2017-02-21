@@ -358,18 +358,16 @@ public class HeroService extends GameSupport {
 
     /**
      * @Description:提升高感度
-     * @param heroUid
+     * @param heroId
      * @param items
      * @throws
      */
-    public void addHeroRomanceExp(String heroUid, JSONObject items) {
+    public void addHeroRomanceExp(String heroId, JSONObject items) {
         Lord lord = getLord();
-        Map<String, Hero> heros = lord.getHeros();
-        // 英雄校验
-        this.isHave(lord, heroUid);
-        Hero hero = heros.get(heroUid);
-        String heroId = hero.getHeroId();
         Romance romance = lord.getRomance().get(heroId);
+        if (romance == null) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24022, "玩家从未获得过该类型武将");
+        }
         int romanceLevel = romance.getLevel();
         int romanceExp = romance.getExp();
         // 检查好感度最高等级
@@ -825,18 +823,15 @@ public class HeroService extends GameSupport {
      * @return
      * @throws
      */
-    public void romanceStory(Integer type, Integer state, Integer romanceLevel, String heroUid) {
+    public void romanceStory(Integer type, Integer state, Integer romanceLevel, String heroId) {
         Lord lord = getLord();
         if (Romance.STORY_TYPE_LEVEL == type) {
             // 等级剧情
-            // 获取武将id
-            String heroId = getHeroId(heroUid, lord);
             // 校验好感度等级
             Map<String, Romance> romanceMap = lord.getRomance();
             Romance romance = romanceMap.get(heroId);
             if (romance == null) {
-                romance = new Romance();
-                romanceMap.put(heroId, romance);
+                GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24022, "玩家从未获得过该类型武将");
             }
             if (romanceLevel > romance.getLevel()) {
                 GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24021, "好感度等级不够");
@@ -862,7 +857,6 @@ public class HeroService extends GameSupport {
             // 随机剧情
             Map<String, Map<Integer, Integer>> randomStory = lord.getRomanceRandomStory();
             Set<String> heroIdSet = randomStory.keySet();
-            String heroId = null;
             for (String string : heroIdSet) {
                 heroId = string;
             }
@@ -965,13 +959,11 @@ public class HeroService extends GameSupport {
     /**
      * @Description:选择武将默认立绘图
      * @param level
-     * @param heroUid
+     * @param heroId
      * @throws
      */
-    public void romanceAddpic(Integer level, String heroUid) {
+    public void romanceAddpic(Integer level, String heroId) {
         Lord lord = getLord();
-        Hero hero = isHave(lord, heroUid);
-        String heroId = hero.getHeroId();
         Map<String, Romance> romanceMap = lord.getRomance();
         Romance romance = romanceMap.get(heroId);
         // 好感度等级校验
