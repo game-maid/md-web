@@ -390,7 +390,6 @@ public class HeroService extends GameSupport {
             gainPayService.pay(lord, itemId, items.getInt(itemId));
             romanceExp += itemConfig.get(itemId).getInteger(ConfigKey.ITEM_PARAMS) * items.getInt(itemId);
         }
-
         // 加经验
         gainPayService.gain(lord, ItemID.ROMANCE_EXP + "--" + heroId, romanceExp);
         lordRepository.save(lord);

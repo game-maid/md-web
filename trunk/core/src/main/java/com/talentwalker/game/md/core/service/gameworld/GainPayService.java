@@ -315,8 +315,9 @@ public class GainPayService extends GameSupport {
                     itemId = items[1];
                     Romance romance = lord.getRomance().get(itemId);
                     int romanceLevel = romance.getLevel();
-                    DataConfig romanceConfig = getDataConfig().get(ConfigKey.ROMANCE_BASE).get(itemId)
-                            .get(ConfigKey.ROMANCE_BASE_ROMANCE).get(romanceLevel + 1 + "");
+                    DataConfig romanceLevelsConfig = getDataConfig().get(ConfigKey.ROMANCE_BASE).get(itemId)
+                            .get(ConfigKey.ROMANCE_BASE_ROMANCE);
+                    DataConfig romanceConfig = romanceLevelsConfig.get(romanceLevel + 1 + "");
                     Integer romanceExpCost = romanceConfig.getInteger(ConfigKey.ROMANCE_BASE_COST);
                     int romanceMaxLv = getDataConfig().get(ConfigKey.ROMANCE_BASE).get(itemId)
                             .getInteger(ConfigKey.ROMANCE_BASE_MAXLV);
@@ -332,7 +333,8 @@ public class GainPayService extends GameSupport {
                         if (romanceMaxLv <= romanceLevel) {
                             break;
                         }
-                        romanceExpCost = romanceConfig.getInteger(ConfigKey.ROMANCE_BASE_COST);
+                        romanceExpCost = romanceLevelsConfig.get(romanceLevel + 1 + "")
+                                .getInteger(ConfigKey.ROMANCE_BASE_COST);
                     }
                     romance.setExp(number);
                     romance.setLevel(romanceLevel);
