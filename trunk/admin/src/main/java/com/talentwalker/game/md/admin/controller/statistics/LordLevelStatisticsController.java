@@ -55,7 +55,6 @@ public class LordLevelStatisticsController extends BaseController {
     public Page<LordLevel> findPage(@RequestParam("userType") String userType,
             @RequestParam("startLong") Long startLong, @RequestParam("endLong") Long endLong,
             @RequestParam("zoneArr[]") String[] zoneArr) {
-        System.out.println(userType + "--" + startLong + "---" + endLong + "---" + zoneArr.length);
         return lordLevelStatisticsService.findPage(userType, startLong, endLong, zoneArr);
     }
 }

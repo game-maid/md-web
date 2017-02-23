@@ -26,5 +26,5 @@ public interface LoginRepository extends BaseMongoRepository<Login, String> {
     List<Login> findByLordId(String lordId, Long startTime, Long endTime);
 
     @Query("{'$and':[{'loginTime':{$gte:?0}},{'loginTime':{$lte:?1}},{'zone_id':{'$in':?2}}]}")
-    public List<Login> findByLoginTimeAndZoneId(Long start, Long end, String[] zoneArr);
+    public List<Login> findByDistinctLoginTimeAndZoneId(Long start, Long end, String[] zoneArr);
 }

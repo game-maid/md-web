@@ -17,12 +17,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
+import com.talentwalker.game.md.core.domain.gameworld.Lordname;
 import com.talentwalker.game.md.core.domain.statistics.Login;
 import com.talentwalker.game.md.core.domain.statistics.LordLevel;
 import com.talentwalker.game.md.core.domain.statistics.Register;
@@ -80,16 +83,47 @@ public class LordLevelStatisticsService {
         }
         sb.append("]");
         String lordIds = queryLordIds(userType, startLong, endLong, zoneArr);
-        System.out.println(lordIds);
         // 计算总数
-        long total = findTotal(lordIds);
-        System.out.println(total);
+        long total = findTotal(userType, lordIds);
         Pageable pageable = SearchFilter.newSearchFilter().getPageable();
         // 分页查询
         List<DBObject> pageList = new ArrayList<>();
-        pageList.add((DBObject) JSON.parse("{$match:{_id:{$in:" + lordIds + "}}}"));
+        if (!ALL_USER.equals(userType)) {
+            pageList.add((DBObject) JSON.parse("{$match:{_id:{$in:" + lordIds + "}}}"));
+        }
+        pageList.add((DBObject) JSON.parse("{$group:{_id:{level:'$level'},num:{$sum:1}}}"));
+        pageList.add((DBObject) JSON.parse("{$sort:{_id.level:1}}"));
+        pageList.add((DBObject) JSON.parse("{$skip:" + pageable.getOffset() + "}"));
+        pageList.add((DBObject) JSON.parse("{$limit:" + pageable.getPageSize() + "}"));
+        AggregationOutput out = mongoTemplate.getCollection("game_lord").aggregate(pageList);
+        Iterator<DBObject> it = out.results().iterator();
+        int totalNum = 0;
+        while (it.hasNext()) {
+            BasicDBObject result = (BasicDBObject) it.next();
+            int level = ((BasicDBObject) result.get("_id")).getInt("level");// 等级
+            int num = result.getInt("num");// 人数
+            LordLevel lordLevel = new LordLevel();
+            lordLevel.setLevel(level);
+            lordLevel.setNum(num);
+            totalNum += num;
+            content.add(lordLevel);
+        }
+        List<String> list = (List<String>) JSON.parse(lordIds);
+        System.out.println("玩家id:" + list.size() + "分页总数：" + totalNum);
+        for (int i = 0; i < content.size(); i++) {
+            LordLevel lordLevel = content.get(i);
+            lordLevel.setProportion((lordLevel.getNum() * 100) / totalNum / 100.0D);
+            int level = lordLevel.getLevel();
+            Query query = new Query();
+            for (String lordId : list) {
 
-        mongoTemplate.getCollection("game_lord").aggregate(pageList);
+            }
+            query.addCriteria(Criteria.where("player_id").orOperator());
+            query.addCriteria(Criteria.where("level").is(level));
+            List<Lordname> lordName = mongoTemplate.find(query, Lordname.class);
+            lordLevel.setLordList(lordName);
+        }
+
         return new PageImpl<>(content, pageable, total);
     }
 
@@ -98,10 +132,12 @@ public class LordLevelStatisticsService {
      * @return
      * @throws
      */
-    private long findTotal(String lordIds) {
+    private long findTotal(String userType, String lordIds) {
         long total = 0L;
         List<DBObject> totalNumList = new ArrayList<>();
-        totalNumList.add((DBObject) JSON.parse("{$match:{_id:{$in:" + lordIds + "}}}"));
+        if (!ALL_USER.equals(userType)) {
+            totalNumList.add((DBObject) JSON.parse("{$match:{_id:{$in:" + lordIds + "}}}"));
+        }
         totalNumList.add((DBObject) JSON.parse("{$group:{_id:{lordId:'$id',level:'$level'}}}"));
         totalNumList.add((DBObject) JSON.parse("{$group:{_id:{lordId:'$_id.lordId'},total:{$sum:1}}}"));
         AggregationOutput outTotal = mongoTemplate.getCollection("game_lord").aggregate(totalNumList);
@@ -126,7 +162,7 @@ public class LordLevelStatisticsService {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         if (ACTIVE_USER.equals(userType)) {// 活跃用户
-            List<Login> loginList = loginRepository.findByLoginTimeAndZoneId(startLong, endLong, zoneArr);
+            List<Login> loginList = loginRepository.findByDistinctLoginTimeAndZoneId(startLong, endLong, zoneArr);
             Iterator<Login> it = loginList.iterator();
             while (it.hasNext()) {
                 sb.append("'").append(it.next().getLordId()).append("'");
