@@ -14,7 +14,15 @@ import com.talentwalker.game.md.core.repository.BaseMongoRepository;
  * @author <a href="mailto:zhangfutao@talentwalker.com">张福涛</a> 于 2016年12月22日 上午11:09:45
  */
 public interface LoginRepository extends BaseMongoRepository<Login, String> {
-
+    /**
+     * @Description:根据登录时间查询
+     * @param lordId
+     * @param startTime
+     * @param endTime
+     * @return
+     * @throws
+     */
     @Query("{'$and':[{'lordId':?0},{'loginTime':{'$gt':?1}},{'loginTime':{'$lt':?2}}]}")
     List<Login> findByLordId(String lordId, Long startTime, Long endTime);
+
 }
