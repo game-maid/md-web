@@ -842,10 +842,12 @@ public class HeroService extends GameSupport {
                 DataConfig awardConfig = getDataConfig().get(ConfigKey.ROMANCE_BASE).get(heroId)
                         .get(ConfigKey.ROMANCE_BASE_ROMANCE).get(romanceLevel + "").get(ConfigKey.ROMANCE_BASE_AWARD);
                 if (awardConfig != null) {
-                    for (int i = 0; i < awardConfig.size(); i++) {
-                        gainPayService.gain(lord, awardConfig.getString(i),
-                                awardConfig.getInteger(awardConfig.getString(i)));
+                    JSONObject jsonObject = awardConfig.getJsonObject();
+                    Set<String> keySet = jsonObject.keySet();
+                    for (String itemId : keySet) {
+                        gainPayService.gain(lord, itemId, jsonObject.getInt(itemId));
                     }
+
                 }
             }
             storyMap.put(romanceLevel, state);
