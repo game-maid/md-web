@@ -9,6 +9,7 @@ package com.talentwalker.game.md.core.service.gameworld;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -854,22 +855,21 @@ public class HeroService extends GameSupport {
             this.gameModel.addObject(ResponseKey.ROMANCE, updateRomance);
         } else if (Romance.STORY_TYPE_RANDOM == type) {
             // 随机剧情
-            Map<String, Map<Integer, Integer>> randomStory = lord.getRomanceRandomStory();
+            Map<String, Integer> randomStory = lord.getRomanceRandomStory();
+
             Set<String> heroIdSet = randomStory.keySet();
+            String storyId = "";// 剧情id
             for (String string : heroIdSet) {
-                heroId = string;
+                storyId = string;
             }
-            Map<Integer, Integer> storyState = randomStory.get(heroId);
-            Set<Integer> storyStateSet = storyState.keySet();
-            for (Integer index : storyStateSet) {
-                if (state == Romance.STORY_STATE_END && storyState.get(index) != Romance.STORY_STATE_END) {
-                    // 发送奖励
-                    getRomanceTHeaterAward(lord);
-                    // 记录随机剧情历史记录
-                    recordRomanceRandomStory(lord);
-                }
-                storyState.put(index, state);
+            Integer oldState = randomStory.get(storyId);
+            if (state == Romance.STORY_STATE_END && oldState != Romance.STORY_STATE_END) {
+                // 发送奖励
+                getRomanceTHeaterAward(lord);
+                // 记录随机剧情历史记录
+                recordRomanceRandomStory(lord);
             }
+            randomStory.put(storyId, state);
             this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY, randomStory);
         }
         lordRepository.save(lord);
@@ -919,22 +919,19 @@ public class HeroService extends GameSupport {
      * @throws
      */
     private void recordRomanceRandomStory(Lord lord) {
-        Map<String, Map<Integer, Integer>> curStory = lord.getRomanceRandomStory();
+        Map<String, Integer> curStory = lord.getRomanceRandomStory();
+
         Map<String, Romance> romanceMap = lord.getRomance();
-        for (String heroId : curStory.keySet()) {
-            Map<Integer, Integer> stateMap = curStory.get(heroId);
-            for (Integer index : stateMap.keySet()) {
-                if (stateMap.get(index) == Romance.STORY_STATE_END) {
-                    Romance romance = romanceMap.get(heroId);
-                    List<Integer> randomStoryRecord = romance.getRandomStoryRecord();
-                    if (randomStoryRecord == null) {
-                        randomStoryRecord = new ArrayList<>();
-                        romance.setRandomStoryRecord(randomStoryRecord);
-                    }
-                    if (!randomStoryRecord.contains(index)) {
-                        randomStoryRecord.add(index);
-                    }
+        for (String storyId : curStory.keySet()) {
+            Integer state = curStory.get(storyId);
+            if (state == Romance.STORY_STATE_END) {
+                Romance romance = romanceMap.get(storyId);
+                Set<String> randomStoryRecord = romance.getRandomStoryRecord();
+                if (randomStoryRecord == null) {
+                    randomStoryRecord = new HashSet<>();
+                    romance.setRandomStoryRecord(randomStoryRecord);
                 }
+                randomStoryRecord.add(storyId);
             }
         }
     }
