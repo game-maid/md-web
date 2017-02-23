@@ -966,7 +966,7 @@ public class HeroService extends GameSupport {
         Map<String, Romance> romanceMap = lord.getRomance();
         Romance romance = romanceMap.get(heroId);
         // 好感度等级校验
-        if (romance.getLevel() < level || level <= 0) {
+        if (romance.getLevel() < level || level < 0) {
             GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24021, "好感度等级不够");
         }
         romance.setAddpic(level);
