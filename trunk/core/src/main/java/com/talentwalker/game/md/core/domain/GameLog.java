@@ -76,8 +76,14 @@ public class GameLog extends BaseDomain {
     @Field("pre_diamond")
     private int preDiamond;
 
+    @Field("pre_persent_diamond")
+    private int prePersentDiamond;
+
     @Field("post_diamond")
     private int postDiamond;
+
+    @Field("post_persent_diamond")
+    private int postPersentDiamond;
 
     @Field("pre_vipscore")
     private int preVipscore;
@@ -424,6 +430,34 @@ public class GameLog extends BaseDomain {
      */
     public void setExpendItems(List<String> expendItems) {
         this.expendItems = expendItems;
+    }
+
+    /**
+     * @return prePersentDiamond
+     */
+    public int getPrePersentDiamond() {
+        return prePersentDiamond;
+    }
+
+    /**
+     * @param prePersentDiamond 要设置的 prePersentDiamond
+     */
+    public void setPrePersentDiamond(int prePersentDiamond) {
+        this.prePersentDiamond = prePersentDiamond;
+    }
+
+    /**
+     * @return postPersentDiamond
+     */
+    public int getPostPersentDiamond() {
+        return postPersentDiamond;
+    }
+
+    /**
+     * @param postPersentDiamond 要设置的 postPersentDiamond
+     */
+    public void setPostPersentDiamond(int postPersentDiamond) {
+        this.postPersentDiamond = postPersentDiamond;
     }
 
 }

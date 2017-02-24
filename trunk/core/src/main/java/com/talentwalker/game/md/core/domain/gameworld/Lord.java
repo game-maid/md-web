@@ -50,9 +50,13 @@ public class Lord extends BaseDomain {
      */
     protected int exp;
     /**
-     * 钻石
+     * 充钱买的钻石
      */
     protected int diamond;
+    /**
+     * 赠送的钻石
+     */
+    protected int persentDiamond;
     /**
      * 金币
      */
@@ -1006,6 +1010,20 @@ public class Lord extends BaseDomain {
      */
     public void setRomanceStoryTime(long romanceStoryTime) {
         this.romanceStoryTime = romanceStoryTime;
+    }
+
+    /**
+     * @return persentDiamond
+     */
+    public int getPersentDiamond() {
+        return persentDiamond;
+    }
+
+    /**
+     * @param persentDiamond 要设置的 persentDiamond
+     */
+    public void setPersentDiamond(int persentDiamond) {
+        this.persentDiamond = persentDiamond;
     }
 
 }

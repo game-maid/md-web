@@ -29,6 +29,7 @@ public class Player extends Lord {
         this.level = lord.getLevel();
         this.exp = lord.getExp();
         this.diamond = lord.getDiamond();
+        this.persentDiamond = lord.getPersentDiamond();
         this.gold = lord.getGold();
         this.vipScore = lord.getVipScore();
         this.vipLevel = lord.getVipLevel();

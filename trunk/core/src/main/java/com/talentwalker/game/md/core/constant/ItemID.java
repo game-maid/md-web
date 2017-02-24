@@ -17,6 +17,8 @@ public class ItemID {
 
     public final static String DIAMOND = "diamond";
 
+    public final static String PERSENT_DIAMOND = "persentDiamond";
+
     public final static String GOLD = "gold";
 
     public final static String EXP = "exp";

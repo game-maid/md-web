@@ -76,14 +76,28 @@ public class GainPayService extends GameSupport {
             Lord lord = (Lord) obj;
             if (ItemID.DIAMOND.equals(itemId)) { // 钻石
                 int diamond = lord.getDiamond();
-                if (number < 0) {
+                int persentDiamond = lord.getPersentDiamond();
+                if (number < 0) {// 消耗钻石
                     // this.check(diamond, number);
-                    if (diamond + number < 0) {
+                    // 优先消耗充值钻石
+                    if (diamond + number >= 0) {// 消耗充值钻石
+                        lord.setDiamond(diamond + number);
+                        this.lordResponse(itemId, number, lord.getDiamond());
+                    } else if (diamond + persentDiamond + number >= 0) {// 消耗充值钻石和赠送钻石
+                        lord.setDiamond(0);
+                        this.lordResponse(itemId, diamond, lord.getDiamond());
+                        lord.setPersentDiamond(diamond + persentDiamond + number);
+                        this.lordResponse(ItemID.PERSENT_DIAMOND, number - diamond, lord.getPersentDiamond());
+                    } else {
                         GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_21019, "钻石不足");
                     }
+                } else {// 获得充值钻石
+                    lord.setDiamond(diamond + number);
+                    this.lordResponse(itemId, number, lord.getDiamond());
                 }
-                lord.setDiamond(diamond + number);
-                this.lordResponse(itemId, number, lord.getDiamond());
+            } else if (ItemID.PERSENT_DIAMOND.equals(itemId)) {// 增加赠送的钻石
+                lord.setPersentDiamond(number + lord.getPersentDiamond());
+                this.lordResponse(itemId, number, lord.getPersentDiamond());
             } else if (ItemID.GOLD.equals(itemId)) { // 金币
                 int gold = lord.getGold();
                 if (number < 0) {

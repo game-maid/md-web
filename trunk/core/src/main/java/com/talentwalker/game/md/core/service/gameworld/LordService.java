@@ -1133,7 +1133,8 @@ public class LordService extends GameSupport {
     public void updateLord() {
         Lord lord = getLord();
         Map<String, Object> map = new HashMap<>();
-        map.put("diamond", lord.getDiamond());
+        map.put(ItemID.DIAMOND, lord.getDiamond());
+        map.put(ItemID.PERSENT_DIAMOND, lord.getPersentDiamond());
         map.put("monthCard", lord.getMonthCard());
         map.put("vipLevel", lord.getVipLevel());
         map.put("vipScore", lord.getVipScore());
