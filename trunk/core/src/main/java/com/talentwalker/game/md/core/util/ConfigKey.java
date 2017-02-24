@@ -210,12 +210,16 @@ public class ConfigKey {
      *权重
      */
     public static final String ROMANCE_THEATERID_WEIGHT = "weight";
+    /**
+     *剧情id
+     */
+    public static final String ROMANCE_THEATERID_WEIGHT_ID = "ID";
     /*************************好感度随机剧情奖励***********************/
     public static final String ROMANCE_THRETER_AWARD = "romance_theaterTriggerAward";
     /**
      *奖励及权重
      */
-    public static final String ROMANCE_THRETER_AWARD_AND_WEIGHT = "wardAndWeight";
+    public static final String ROMANCE_THRETER_AWARD_AND_WEIGHT = "awardAndWeight";
     /**
      * 道具id
      */
