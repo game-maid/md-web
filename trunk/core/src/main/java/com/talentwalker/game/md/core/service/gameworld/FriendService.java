@@ -467,7 +467,7 @@ public class FriendService extends GameSupport {
         friendStrength.setFailureTime(new Date());
         int energy = config.get(ConfigKey.SEND_ENERGY).getInteger("value");
         lord.setGivesStrengthTimes(lord.getGivesStrengthTimes() + 1);
-        lord.setGivesStrengthTime(new Date());
+        lord.setGivesStrengthTime(System.currentTimeMillis());
         gainPayService.gain(lord, ItemID.STRENGTH, energy);
         lordRepository.save(lord);
         friendSendStrengthRepository.save(friendStrength);

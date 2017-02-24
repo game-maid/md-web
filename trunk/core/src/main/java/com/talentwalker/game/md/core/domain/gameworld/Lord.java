@@ -277,7 +277,7 @@ public class Lord extends BaseDomain {
     /**
      * 最后一次赠送奖励领取时间
      */
-    protected Date givesStrengthTime;
+    protected long givesStrengthTime;
     /**
      * 新手招募第步了
      */
@@ -911,25 +911,39 @@ public class Lord extends BaseDomain {
         this.givesStrengthTimes = givesStrengthTimes;
     }
 
+//    /**
+//     * @return givesStrengthTime
+//     */
+//    public Date getGivesStrengthTime() {
+//        if (givesStrengthTime == null) {
+//            givesStrengthTime = new Date();
+//        }
+//        return givesStrengthTime;
+//    }
+//
+//    /**
+//     * @param givesStrengthTime 要设置的 givesStrengthTime
+//     */
+//    public void setGivesStrengthTime(Date givesStrengthTime) {
+//        this.givesStrengthTime = givesStrengthTime;
+//    }
+
+    public Long getDailyFirstFreeStrenthStartTime() {
+        return dailyFirstFreeStrenthStartTime;
+    }
+
     /**
      * @return givesStrengthTime
      */
-    public Date getGivesStrengthTime() {
-        if (givesStrengthTime == null) {
-            givesStrengthTime = new Date();
-        }
+    public long getGivesStrengthTime() {
         return givesStrengthTime;
     }
 
     /**
      * @param givesStrengthTime 要设置的 givesStrengthTime
      */
-    public void setGivesStrengthTime(Date givesStrengthTime) {
+    public void setGivesStrengthTime(long givesStrengthTime) {
         this.givesStrengthTime = givesStrengthTime;
-    }
-
-    public Long getDailyFirstFreeStrenthStartTime() {
-        return dailyFirstFreeStrenthStartTime;
     }
 
     public void setDailyFirstFreeStrenthStartTime(Long dailyFirstFreeStrenthStartTime) {
