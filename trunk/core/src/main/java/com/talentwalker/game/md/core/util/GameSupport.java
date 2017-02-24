@@ -123,10 +123,14 @@ public class GameSupport extends BaseGameSupport {
             }
         }
         // 刷新赠送体力领取次数
-        if (!DateUtils.isSameDay(new Date(), lord.getGivesStrengthTime())) {
-            lord.setGivesStrengthTime(new Date());
+        if (!DateUtils.isSameDay(new Date(), new Date(lord.getGivesStrengthTime()))) {
+            lord.setGivesStrengthTime(System.currentTimeMillis());
             lord.setGivesStrengthTimes(0);
         }
+        // if (!DateUtils.isSameDay(new Date(), lord.getGivesStrengthTime())) {
+        // lord.setGivesStrengthTime(new Date());
+        // lord.setGivesStrengthTimes(0);
+        // }
 
         return lord;
     }
