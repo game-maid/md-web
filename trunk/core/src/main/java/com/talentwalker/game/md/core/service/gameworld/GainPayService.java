@@ -84,10 +84,12 @@ public class GainPayService extends GameSupport {
                         lord.setDiamond(diamond + number);
                         this.lordResponse(itemId, number, lord.getDiamond());
                     } else if (diamond + persentDiamond + number >= 0) {// 消耗充值钻石和赠送钻石
-                        lord.setDiamond(0);
-                        this.lordResponse(itemId, diamond, lord.getDiamond());
+                        if (diamond != 0) {
+                            lord.setDiamond(0);
+                            this.lordResponse(itemId, -diamond, lord.getDiamond());
+                        }
                         lord.setPersentDiamond(diamond + persentDiamond + number);
-                        this.lordResponse(ItemID.PERSENT_DIAMOND, number - diamond, lord.getPersentDiamond());
+                        this.lordResponse(ItemID.PERSENT_DIAMOND, number + diamond, lord.getPersentDiamond());
                     } else {
                         GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_21019, "钻石不足");
                     }
