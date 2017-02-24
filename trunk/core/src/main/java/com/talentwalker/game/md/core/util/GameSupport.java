@@ -24,6 +24,7 @@ import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.dataconfig.IDataConfigManager;
 import com.talentwalker.game.md.core.domain.GameUser;
 import com.talentwalker.game.md.core.domain.GameZone;
+import com.talentwalker.game.md.core.domain.gameworld.Duel;
 import com.talentwalker.game.md.core.domain.gameworld.FormHold;
 import com.talentwalker.game.md.core.domain.gameworld.Hero;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
@@ -33,6 +34,7 @@ import com.talentwalker.game.md.core.domain.gameworld.SignInRecord;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.repository.GameUserRepository;
 import com.talentwalker.game.md.core.repository.GameZoneRepository;
+import com.talentwalker.game.md.core.repository.gameworld.DuelRepository;
 import com.talentwalker.game.md.core.repository.gameworld.LordRepository;
 import com.talentwalker.game.md.core.response.ResponseKey;
 import com.talentwalker.game.md.core.service.IGameUserServiceRemote;
@@ -56,7 +58,9 @@ public class GameSupport extends BaseGameSupport {
     @Autowired
     protected GameUserRepository gameUserRepository;
     @Autowired
-    private GameZoneRepository gameZoneRepository;
+    protected GameZoneRepository gameZoneRepository;
+    @Autowired
+    protected DuelRepository duelRepository;
 
     /**
      * @Description:获得当前的GameUser对象
@@ -283,24 +287,21 @@ public class GameSupport extends BaseGameSupport {
         int timeMax = timeJson.getInt(1);
         int timeLimit = RandomUtils.randomInt(timeMin, timeMax);
         // 检查是否有随机剧情
-        Map<String, Map<Integer, Integer>> romanceRandomStory = lord.getRomanceRandomStory();
+        Map<String, Integer> romanceRandomStory = lord.getRomanceRandomStory();
         if (romanceRandomStory != null) {
             Set<String> heroSet = romanceRandomStory.keySet();
-            for (String heroId : heroSet) {
-                Map<Integer, Integer> stateMap = romanceRandomStory.get(heroId);
-                Set<Integer> keySet = stateMap.keySet();
-                for (Integer index : keySet) {
-                    if (Romance.STORY_STATE_END != stateMap.get(index)) {
-                        return;
-                    }
+            for (String storyId : heroSet) {
+                Integer state = romanceRandomStory.get(storyId);
+                if (Romance.STORY_STATE_END != state) {
+                    return;
                 }
             }
         }
         // 检查剧情时间限制
-        // long romanceStoryTime = lord.getRomanceStoryTime();
-        // if (System.currentTimeMillis() < (romanceStoryTime + DateUtils.MILLIS_PER_MINUTE * timeLimit)) {
-        // return;
-        // }
+        long romanceStoryTime = lord.getRomanceStoryTime();
+        if (System.currentTimeMillis() < (romanceStoryTime + DateUtils.MILLIS_PER_MINUTE * timeLimit)) {
+            return;
+        }
         // 根据概率计算是否触发随机剧情
         if (Math.random() > limitPro) {
             return;
@@ -309,15 +310,13 @@ public class GameSupport extends BaseGameSupport {
         /**
          *  计算随机剧情
          */
-        if (type == RandomStoryType.PVE_WIN) {
+        if (type == RandomStoryType.PVP_WIN || type == RandomStoryType.PVP_LOSE) {
+            Duel duelLord = duelRepository.findOne(lord.getId());
+            List<FormHold> formDefend = duelLord.getFormDefend();
+            randomStory(lord, formDefend, type.getType());
+        } else {
             List<FormHold> formHoldList = lord.getForm().get(0);
             randomStory(lord, formHoldList, type.getType());
-        } else if (type == RandomStoryType.PVE_LOSE) {
-            System.out.println(type.getType());
-        } else if (type == RandomStoryType.PVP_WIN) {
-            System.out.println(type.getType());
-        } else if (type == RandomStoryType.PVP_LOSE) {
-            System.out.println(type.getType());
         }
     }
 
@@ -331,7 +330,7 @@ public class GameSupport extends BaseGameSupport {
         Map<String, Hero> heros = lord.getHeros();
         DataConfig randomTheaterConfig = getDataConfig().get(ConfigKey.ROMANCE_THEATERID);// 剧情配置
         Map<String, Map<Integer, Integer>> heroWeightMap = new HashMap<>();
-        Map<String, Map<Integer, Integer>> randomStoryMap = new HashMap<>();
+        Map<String, Integer> randomStoryMap = null;
 
         // 权重总和
         int weightTotal = 0;
@@ -369,9 +368,9 @@ public class GameSupport extends BaseGameSupport {
                 tempTotal += weight;
                 if (tempTotal >= randomInt) {
                     // 产生随机剧情
-                    Map<Integer, Integer> stateMap = new HashMap<>();
-                    randomStoryMap.put(heroId, stateMap);
-                    stateMap.put(index, Romance.STORY_STATE_END);
+                    String storyId = randomTheaterConfig.get(heroId).get(ConfigKey.ROMANCE_THEATERID_THEATER)
+                            .get(index + "").getString(ConfigKey.ROMANCE_THEATERID_WEIGHT_ID);
+                    randomStoryMap.put(storyId, Romance.STORY_STATE_LOCK);
                     lord.setRomanceStoryTime(System.currentTimeMillis());
                     flag = true;
                     break;

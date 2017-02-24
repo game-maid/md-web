@@ -183,8 +183,8 @@ public class GoldDiamondExpendService extends BaseService {
         String limitStr = "";
         String offsetStr = "";
         if (pageable != null) {
-            limitStr = "{$limit:" + pageable.getPageSize() + "}";
             offsetStr = "{$skip:" + pageable.getOffset() + "}";
+            limitStr = "{$limit:" + pageable.getPageSize() + "}";
         }
         AggregationOutput selectOutPut = null;
         AggregationOutput payOutPut = null;

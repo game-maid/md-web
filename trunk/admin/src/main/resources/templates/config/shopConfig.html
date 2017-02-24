@@ -329,7 +329,6 @@ function onSave(){
 			data+="&id="+id;
 		}
 	/*]]>*/
-		console.log(data);
 		$("#zonelist").getValues();
 	 	gameAjax({
 			url : "/shopConfig/add",
@@ -388,7 +387,6 @@ function initTable() {
 			});
 			text+='</table></td></tr>';
 			text+='</table>';
-			console.log(text);
 			return text;
 		},
 		uniqueId : "id",
@@ -474,7 +472,6 @@ function edit(activityId){
 	initVipLevelSelect();
 	initItemInput($(".itemList"));
 	var data = table.bootstrapTable("getRowByUniqueId", activityId);
-	console.log(data);
 	editZone(data.zoneList);
 	editDataTimePicker(data);
 	$("#name").val(data.name);
