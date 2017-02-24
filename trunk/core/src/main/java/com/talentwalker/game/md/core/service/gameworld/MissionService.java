@@ -437,9 +437,9 @@ public class MissionService extends GameSupport {
             mission.setMissions(new HashMap<>());
             mission.setActive(0);
             mission.getActiveStatus().clear();
+            // 刷新任务
+            initDailyMission(lord, mission);
         }
-        // 刷新任务
-        initDailyMission(lord, mission);
 
         return mission;
     }
