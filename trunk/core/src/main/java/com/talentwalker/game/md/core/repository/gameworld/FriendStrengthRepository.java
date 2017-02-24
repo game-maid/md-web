@@ -25,10 +25,20 @@ public interface FriendStrengthRepository extends BaseMongoRepository<FriendStre
 
     List<FriendStrength> findByReceiverId(String id);
 
-    // @Query("{'$and':[{'getTime':{'$gte':?1}},{'getTime':{ '$lte':?2} },{'senderId':?0}]}")
-    // List<FriendStrength> findReceiversBySenderId(String senderId, Long startTime, Long endTime);
+    // List<FriendStrength> findByReceiverIdAndSendDate(String id, String sendDate);
 
-    @Query("{'$and':[{'getTime':{'$gte':?1}},{'getTime':{ '$lte':?2} },{'receiverId':?0}]}")
-    List<FriendStrength> findReceiversByReceiverId(String receiverId, Long startTime, Long endTime);
+    List<FriendStrength> findBySenderIdAndSendDate(String id, String nowDateStr);
+
+    @Query("{'$and':[{'sendTime':{'$gte':?1}},{'sendTime':{ '$lte':?2} },{'senderId':?0}]}")
+    List<FriendStrength> findBySenderId(String senderId, Long startTime, Long endTime);
+
+    @Query("{'$and':[{'sendTime':{'$gte':?1}},{'sendTime':{ '$lte':?2} },{'receiverId':?0}]}")
+    List<FriendStrength> findByReceiverId(String receiverId, Long startTime, Long endTime);
+
+    @Query("{'$and':[{'sendTime':{'$gte':?2}},{'sendTime':{ '$lte':?3} },{'receiverId':?0},{'senderId':?1}]}")
+    List<FriendStrength> findByReceiverIdAndSenderId(String receiverId, String senderId, Long startTime, Long endTime);
+
+    @Query("{'$and':[{'sendTime':{'$gte':?2}},{'receiverId':?0},{'senderId':?1}]}")
+    FriendStrength findByReceiverIdAndSenderIdAndSendDate(String receiverId, String senderId, String sendDate);
 
 }

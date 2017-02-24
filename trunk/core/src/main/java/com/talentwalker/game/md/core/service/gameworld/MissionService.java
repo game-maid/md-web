@@ -440,6 +440,7 @@ public class MissionService extends GameSupport {
         }
         // 刷新任务
         initDailyMission(lord, mission);
+
         return mission;
     }
 
