@@ -10,7 +10,7 @@ package com.talentwalker.game.md.core.domain.statistics;
 
 import java.util.List;
 
-import com.talentwalker.game.md.core.domain.gameworld.Lordname;
+import com.talentwalker.game.md.core.domain.gameworld.Lord;
 
 /**
  * @ClassName: LordLevel
@@ -34,7 +34,7 @@ public class LordLevel {
     /**
      * 玩家信息
      */
-    private List<Lordname> lordList;
+    private List<Lord> lordList;
 
     /**
      * @return level
@@ -81,14 +81,14 @@ public class LordLevel {
     /**
      * @return lordList
      */
-    public List<Lordname> getLordList() {
+    public List<Lord> getLordList() {
         return lordList;
     }
 
     /**
      * @param lordList 要设置的 lordList
      */
-    public void setLordList(List<Lordname> lordList) {
+    public void setLordList(List<Lord> lordList) {
         this.lordList = lordList;
     }
 

@@ -113,6 +113,10 @@ $(function(){
 	initPanelTable();
 	$("#panelTable").hide();
 	graph={};
+	var level=[];
+	graph["level"]=level;
+	var num=[];
+	graph["num"]=num;
 })
 
 //初始化时间(日/周/月)
@@ -176,10 +180,9 @@ $("#select").click(function(){
 			var num=[];
 			graph["num"]=num;
 			gameBootstrapTable("/statistics/lord/level/findPage", params);
-			initGraph();
 		}
 	});
-			$("#panelTable").show();
+	$("#panelTable").show();
 	
 });
 //检查参数是否为null,如果为null返回o
@@ -206,12 +209,11 @@ function divide(element,denominator){
 }
 
 //初始化曲线图
-function initGraph(){
+$(document).ajaxComplete(function(){
 	if(graph==null ||graph.length==0){
 		$("#graph-div").hide();
 		return ;
 	}
-	$("#graph-div").show();
 	var categories=[];
 	var series =[];
 	var map={};
@@ -224,8 +226,6 @@ function initGraph(){
 			map["data"]=data;
 		}
 	});
-console.log(categories);
-console.log(series);
 	$('#graph-div').highcharts({
 		credits:{
 			href:"",
@@ -254,7 +254,7 @@ console.log(series);
         series:  series
     });
 	$('#graph-div').show();
-}
+})
 //分页统计（最下面的表格）
 function initPanelTable(zoneArr){
 	var condition={};
@@ -284,9 +284,11 @@ function initPanelTable(zoneArr){
 		sidePagination : "server",
 		detailView:true,
 		 detailFormatter:function(index, row){
-			 console.log(row.lordList);
 			var text='<table class="table">';
 			text+='<thead><tr><td><b>'+[[#{sys.sequence}]]+'</b></td><td><b>'+[[#{gamelog.player}]]+'</b></td><td><b>'+[[#{gmtool.lord.name}]]+'</b></td></tr></thead>'
+			$.each(row.lordList,function(index,lord){
+				text+='<tr><td>'+(index+1)+'</td><td>'+lord.id+'</td><td>'+lord.name+'</td></tr>';
+			});
 			text+='</table>';
 			return text;
 		}, 

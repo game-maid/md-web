@@ -25,10 +25,11 @@ import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
-import com.talentwalker.game.md.core.domain.gameworld.Lordname;
+import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.statistics.Login;
 import com.talentwalker.game.md.core.domain.statistics.LordLevel;
 import com.talentwalker.game.md.core.domain.statistics.Register;
+import com.talentwalker.game.md.core.repository.gameworld.LordRepository;
 import com.talentwalker.game.md.core.repository.statistics.LoginRepository;
 import com.talentwalker.game.md.core.repository.statistics.RegisterRepository;
 import com.talentwalker.game.md.core.repository.support.SearchFilter;
@@ -60,6 +61,8 @@ public class LordLevelStatisticsService {
     private RegisterRepository registerRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
+    @Autowired
+    private LordRepository lordRepository;
 
     /**
      * @Description:分页查询玩家等级
@@ -109,21 +112,20 @@ public class LordLevelStatisticsService {
             content.add(lordLevel);
         }
         List<String> list = (List<String>) JSON.parse(lordIds);
+
+        System.out.println(lordIds);
         System.out.println("玩家id:" + list.size() + "分页总数：" + totalNum);
         for (int i = 0; i < content.size(); i++) {
             LordLevel lordLevel = content.get(i);
             lordLevel.setProportion((lordLevel.getNum() * 100) / totalNum / 100.0D);
             int level = lordLevel.getLevel();
             Query query = new Query();
-            for (String lordId : list) {
-
-            }
-            query.addCriteria(Criteria.where("player_id").orOperator());
+            query.addCriteria(Criteria.where("id").in(list));
             query.addCriteria(Criteria.where("level").is(level));
-            List<Lordname> lordName = mongoTemplate.find(query, Lordname.class);
-            lordLevel.setLordList(lordName);
+            List<Lord> lordList = mongoTemplate.find(query, Lord.class);
+            System.out.println(lordList.size());
+            lordLevel.setLordList(lordList);
         }
-
         return new PageImpl<>(content, pageable, total);
     }
 
