@@ -61,6 +61,7 @@ public class TopUpCardService extends GameSupport {
         DataConfig topupConfig = config.get(CONFIG_CASH_SHOP).get(productId);
         int vipScore = topupConfig.getInteger(CONFIG_CASH_SHOP_BASE_AMOUNT);
         int baseAmount = vipScore;
+        int persentAmount = 0;
         if (topUpFirstRecord == null) {
             topUpFirstRecord = new TopUpFirstRecord();
             topUpFirstRecord.setRecord(new HashMap<>());
@@ -71,7 +72,7 @@ public class TopUpCardService extends GameSupport {
         }
         if (!topUpFirstRecord.getRecord().containsKey(productId)) {
             // 首充翻倍
-            baseAmount = baseAmount * (topupConfig.getInteger(CONFIG_CASH_SHOP_MULTIPLE));
+            persentAmount = baseAmount * (topupConfig.getInteger(CONFIG_CASH_SHOP_MULTIPLE) - 1);
             if (topupConfig.getInteger("type") != CONFIG_SHOP_TYPE_ITEM) {
                 vipScore += topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
             }
@@ -80,7 +81,7 @@ public class TopUpCardService extends GameSupport {
             if (topupConfig.getInteger("type") != CONFIG_SHOP_TYPE_ITEM) {
                 vipScore += topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
             } else {
-                baseAmount += topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
+                persentAmount = topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
             }
             topUpFirstRecord.getRecord().put(productId, topUpFirstRecord.getRecord().get(productId) + 1);
         }
@@ -117,6 +118,9 @@ public class TopUpCardService extends GameSupport {
         }
         if (baseAmount > 0) {
             gainPayService.gain(lord, ItemID.DIAMOND, baseAmount);
+        }
+        if (persentAmount > 0) {
+            gainPayService.gain(lord, ItemID.PERSENT_DIAMOND, persentAmount);
         }
         if (vipScore > 0) {
             gainPayService.gain(lord, ItemID.VIPSCORE, vipScore);
