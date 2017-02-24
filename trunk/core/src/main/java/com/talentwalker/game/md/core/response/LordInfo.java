@@ -46,7 +46,7 @@ public class LordInfo {
      */
     protected String leagueName;
 
-    public void lordInfo(Lord lord) {
+    public LordInfo(Lord lord) {
         this.id = lord.getId();
         this.level = lord.getLevel();
         this.vipLevel = lord.getVipLevel();

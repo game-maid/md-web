@@ -118,10 +118,10 @@ public class GameSupport extends BaseGameSupport {
                 lord.setReplenishSignTimes(0);
             }
         }
-        // 刷新赠送体力记录
-        if (!DateUtils.isSameDay(new Date(lord.getGivesStrengthTime()), new Date())) {
-            lord.setGivesStrengthTime(System.currentTimeMillis());
-            lord.setGivesStrengthRecord(new HashMap<>());
+        // 刷新赠送体力领取次数
+        if (!DateUtils.isSameDay(new Date(), lord.getGivesStrengthTime())) {
+            lord.setGivesStrengthTime(new Date());
+            lord.setGivesStrengthTimes(0);
         }
 
         return lord;
