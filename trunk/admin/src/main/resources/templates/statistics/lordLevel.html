@@ -112,7 +112,11 @@ $(function(){
 	//初始化分页表格
 	initPanelTable();
 	$("#panelTable").hide();
-	graph=[];
+	graph={};
+	var level=[];
+	graph["level"]=level;
+	var num=[];
+	graph["num"]=num;
 })
 
 //初始化时间(日/周/月)
@@ -168,19 +172,18 @@ $("#select").click(function(){
 	$(".checked input[name='zone-all']").each(function(){
 		zoneArr.push($(this).val());
 	});
-	/*<![CDATA[*/
-		var data="packageId="+$("#package-select").val()+"&orderState="+$("#order-state-select").val()+
-				"&itemType="+$("#item-type-select").val()+"&zoneList[]="+zoneArr+"&startStr="+$("#startDatetimepicker").val()+
-				"&endStr="+$("#endDatetimepicker").val();
-    /*]]>*/
 	//刷新表格
 	$("#panelTable").bootstrapTable("refreshOptions", {
 		ajax : function(params) {
+			var level=[];
+			graph["level"]=level;
+			var num=[];
+			graph["num"]=num;
 			gameBootstrapTable("/statistics/lord/level/findPage", params);
 		}
 	});
-    $("#panelTable").show();
-	initGraph();
+	$("#panelTable").show();
+	
 });
 //检查参数是否为null,如果为null返回o
 function checkNull(val){
@@ -206,24 +209,21 @@ function divide(element,denominator){
 }
 
 //初始化曲线图
-function initGraph(){
+$(document).ajaxComplete(function(){
 	if(graph==null ||graph.length==0){
 		$("#graph-div").hide();
 		return ;
 	}
-	$("#graph-div").show();
 	var categories=[];
 	var series =[];
 	var map={};
 	series.push(map);
-	var dataArr=[];
-	map["data"]=dataArr
 	map["name"]=[[#{statistics.lord.level.num}]];
 	$.each(graph,function(index,data){
 		if(index=="level"){
-			categories.data;
+			categories=data;
 		}else if(index=="num"){
-		 	dataArr.data;
+			map["data"]=data;
 		}
 	});
 	$('#graph-div').highcharts({
@@ -254,7 +254,7 @@ function initGraph(){
         series:  series
     });
 	$('#graph-div').show();
-}
+})
 //分页统计（最下面的表格）
 function initPanelTable(zoneArr){
 	var condition={};
@@ -282,34 +282,19 @@ function initPanelTable(zoneArr){
 		singleSelect : false,
 		uniqueId : "id",
 		sidePagination : "server",
-		detailView:false,
+		detailView:true,
 		 detailFormatter:function(index, row){
 			var text='<table class="table">';
-			//区服
-			var zone="";
-			$.each(row.zoneList,function(index,zoneId){
-				zone+=zoneId+"-"+zoneMap[zoneId]+"&nbsp;,&nbsp;";
+			text+='<thead><tr><td><b>'+[[#{sys.sequence}]]+'</b></td><td><b>'+[[#{gamelog.player}]]+'</b></td><td><b>'+[[#{gmtool.lord.name}]]+'</b></td></tr></thead>'
+			$.each(row.lordList,function(index,lord){
+				text+='<tr><td>'+(index+1)+'</td><td>'+lord.id+'</td><td>'+lord.name+'</td></tr>';
 			});
-			text+='<tr><td><b>'+[[#{sys.zone.select}]]+'</b></td><td>'+zone+'</td></tr>';
-			text+='<tr><td><b>'+[[#{activity.describe}]]+'</b></td><td >'+row.explain+'</td></tr>';
-			//出售道具
-			text+='<tr><td colspan="8"><b>'+[[#{activity.shop.kan.ban}]]+'</b></td></tr>'
-			text+='<tr><td colspan="8"><table class="table">';
-			text+='<thead><tr><td>ID</td><td>'+[[#{activity.shop.kan.ban}]]+[[#{sys.menu.name}]]+'</td><td>'+[[#{activity.shop.request.item}]]+[[#{sys.menu.name}]]+'</td><td>'+[[#{activity.shop.discount.amount}]]+'</td><td>'+[[#{activity.shop.discount}]]+'</td></tr></thead>'
-			$.each(row.good,function(id,discountNum){
-				var name = itemAll[id];//看板娘名称
-				var item =itemAll[kanbanRequest[id]];//需求道具名称
-				var num =Math.ceil(kanbanRequest[kanbanRequest[id]]*discountNum/10);//折后需求数量
-				var disc = discountNum==10?"无折扣":discountNum+"折";
-				text+='<tr><td>'+id+'</td><td>'+name+'</td><td>'+item+'</td><td>'+num+'</td><td>'+disc+'</td></tr>';
-			});
-			text+='</table></td></tr>'; 
 			text+='</table>';
 			return text;
 		}, 
 		columns : [
 					{
-						title : [[#{statistics.top.up.order}]],
+						title : [[#{statistics.lord.level.user.level}]],
 						field : "level",
 						align : "center",
 						formatter:function(value){
@@ -320,7 +305,7 @@ function initPanelTable(zoneArr){
 						},
 					},
 					{
-						title : [[#{statistics.top.up.item.desc}]],
+						title : [[#{statistics.lord.level.num}]],
 						field : "num",
 						align : "center",
 						formatter : function(value){
@@ -331,7 +316,7 @@ function initPanelTable(zoneArr){
 						},
 					},
 					{
-						title : [[#{statistics.top.up.item.ID}]],
+						title : [[#{statistics.lord.level.user.level.proportion}]],
 						field : "proportion",
 						align : "center",
 						formatter : function(value){

@@ -33,7 +33,7 @@ public interface RegisterRepository extends BaseMongoRepository<Register, String
      * @return
      * @throws
      */
-    @Query("{$and:[{'register_time':{$gte:?0}},{'register_time':{$lte:?1}},{'zone_id':{$in:?2}}]}")
-    public List<Register> findByRegisterTimeAndZoneArr(long startLong, long endLong, String zoneArr);
+    @Query("{'$and':[{'register_time':{$gte:?0}},{'register_time':{$lte:?1}},{'zone_id':{$in:?2}}]}")
+    public List<Register> findByRegisterTimeAndZoneArr(long startLong, long endLong, String[] zoneArr);
 
 }
