@@ -9,8 +9,8 @@
 package com.talentwalker.game.md.core.domain.gameworld;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @ClassName: Romance
@@ -62,7 +62,7 @@ public class Romance implements Serializable {
     /**
      * 随机剧情记录
      */
-    private List<Integer> randomStoryRecord;
+    private Set<String> randomStoryRecord;
     /**
      * 当前使用(那个等级)的立绘
      */
@@ -127,14 +127,14 @@ public class Romance implements Serializable {
     /**
      * @return randomStoryRecord
      */
-    public List<Integer> getRandomStoryRecord() {
+    public Set<String> getRandomStoryRecord() {
         return randomStoryRecord;
     }
 
     /**
      * @param randomStoryRecord 要设置的 randomStoryRecord
      */
-    public void setRandomStoryRecord(List<Integer> randomStoryRecord) {
+    public void setRandomStoryRecord(Set<String> randomStoryRecord) {
         this.randomStoryRecord = randomStoryRecord;
     }
 
