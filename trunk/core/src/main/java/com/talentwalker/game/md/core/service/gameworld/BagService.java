@@ -283,7 +283,7 @@ public class BagService extends GameSupport {
             }
 
         } else if (BOX_KEY.equals(config.getString("type"))) {
-            gainPayService.pay(lord, config.getString("keybar"), 1);
+            gainPayService.pay(lord, config.getString("keybar"), times);
             Map<String, Integer> weightMap = new HashMap<String, Integer>();
             JSONObject params = config.get("params").getJsonObject();
             Iterator it = params.keys();

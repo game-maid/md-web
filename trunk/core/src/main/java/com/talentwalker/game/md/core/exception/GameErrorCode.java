@@ -701,6 +701,18 @@ public class GameErrorCode extends ErrorCode {
      * 当天已经送过体力给该好友
      */
     public static final Integer GAME_ERROR_37002 = 37002;
+    /**
+     * 赠送体力数据不存在
+     */
+    public static final Integer GAME_ERROR_37003 = 37003;
+    /**
+     * 玩家每天可以收取体力的次数达到上限
+     */
+    public static final Integer GAME_ERROR_37004 = 37004;
+    /**
+     * 不能重复领取
+     */
+    public static final Integer GAME_ERROR_37005 = 37005;
     /*******************签到*************************/
     /**
      * 已经签到

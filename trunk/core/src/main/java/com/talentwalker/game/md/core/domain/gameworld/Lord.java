@@ -9,6 +9,7 @@
 package com.talentwalker.game.md.core.domain.gameworld;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -271,12 +272,12 @@ public class Lord extends BaseDomain {
     /**
      * 赠送体力记录
      */
-    protected Map<String, Integer> givesStrengthRecord;
+    protected int givesStrengthTimes;
 
     /**
-     * 赠送奖励时间
+     * 最后一次赠送奖励领取时间
      */
-    protected long givesStrengthTime;
+    protected Date givesStrengthTime;
     /**
      * 新手招募第步了
      */
@@ -897,30 +898,33 @@ public class Lord extends BaseDomain {
     }
 
     /**
-     * @return givesStrengthRecord
+     * @return givesStrengthTimes
      */
-    public Map<String, Integer> getGivesStrengthRecord() {
-        return givesStrengthRecord;
+    public int getGivesStrengthTimes() {
+        return givesStrengthTimes;
     }
 
     /**
-     * @param givesStrengthRecord 要设置的 givesStrengthRecord
+     * @param givesStrengthTimes 要设置的 givesStrengthTimes
      */
-    public void setGivesStrengthRecord(Map<String, Integer> givesStrengthRecord) {
-        this.givesStrengthRecord = givesStrengthRecord;
+    public void setGivesStrengthTimes(int givesStrengthTimes) {
+        this.givesStrengthTimes = givesStrengthTimes;
     }
 
     /**
      * @return givesStrengthTime
      */
-    public long getGivesStrengthTime() {
+    public Date getGivesStrengthTime() {
+        if (givesStrengthTime == null) {
+            givesStrengthTime = new Date();
+        }
         return givesStrengthTime;
     }
 
     /**
      * @param givesStrengthTime 要设置的 givesStrengthTime
      */
-    public void setGivesStrengthTime(long givesStrengthTime) {
+    public void setGivesStrengthTime(Date givesStrengthTime) {
         this.givesStrengthTime = givesStrengthTime;
     }
 

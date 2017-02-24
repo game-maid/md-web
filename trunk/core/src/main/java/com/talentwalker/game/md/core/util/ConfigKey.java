@@ -232,4 +232,18 @@ public class ConfigKey {
      * 数量
      */
     public static final String ROMANCE_THRETER_AWARD_NUM = "num";
+    /*************************好感度随机剧情奖励***********************/
+    /**
+     * 好友赠送体力表名
+     */
+    public static final String FRIEND_ENERGY = "friend_energy";
+    /**
+     * 赠送体力值
+     */
+    public static final String SEND_ENERGY = "sendEnergy";
+    /**
+     * 收取体力数量
+     */
+    public static final String RECEIVE_ENERGY = "receiveEnergy";
+
 }
