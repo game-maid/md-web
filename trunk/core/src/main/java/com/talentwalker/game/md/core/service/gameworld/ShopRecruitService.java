@@ -10,11 +10,9 @@ package com.talentwalker.game.md.core.service.gameworld;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -301,12 +299,14 @@ public class ShopRecruitService extends GameSupport {
      */
     private String randomHero(Recruit recruit, DataConfig config) {
         int times = recruit.getTimes();
+        // 刷新卡池（C、D）
+        refreshPoll(times, recruit, config);
         times++;
         // 获得英雄
         String resultHeroId = null;
         // 保底次数
         boolean isRare = false; // true:必抽稀有池，false：普通池
-        int safetyTimes = config.getInteger("safetyTimes");
+        int safetyTimes = config.getInteger(ConfigKey.SHOP_HERO_RECRUIT_SAFETY_TIMES);
         if (safetyTimes > 0) {
             if (times % safetyTimes == 0) {
                 isRare = true;
@@ -314,82 +314,94 @@ public class ShopRecruitService extends GameSupport {
         }
         // 抽中稀有池概率
         double probability = recruit.getProbability();
-        if (probability <= 0) {
-            probability = config.getDouble("probability");
-        }
-        int random = RandomUtils.randomInt(1, 10 * 100000);
-        Map<String, Integer> weightMap = new HashMap<String, Integer>();
+        int random = RandomUtils.randomInt(1, 1 * 100000);
         if (!isRare && random > probability * 100000) {
-            // 普通池B池
-            double probabilityUp = config.getDouble("probabilityUp");
-            probability += probabilityUp; // 概率成长
-
-            List<JSONObject> arr = config.get("poll_B").getJsonArray();
-            for (JSONObject heroData : arr) {
-                String heroId = heroData.getString("ID");
-                Integer weight = heroData.getInt("weight");
-                weightMap.put(heroId, weight);
-            }
-            resultHeroId = RandomUtils.randomTable(weightMap);
-        } else {
-            // 稀有池A池
-            probability = 0; // 清空抽A池概率
+            // 普通池A池
+            double probabilityUp = config.getDouble(ConfigKey.SHOP_HERO_RECRUIT_PROBABILITYUP);
             int aTimes = recruit.getaTimes();
-            aTimes++;
-            recruit.setaTimes(aTimes);
-            List<JSONObject> arr = config.get("poll_A").getJsonArray();
-            // 稀有池原权重副本（用于条件冲突，导致卡池符合条件权重数据为空时）
-            Map<String, Integer> weightTemp = new HashMap<String, Integer>();
-            for (JSONObject heroData : arr) {
-                String heroId = heroData.getString("ID");
-                Integer weight = heroData.getInt("weight");
-                weightMap.put(heroId, weight);
-                weightTemp.put(heroId, weight);
-            }
-            // 稀有不重复次数
-            int norepeat = config.getInteger("norepeat");
-            List<String> oldHeros = recruit.getOldHeros();
-            if (oldHeros != null && oldHeros.size() > 0) {
-                int end = (oldHeros.size() - norepeat) <= 0 ? 0 : oldHeros.size() - norepeat;
-                for (int i = oldHeros.size() - 1; i >= end; i--) {
-                    if (weightMap.containsKey(oldHeros.get(i))) {
-                        weightMap.remove(oldHeros.get(i));
-                    }
-                }
-            }
-            // 获取新卡间隔
-            int getnew = config.getInteger("getnew");
-            Set<List> set = new HashSet<>();
-            set.add(oldHeros);
-            if (getnew > 0 && times % getnew == 0) {
-                for (Iterator it = set.iterator(); it.hasNext();) {
-                    String heroId = it.next().toString();
-                    if (weightMap.containsKey(heroId)) {
-                        weightMap.remove(heroId);
-                    }
-                }
-            } else if (oldHeros.size() > norepeat) {
-                // 抽旧卡(旧卡数大于重复次数，抽旧卡，否则抽新卡)
-                Map<String, Integer> weightMapTemp = new HashMap<String, Integer>();
-                for (Iterator it = set.iterator(); it.hasNext();) {
-                    String heroId = it.next().toString();
-                    if (weightMap.containsKey(heroId)) {
-                        weightMapTemp.put(heroId, weightMap.get(heroId));
-                    }
-                }
-                weightMap = weightMapTemp;
-            }
-            if (weightMap.size() <= 0) {
-                weightMap = weightTemp;
-            }
-            resultHeroId = RandomUtils.randomTable(weightMap);
-            oldHeros.add(resultHeroId);
-            recruit.setOldHeros(oldHeros);
+            recruit.setaTimes(++aTimes);
+            probability += probabilityUp; // 概率成长
+            Map<String, Integer> pollC = recruit.getPollC();
+            resultHeroId = RandomUtils.randomTable(pollC);
+        } else {
+            // 稀有池B池
+            probability = config.getDouble("probability"); // 清空抽A池概率
+
+            Map<String, Integer> pollD = recruit.getPollD();
+            resultHeroId = RandomUtils.randomTable(pollD);
         }
         recruit.setTimes(times);
         recruit.setProbability(probability);
         return resultHeroId;
 
+    }
+
+    /**
+     * @Description:刷新C、D卡池
+     * @param times
+     * @param recruit
+     * @throws
+     */
+    private void refreshPoll(int times, Recruit recruit, DataConfig config) {
+        Map<String, Integer> pollC = recruit.getPollC();
+        Map<String, Integer> pollD = recruit.getPollD();
+        if (times == 0) {
+            Integer startC = config.getInteger(ConfigKey.SHOP_HERO_RECRUIT_START_C);
+            Integer startD = config.getInteger(ConfigKey.SHOP_HERO_RECRUIT_START_D);
+            addPoll(startC, config.get(ConfigKey.SHOP_HERO_RECRUIT_POLL_A), pollC);
+            addPoll(startD, config.get(ConfigKey.SHOP_HERO_RECRUIT_POLL_B), pollD);
+        } else {
+            List<Integer> goingCList = config.get(ConfigKey.SHOP_HERO_RECRUIT_GOING_C).getJsonArray();
+            List<Integer> goingDList = config.get(ConfigKey.SHOP_HERO_RECRUIT_GOING_C).getJsonArray();
+            // C卡池
+            Integer limitTimesC = goingCList.get(0);
+            if (recruit.getTimes() % limitTimesC == 0) {
+                Integer numC = goingCList.get(1);
+                addPoll(numC, config.get(ConfigKey.SHOP_HERO_RECRUIT_POLL_A), pollC);
+            }
+            // D卡池
+            Integer limitTimesD = goingDList.get(0);
+            if (recruit.getTimes() % limitTimesD == 0) {
+                Integer numD = goingDList.get(1);
+                addPoll(numD, config.get(ConfigKey.SHOP_HERO_RECRUIT_POLL_B), pollD);
+            }
+        }
+    }
+
+    /**
+     * @Description:向C/D池中 添加英雄
+     * @param num :添加数量
+     * @param config ：
+     * @param pollRecurit ：目标卡池
+     * @param pollKey ： ConfigKey.SHOP_HERO_RECRUIT_POLL_A    /  ConfigKey.SHOP_HERO_RECRUIT_POLL_B
+     * @throws
+     */
+    private void addPoll(Integer num, DataConfig config, Map<String, Integer> pollRecurit) {
+        List<JSONObject> poll = config.getJsonArray();
+        // 获得添加权重列表 去除CD卡池中已有
+        Map<String, Integer> gotoWeightMap = new HashMap<>();
+        for (JSONObject json : poll) {
+            String heroId = json.getString(ConfigKey.SHOP_HERO_RECRUIT_HEROID);
+            if (pollRecurit.containsKey(heroId)) {
+                continue;
+            }
+            int gotoWeight = json.getInt(ConfigKey.SHOP_HERO_RECRUIT_GOTOWEIGHT);
+            gotoWeightMap.put(heroId, gotoWeight);
+        }
+        // 添加
+        for (int i = 0; i < num; i++) {
+            if (gotoWeightMap.size() == 0) {
+                return;
+            }
+            String heroId = RandomUtils.randomTable(gotoWeightMap);
+            for (JSONObject jsonA : poll) {
+                if (jsonA.getString(ConfigKey.SHOP_HERO_RECRUIT_HEROID).equals(heroId)) {
+                    int getWeight = jsonA.getInt(ConfigKey.SHOP_HERO_RECRUIT_GETWEIGHT);
+                    pollRecurit.put(heroId, getWeight);
+                }
+            }
+            gotoWeightMap.remove(heroId);
+        }
     }
 
     /**
