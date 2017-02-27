@@ -329,6 +329,10 @@ function initPanelTable(zoneArr){
 
 //导出
 function exportCDKey(){
+	var startStr=$("#startDatetimepicker").val().replace(/-/g,"/");
+	var startLong = new Date(startStr).getTime();
+	var endStr =$("#endDatetimepicker").val().replace(/-/g,"/");
+	var endLong = new Date(endStr).getTime();
 	var zoneArr=[];
 	$(".checked input[name='zone-all']").each(function(){
 		zoneArr.push($(this).val());
@@ -337,20 +341,9 @@ function exportCDKey(){
 		swal("",[[#{statistics.active.zone.null}]],"warning");
 		return;
 	}
-	var zoneArr=[];
-	$(".checked input[name='zone-all']").each(function(){
-		zoneArr.push($(this).val());
-	});
 	/*<![CDATA[*/
-		var data="packageId="+$("#package-select").val()+"&orderState="+$("#order-state-select").val()+
-				"&itemType="+$("#item-type-select").val()+"&zoneList[]="+zoneArr+"&startStr="+$("#startDatetimepicker").val()+
-				"&endStr="+$("#endDatetimepicker").val();
-    /*]]>*/
-	
-	/*<![CDATA[*/
-		var data="/statistics/topUp/export?packageId="+$("#package-select").val()+"&orderState="+$("#order-state-select").val()+
-				"&itemType="+$("#item-type-select").val()+"&zoneList[]="+zoneArr+"&startStr="+$("#startDatetimepicker").val()+
-				"&endStr="+$("#endDatetimepicker").val();	           
+		var data="/statistics/lord/level/export?startLong="+startLong+"&endLong="+endLong+
+				"&zoneArr="+zoneArr+"&userType="+$("#user-type-select").val();	           
 	/*]]>*/
 	window.location.href=data;
 	
