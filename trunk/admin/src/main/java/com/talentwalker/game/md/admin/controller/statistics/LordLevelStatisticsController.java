@@ -8,6 +8,8 @@
 
 package com.talentwalker.game.md.admin.controller.statistics;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -56,5 +58,13 @@ public class LordLevelStatisticsController extends BaseController {
             @RequestParam("startLong") Long startLong, @RequestParam("endLong") Long endLong,
             @RequestParam("zoneArr[]") String[] zoneArr) {
         return lordLevelStatisticsService.findPage(userType, startLong, endLong, zoneArr);
+    }
+
+    @GameResponse
+    @RequestMapping(value = "export", method = RequestMethod.GET)
+    public Object export(String userType, Long startLong, Long endLong, String[] zoneArr,
+            HttpServletResponse response) {
+        lordLevelStatisticsService.export(userType, startLong, endLong, zoneArr, response);
+        return null;
     }
 }
