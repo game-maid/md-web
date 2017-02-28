@@ -656,16 +656,17 @@ function initTable() {
 				text+='<td colspan=""><b>'+[[#{activity.recruit.probability}]]+'</b></td><td colspan="">'+row.probability+'</td>';
 				text+='<td colspan=""><b>'+[[#{activity.recruit.probabilityUp}]]+'</b></td><td colspan="">'+row.probabilityUp+'</td>';
 			}
+			text+='<td colspan="2"><b>'+[[#{activity.recruit.safetyTimes}]]+'</b></td><td colspan="2">'+row.safetyTimes+'</td>';
+			text+='</tr>';
+			
+			text+='<tr>';
 			var oneRecruit="";
 			if(row.isOneRecruit){
 				oneRecruit=[[#{sys.true}]];
 			}else{
 				oneRecruit=[[#{sys.false}]];
 			}
-			text+='</tr>';
-			text+='<tr><td colspan="2"><b>'+[[#{activity.recruit.safetyTimes}]]+'</b></td><td colspan="2">'+row.safetyTimes+'</td>';
-			text+='<td colspan="2"><b>'+[[#{activity.recruit.is.one}]]+'</b></td><td colspan="2">'+oneRecruit+'</td></tr>'
-			text+='<tr>';
+			text+='<td colspan="2"><b>'+[[#{activity.recruit.is.one}]]+'</b></td><td colspan="2">'+oneRecruit+'</td>'
 			var continuous="";
 			if(row.continuous){
 				continuous=[[#{sys.true}]];
@@ -687,6 +688,26 @@ function initTable() {
 			text+='<td><b>'+[[#{activity.recruit.continuousPrice1}]]+'</b></td><td>'+row.continuousPrice1+'</td>';
 			text+='<td><b>'+[[#{activity.recruit.continuousPrice2}]]+'</b></td><td>'+row.continuousPrice2+'</td>';
 			text+='<td><b>'+[[#{activity.recruit.continuousPrice.price}]]+'</b></td><td>'+row.continuousPrice3+'</td>';
+			text+='</tr>';
+			
+			text+='<tr>';
+			var limitType="";
+			if(row.limitTimesType==0){
+				limitType=[[#{activity.recruit.no.times.limit}]]
+				text+='<td><b>'+[[#{activity.recruit.is.times.limit}]]+'</b></td><td>'+limitType+'</td>';
+			}else {
+				if(row.limitTimesType==1){
+					limitType=[[#{activity.recruit.daily.times.limit}]]
+				}else{
+					limitType=[[#{activity.recruit.total.times.limit}]]
+				}
+				text+='<td><b>'+[[#{activity.recruit.is.times.limit}]]+'</b></td><td>'+limitType+'</td>';
+				text+='<td><b>'+[[#{activity.recruit.times.limit}]]+'</b></td><td>'+row.limitTimes+'</td>';
+			}
+			text+='<td><b>'+[[#{activity.recruit.start.num.common}]]+'</b></td><td>'+row.startB+'</td>';
+			text+='<td><b>'+[[#{activity.recruit.start.num.uncommon}]]+'</b></td><td>'+row.startA+'</td>';
+			text+='<td><b>'+[[#{activity.recruit.every}]]+row.everyTimesA+[[#{activity.recruit.add}]]+row.addA+[[#{activity.recruit.uncommon.card}]]+'</b></td>';
+			text+='<td><b>'+[[#{activity.recruit.every}]]+row.everyTimesB+[[#{activity.recruit.add}]]+row.addB+[[#{activity.recruit.common.card}]]+'</b></td>';
 			text+='</tr>';
 			//A池数据
 			text+='<tr><td colspan="8"><b>A'+[[#{activity.recruit.content}]]+'</b></td></tr>'
