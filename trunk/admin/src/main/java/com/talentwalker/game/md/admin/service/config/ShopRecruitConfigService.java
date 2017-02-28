@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class ShopRecruitConfigService extends BaseService {
      */
     public void add(ShopRecruitConfig recruit) {
         ShopRecruitConfig shopRecruit = new ShopRecruitConfig();
-        if (recruit.getId() != null) {
+        if (!StringUtils.isEmpty(recruit.getId())) {
             shopRecruit = shopRecruitRepository.findOne(new ObjectId(recruit.getId()));
         }
         shopRecruit.setZoneList(recruit.getZoneList());
@@ -58,7 +59,6 @@ public class ShopRecruitConfigService extends BaseService {
         } else {
             shopRecruit.setCost(recruit.getCost());
         }
-        shopRecruit.setLimtVip(recruit.getLimtVip());
         try {
             long startTime = DateUtils.parseDate(recruit.getStartDate(), "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd").getTime();
             long endTime = DateUtils.parseDate(recruit.getEndDate(), "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd").getTime();
@@ -71,24 +71,32 @@ public class ShopRecruitConfigService extends BaseService {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        shopRecruit.setNumber(recruit.getNumber());
         shopRecruit.setProType(recruit.getProType());
         if (recruit.getProType() == 1) {
-            shopRecruit.setAverage(recruit.getAverage());
+            shopRecruit.setProbability(recruit.getProbability());
         } else {
             shopRecruit.setProbability(recruit.getProbability());
             shopRecruit.setProbabilityUp(recruit.getProbabilityUp());
         }
+        shopRecruit.setState(recruit.getState());
+        shopRecruit.setStartA(recruit.getStartA());
+        shopRecruit.setStartB(recruit.getStartB());
+        shopRecruit.setEveryTimesA(recruit.getEveryTimesA());
+        shopRecruit.setEveryTimesB(recruit.getEveryTimesB());
+        shopRecruit.setAddA(recruit.getAddA());
+        shopRecruit.setAddB(recruit.getAddB());
+        shopRecruit.setLimitTimesType(recruit.getLimitTimesType());
+        shopRecruit.setLimitTimes(recruit.getLimitTimes());
+        shopRecruit.setOneRecruit(recruit.getIsOneRecruit());
         shopRecruit.setSafetyTimes(recruit.getSafetyTimes());
-        shopRecruit.setNorepeat(recruit.getNorepeat());
-        shopRecruit.setContinuous(recruit.isContinuous());
-        shopRecruit.setDiscount(recruit.isDiscount());
+        shopRecruit.setContinuous(recruit.getContinuous());
+        shopRecruit.setDiscount(recruit.getDiscount());
         shopRecruit.setAlonePrice1(recruit.getAlonePrice1());
         shopRecruit.setAlonePrice2(recruit.getAlonePrice2());
         shopRecruit.setAlonePrice3(recruit.getAlonePrice3());
         shopRecruit.setContinuousPrice1(recruit.getContinuousPrice1());
         shopRecruit.setContinuousPrice2(recruit.getContinuousPrice2());
-        shopRecruit.setContinuousPrice3(shopRecruit.getContinuousPrice3());
+        shopRecruit.setContinuousPrice3(recruit.getContinuousPrice3());
         List<Map<String, Object>> aData = JSONArray.fromObject(recruit.getData1());
         List<Map<String, Object>> bData = JSONArray.fromObject(recruit.getData2());
         shopRecruit.setaData(aData);
@@ -126,9 +134,7 @@ public class ShopRecruitConfigService extends BaseService {
      */
     public void update(String pk, String name, Integer value) {
         ShopRecruitConfig shop = shopRecruitRepository.findOne(new ObjectId(pk));
-        if ("number".equals(name)) {
-            shop.setNumber(value);
-        }
+
         shopRecruitRepository.save(shop);
     }
 }

@@ -67,6 +67,14 @@ public class Recruit extends BaseDomain {
      */
     protected long triggeringTime;
     /**
+     * 今天第一次抽卡的时间
+     */
+    protected long recruitTime;
+    /**
+     * 今天抽卡次数
+     */
+    protected int todayTimes;
+    /**
      * 配置
      */
     @Transient
@@ -224,6 +232,34 @@ public class Recruit extends BaseDomain {
      */
     public void setPollD(Map<String, Integer> pollD) {
         this.pollD = pollD;
+    }
+
+    /**
+     * @return recruitTime
+     */
+    public long getRecruitTime() {
+        return recruitTime;
+    }
+
+    /**
+     * @param recruitTime 要设置的 recruitTime
+     */
+    public void setRecruitTime(long recruitTime) {
+        this.recruitTime = recruitTime;
+    }
+
+    /**
+     * @return todayTimes
+     */
+    public int getTodayTimes() {
+        return todayTimes;
+    }
+
+    /**
+     * @param todayTimes 要设置的 todayTimes
+     */
+    public void setTodayTimes(int todayTimes) {
+        this.todayTimes = todayTimes;
     }
 
 }

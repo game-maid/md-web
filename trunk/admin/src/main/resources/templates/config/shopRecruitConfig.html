@@ -53,6 +53,17 @@
 							</div>
 						</div>
 						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.gamezone.status}">状态</label>
+							<div class="col-sm-7">
+								<label class="radio-inline i-checks"> 
+									<input type="radio"  checked="checked"  value="true" id="stateTrue" name="state" th:text="#{activity.recruit.state.open}" />
+								</label> 
+								<label class="radio-inline i-checks"> 
+									<input type="radio" value="false" id="stateFalse" name="state" th:text="#{activity.recruit.state.close}" />
+								</label>
+							</div>
+						</div>
+						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{activity.name}">名称：</label>
 							<div class="col-sm-7">
 								<input type="text" name="name" id="name" class="form-control" required="required" />
@@ -81,12 +92,6 @@
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="col-sm-3 control-label" th:text="#{activity.shop.vip.limt}">限定VIP：</label>
-							<div class="col-sm-7">
-								<select class="form-control" name="limtVip" id="limtVip"></select>
-							</div>
-						</div>
-						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{sys.time}">时间：</label>
 							<div class="col-sm-7" id="datepicker">
 								<div class="input-daterange input-group">
@@ -94,12 +99,6 @@
 									<span class="input-group-addon">-</span> 
 									<input type="text" name="endDate" class="form-control" id="endDatetimepicker" />
 								</div>
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-sm-3 control-label" th:text="#{activity.shop.number}">商店序号：</label>
-							<div class="col-sm-7">
-								<input type="text" id="number" name="number" class="form-control"  onkeyup="this.value=this.value.replace(/\D/g,'')"  required="required" />
 							</div>
 						</div>
 
@@ -114,20 +113,16 @@
 								</select>
 							</div>
 						</div>
-						<div class="form-group" id="averageShow">
-							<label class="col-sm-3 control-label" th:text="#{activity.recruit.average}">平均概率：</label>
-							<div class="col-sm-7">
-								<input type="text" id="average" name="average" class="form-control" required="required" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')" />
+						<div class="form-group" id="probabilityShow">
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.probability}" >成长概率基础：</label>
+							<div class="col-sm-2">
+								<input type="text" id="probability" name="probability" class="form-control"  required="required" />
 							</div>
 						</div>
-						<div class="form-group" id="growUpShow" style="display: none;">
-							<label class="col-sm-3 control-label" th:text="#{activity.recruit.probability}" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">成长概率基础：</label>
+						<div class="form-group" id="probabilityUpShow" style="display: none;">
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.probabilityUp}" >概率成长：</label>
 							<div class="col-sm-2">
-								<input type="text" id="probability" name="probability" class="form-control" required="required" />
-							</div>
-							<label class="col-sm-3 control-label" th:text="#{activity.recruit.probabilityUp}" onkeyup="if(isNaN(value))execCommand('undo')" onafterpaste="if(isNaN(value))execCommand('undo')">概率成长：</label>
-							<div class="col-sm-2">
-								<input type="text" id="probabilityUp" name="probabilityUp" class="form-control" required="required" />
+								<input type="text" value="0" id="probabilityUp" name="probabilityUp" class="form-control" required="required" />
 							</div>
 						</div>
 						
@@ -138,37 +133,94 @@
 							<div class="col-sm-2">
 								<input type="text" value="20" id="safetyTimes" name="safetyTimes" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
 							</div>
-							<label class="col-sm-3 control-label" th:text="#{activity.recruit.norepeat}">不重复间隔：</label>
+						</div>
+
+						<div class="hr-line-dashed"></div>
+
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.is.times.limit}">限次：</label>
 							<div class="col-sm-2">
-								<input type="text" value="5" id="norepeat" name="norepeat" class="form-control"  onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
+								<select class="form-control" name="limitTimesType" id="limitTimesType">
+									<option value="0" th:text="#{activity.recruit.no.times.limit}">不限次</option>
+									<option value="1" th:text="#{activity.recruit.daily.times.limit}">每日限次</option>
+									<option value="2" th:text="#{activity.recruit.total.times.limit}">总限次</option>
+								</select>
 							</div>
 						</div>
-						
+						<div class="form-group" id="limitTimesDiv">
+							<label class="col-sm-3 control-label" th:text ="#{activity.recruit.times.limit}">次数</label>
+							<div class="col-sm-2" >
+								<input type="text" value="0" id="limitTimes" name="limitTimes" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required"  />
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.start.num.common}">初始普通卡牌数</label>
+							<div class="col-sm-2">
+								<input type="text" id="startB" name="startB" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required"  />
+							</div>
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.start.num.uncommon}">初始稀有卡牌数</label>
+							<div class="col-sm-2">
+								<input type="text" id="startA" name="startA" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required"  />
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.every}">每</label>
+							<div class="col-sm-2">
+								<input type="text" id="everyTimesB" name="everyTimesB" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required"  />
+							</div>
+							<label class="col-sm-2 control-label" th:text="#{activity.recruit.add}">次抽取后增加</label>
+							<div class="col-sm-2">
+								<input type="text" id="addB" name="addB" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required"  />
+							</div>
+							<label class="col-sm-0 control-label" th:text="#{activity.recruit.common.card}">张普通卡牌</label>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.every}">每</label>
+							<div class="col-sm-2">
+								<input type="text" id="everyTimesA" name="everyTimesA" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required"  />
+							</div>
+							<label class="col-sm-2 control-label" th:text="#{activity.recruit.add}">次抽取后增加</label>
+							<div class="col-sm-2">
+								<input type="text" id="addA" name="addA" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required"  />
+							</div>
+							<label class="col-sm-0 control-label" th:text="#{activity.recruit.uncommon.card}">张稀有卡牌</label>
+						</div>
 						<div class="hr-line-dashed"></div>
-						
+
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.is.one}">是否单抽：</label>
+							<div class="col-sm-7 btn-group" id="isOneRecruitDiv">
+								<label class="radio-inline i-checks isOneRecruit"> 
+									<input type="radio"  checked="checked"  value="true" id="oneRecruitTrue" name="isOneRecruit" th:text="#{sys.true}" />
+								</label> 
+								<label class="radio-inline i-checks isOneRecruit"> 
+									<input type="radio" value="false" id="oneRecruitFalse" name="isOneRecruit" th:text="#{sys.false}" />
+								</label>
+							</div>
+						</div>
 						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{activity.recruit.is.continuous}">是否十连抽：</label>
-							<div class="col-sm-7">
-								<label class="radio-inline i-checks"> 
+							<div class="col-sm-7 btn-group" id="continuousDiv">
+								<label class="radio-inline i-checks continuous"> 
 									<input type="radio" value="true" id="continuous1" name="continuous" th:text="#{sys.true}" />
 								</label> 
-								<label class="radio-inline i-checks"> 
-									<input type="radio" checked="" value="false" id="continuous2" name="continuous" th:text="#{sys.false}" />
+								<label class="radio-inline i-checks continuous"> 
+									<input type="radio" value="false" id="continuous2" name="continuous" th:text="#{sys.false}" />
 								</label>
 							</div>
 						</div>
 						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{activity.recruit.is.discount}">首抽折扣：</label>
-							<div class="col-sm-7">
-								<label class="radio-inline i-checks"> 
-									<input type="radio" value="true" id="discount1" name="discount" th:text="#{sys.true}" />
+							<div class="col-sm-7 btn-group" id="discountDiv">
+								<label class="radio-inline i-checks discount"> 
+									<input type="radio"  value="true" id="discount1" name="discount" th:text="#{sys.true}" />
 								</label> 
-								<label class="radio-inline i-checks"> 
-									<input type="radio" checked="" value="false" id="discount2" name="discount" th:text="#{sys.false}" />
+								<label class="radio-inline i-checks discount"> 
+									<input type="radio"  value="false" id="discount2" name="discount" th:text="#{sys.false}" />
 								</label>
 							</div>
 						</div>
-						<div class="form-group">
+						<div class="form-group" id="oneRecruitPriceDiv1">
 							<label class="col-sm-3 control-label" th:text="#{activity.recruit.alonePrice1}">单独第一次价格：</label>
 							<div class="col-sm-2">
 								<input type="text" id="alonePrice1" name="alonePrice1" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
@@ -178,13 +230,13 @@
 								<input type="text" id="alonePrice2" name="alonePrice2" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
 							</div>
 						</div>
-						<div class="form-group">
-							<label class="col-sm-3 control-label" th:text="#{activity.recruit.price}">单独正常价格：</label>
+						<div class="form-group" id="oneRecruitPriceDiv2">
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.alonePrice.price}">单独正常价格：</label>
 							<div class="col-sm-7">
 								<input type="text" id="alonePrice3" name="alonePrice3" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
 							</div>
 						</div>
-						<div class="form-group">
+						<div class="form-group" id="tenRecruitPriceDiv1">
 							<label class="col-sm-3 control-label" th:text="#{activity.recruit.continuousPrice1}">十连第一次价格：</label>
 							<div class="col-sm-2">
 								<input type="text" id="continuousPrice1" name="continuousPrice1" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
@@ -194,8 +246,8 @@
 								<input type="text" id="continuousPrice2" name="continuousPrice2" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
 							</div>
 						</div>
-						<div class="form-group">
-							<label class="col-sm-3 control-label" th:text="#{activity.recruit.price}">十连正常价格：</label>
+						<div class="form-group" id="tenRecruitPriceDiv2">
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.continuousPrice.price}">十连正常价格：</label>
 							<div class="col-sm-7">
 								<input type="text" id="continuousPrice3" name="continuousPrice3" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
 							</div>
@@ -206,7 +258,7 @@
 							<label class="col-sm-3 control-label" th:text="A+#{activity.recruit.content}">A池内容：</label>
 							<div class="col-sm-7" >
 	      						<div class="form-group">
-									<div class="col-sm-6" style="padding-right: 0px;">
+									<div class="col-sm-4" style="padding-right: 0px;">
 										<input placeholder="选择道具" class="form-control itemList" id="itemIdA" th:placeholder="#{sys.item.select}"/> 
 									</div>
 									<div class="col-sm-2" style="padding-left: 0px;padding-right: 0px;">
@@ -216,7 +268,12 @@
                             		</div>
                             		<div class="col-sm-2" style="padding-left: 0px;padding-right: 0px;">
                             			<div class="input-group">
-                                			<input type="text" placeholder="权重" class="form-control" id="weightA" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{activity.weight}"/> 
+                                			<input type="text" placeholder="填充权重" class="form-control" id="gotoWeightA" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{activity.recruit.goto.weight}"/> 
+                            			</div>
+                            		</div>
+                            		<div class="col-sm-2" style="padding-left: 0px;padding-right: 0px;">
+                            			<div class="input-group">
+                                			<input type="text" placeholder="抽取权重" class="form-control" id="getWeightA" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{activity.recruit.get.weight}"/> 
                             			</div>
                             		</div>
                             		<div class="col-sm-2" style="padding-left: 0px;">
@@ -239,7 +296,8 @@
 											<th data-field="heroId">ID</th>
 											<th data-field="name" th:text="#{sys.item.name}">name</th>
 											<th data-field="amount" th:text="#{sys.item.amount}">数量</th>
-											<th data-field="weight" th:text="#{activity.weight}">权重</th>
+											<th data-field="gotoWeight" th:text="#{activity.recruit.goto.weight}">填充权重</th>
+											<th data-field="getWeight" th:text="#{activity.recruit.get.weight}">抽取权重</th>
 											<th data-field="remove" th:text="#{sys.operate}">操作</th>
 										</tr>
 									</thead>
@@ -251,7 +309,7 @@
 							<label class="col-sm-3 control-label" th:text="B+#{activity.recruit.content}">B池内容：</label>
 							<div class="col-sm-7" >
 	      						<div class="form-group">
-									<div class="col-sm-6" style="padding-right: 0px;">
+									<div class="col-sm-4" style="padding-right: 0px;">
 										<input placeholder="选择道具" class="form-control itemList" id="itemIdB" th:placeholder="#{sys.item.select}"/> 
 									</div>
 									<div class="col-sm-2" style="padding-left: 0px;padding-right: 0px;">
@@ -261,7 +319,12 @@
                             		</div>
                             		<div class="col-sm-2" style="padding-left: 0px;padding-right: 0px;">
                             			<div class="input-group">
-                                			<input type="text" placeholder="权重" class="form-control" id="weightB" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{activity.weight}"/> 
+                                			<input type="text" placeholder="填充权重" class="form-control" id="gotoWeightB" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{activity.recruit.goto.weight}"/> 
+                            			</div>
+                            		</div>
+                            		<div class="col-sm-2" style="padding-left: 0px;padding-right: 0px;">
+                            			<div class="input-group">
+                                			<input type="text" placeholder="抽取权重" class="form-control" id="getWeightB" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{activity.recruit.get.weight}"/> 
                             			</div>
                             		</div>
                             		<div class="col-sm-2" style="padding-left: 0px;">
@@ -284,7 +347,8 @@
 											<th data-field="heroId">ID</th>
 											<th data-field="name" th:text="#{sys.item.name}">name</th>
 											<th data-field="amount" th:text="#{sys.item.amount}">数量</th>
-											<th data-field="weight" th:text="#{activity.weight}">权重</th>
+											<th data-field="gotoWeight" th:text="#{activity.recruit.goto.weight}">添加权重</th>
+											<th data-field="getWeight" th:text="#{activity.recruit.goto.weight}">获取权重</th>
 											<th data-field="remove" th:text="#{sys.operate}">操作</th>
 										</tr>
 									</thead>
@@ -320,7 +384,91 @@ $(function(){
 	itemNames();
 	itemName=window.itemAll;
 	zoneMap=loadZoneMap();
+	//单选按钮改变事件
+	redioChange();
+	//次数限制
+	$("#limitTimesDiv").hide();	
+	$("#limitTimes").val(0);
+	$("#limitTimesType").change(function(){
+		var value = $(this).val();
+		if(value!="0"){
+			$("#limitTimesDiv").show();			
+			$("#limitTimes").val("");	
+		}else{
+			$("#limitTimesDiv").hide();	
+			$("#limitTimes").val(0);	
+		}
+	});
+	$("#probabilityUp").val(0);
 });
+//单选按钮改变事件
+function redioChange(){
+	//是否单抽
+	$(".isOneRecruit").on('ifChecked',function(event){
+		console.log($("#discountDiv input:radio:checked").val())
+		var isOneRecruit =$(event.target).val();
+		if(isOneRecruit=="true" ){ 
+			if($("#discountDiv input:radio:checked").val()=="true"){
+				$("#oneRecruitPriceDiv1").show();
+				$("#alonePrice1").val("");
+				$("#alonePrice2").val("");
+			}
+			$("#oneRecruitPriceDiv2").show();
+			$("#alonePrice3").val("");
+		}else{
+			$("#oneRecruitPriceDiv1").hide();
+			$("#oneRecruitPriceDiv2").hide();
+			$("#alonePrice1").val(0);
+			$("#alonePrice2").val(0);
+			$("#alonePrice3").val(0);
+		}
+	});
+	//是否十连抽
+	$(".continuous").on('ifChecked',function(event){
+		var continuous =$(event.target).val();
+		if(continuous=="true"){ 
+			if($("#discountDiv input:radio:checked").val()=="true"){
+				$("#tenRecruitPriceDiv1").show();
+				$("#continuousPrice1").val("");
+				$("#continuousPrice2").val("");
+			}
+			$("#tenRecruitPriceDiv2").show();
+			$("#continuousPrice3").val("");
+		}else{
+			$("#tenRecruitPriceDiv1").hide();
+			$("#tenRecruitPriceDiv2").hide();
+			$("#continuousPrice1").val(0);
+			$("#continuousPrice2").val(0);
+			$("#continuousPrice3").val(0);
+		}
+	});
+	//是否首抽折扣
+	$(".discount").on('ifChecked',function(event){
+		var discount =$(event.target).val();
+		if(discount=="true"){ 
+			if($("#continuousDiv input:radio:checked").val()=="true"){
+				$("#tenRecruitPriceDiv1").show();
+				$("#continuousPrice1").val("");
+				$("#continuousPrice2").val("");
+			}
+			if($("#isOneRecruitDiv input:radio:checked").val()=="true"){
+				$("#oneRecruitPriceDiv1").show();
+				$("#alonePrice1").val("");
+				$("#alonePrice2").val("");
+			}
+		}else{
+			$("#oneRecruitPriceDiv1").hide();
+			$("#tenRecruitPriceDiv1").hide();
+			$("#alonePrice1").val(0);
+			$("#alonePrice2").val(0);
+			$("#continuousPrice1").val(0);
+			$("#continuousPrice2").val(0);
+		}
+	});
+}
+
+
+//显示添加表单
 function add() {
 	$("#addForm")[0].reset();
 	itemAtable.bootstrapTable("load", []);
@@ -332,21 +480,18 @@ function add() {
 	}).resetForm();
 	$("#activityId").val("");
 	//初始化icheck选项
-	$("#continuous2").iCheck('check');
-	$("#continuous2").parent("div").addClass("checked"); //改变选中颜色
-	$("#continuous1").parent("div").removeClass("checked"); //改变选中颜色
+	$("#continuous1").iCheck('check');
+	//$("#continuous2").parent("div").addClass("checked"); //改变选中颜色
+	//$("#continuous1").parent("div").removeClass("checked"); //改变选中颜色
 	
-	$("#discount2").iCheck('check');
-	$("#discount2").parent("div").addClass("checked"); //改变选中颜色
-	$("#discount1").parent("div").removeClass("checked"); //改变选中颜色
+	$("#discount1").iCheck('check');
+	//$("#discount2").parent("div").addClass("checked"); //改变选中颜色
+	//$("#discount1").parent("div").removeClass("checked"); //改变选中颜色
 	
 	//初始化区服
 	initZone();
-	initVipLevelSelect();
 	initDataTimePicker();
 	initItemInput($(".itemList"));
-	$("#probability").val(0);
-	$("#probabilityUp").val(0);
 	$("#addModal").modal("show");
 	
 }
@@ -354,19 +499,6 @@ function initZone(){
 	var data=loadZonePickList();
 	$("#zonelist").empty();
 	$("#zonelist").pickList({data: data,add:true});
-}
-function initVipLevelSelect(){
-	gameAjax({
-		url : "/recruit/vipList",
-		async : false,
-		callback : function(data) {
-			var options="";
-			$.each(data, function(n, lv) {
-				options += '<option value="'+lv+'">' + lv + '</option>';
-			});
-			$("#limtVip").html(options);
-		}
-	})
 }
 function initDataTimePicker(){
 	$("#startDatetimepicker").datetimepicker({
@@ -382,8 +514,8 @@ function initDataTimePicker(){
 	});
 	var date=new Date();
 }
-$("#type").change(function(){
-	if($("#type").val()=="item"){
+$("#cost").change(function(){
+	if($("#cost").val()=="item"){
 		//道具选择
 		initItemInput($(".itemList"));
 		$("#itemShow").show();
@@ -394,25 +526,20 @@ $("#type").change(function(){
 });
 $("#proType").change(function(){
 	if($("#proType").val()==1){
-		$("#averageShow").show();
-		$("#growUpShow").hide();
-		$("#average").val("");
-		$("#probability").val(0);
+		$("#probabilityUpShow").hide();
 		$("#probabilityUp").val(0);
 	}else{
-		$("#growUpShow").show();
-		$("#averageShow").hide();
-		$("#average").val(0);
-		$("#probability").val("");
-		$("#probabilityUp").val("");
+		$("#probabilityUpShow").show();
+		$("#probabilityUp").val('');
 	}
 });
 function addItemA(){
 	var itemId=$("#itemIdA").val();
 	var amount=$("#amountA").val();
-	var weight=$("#weightA").val();
+	var gotoWeightA=$("#gotoWeightA").val();
+	var getWeightA=$("#getWeightA").val();
 	
-	if(itemId.length==0||amount==0||amount.length==0||weight==0||weight.length==0){
+	if(itemId.length==0||amount==0||amount.length==0||gotoWeightA==0||gotoWeightA.length==0||getWeightA==0||getWeightA.length==0){
 		return;
 	}
 	if(!itemName.hasOwnProperty(itemId)){
@@ -423,7 +550,8 @@ function addItemA(){
 	//清空文本框
 	$("#itemIdA").val("");
 	$("#amountA").val("");
-	$("#weightA").val("");
+	$("#gotoWeightA").val("");
+	$("#getWeightA").val("");
 	
 	var tableData=itemAtable.bootstrapTable('getData');
 	var isAdd=true; //true id重复只增加数量
@@ -431,6 +559,8 @@ function addItemA(){
 		if(val.heroId==itemId){
 			amount+=parseInt(val.amount);
 			tableData[index]["amount"]=amount;
+			tableData[index]["gotoWeight"]=gotoWeightA;
+			tableData[index]["getWeight"]=gotoWeightA;
 			isAdd=false;
 		}
 	});
@@ -438,7 +568,7 @@ function addItemA(){
 		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removeItemA(\''+itemId+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
 		var name = itemName[itemId];
 		data=[];
-		data.push({heroId:itemId,name:name,amount:amount,weight:weight,remove:remove});
+		data.push({heroId:itemId,name:name,amount:amount,gotoWeight:gotoWeightA,getWeight:getWeightA,remove:remove});
 		itemAtable.bootstrapTable("append", data);
 	}else{
 		itemAtable.bootstrapTable('load', tableData);
@@ -447,9 +577,10 @@ function addItemA(){
 function addItemB(){
 	var itemId=$("#itemIdB").val();
 	var amount=$("#amountB").val();
-	var weight=$("#weightB").val();
+	var gotoWeight=$("#gotoWeightB").val();
+	var getWeight=$("#getWeightB").val();
 	
-	if(itemId.length==0||amount==0||amount.length==0||weight==0||weight.length==0){
+	if(itemId.length==0||amount==0||amount.length==0||gotoWeight==0||gotoWeight.length==0||getWeight==0||getWeight.length==0){
 		return;
 	}
 	if(!itemName.hasOwnProperty(itemId)){
@@ -460,7 +591,8 @@ function addItemB(){
 	//清空文本框
 	$("#itemIdB").val("");
 	$("#amountB").val("");
-	$("#weightB").val("");
+	$("#gotoWeightB").val("");
+	$("#getWeightB").val("");
 	
 	var tableData=itemBtable.bootstrapTable('getData');
 	var isAdd=true; //true id重复只增加数量
@@ -468,6 +600,8 @@ function addItemB(){
 		if(val.heroId==itemId){
 			amount+=parseInt(val.amount);
 			tableData[index]["amount"]=amount;
+			tableData[index]["gotoWeight"]=gotoWeight;
+			tableData[index]["getWeight"]=getWeight;
 			isAdd=false;
 		}
 	});
@@ -475,7 +609,7 @@ function addItemB(){
 		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removeItemB(\''+itemId+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
 		var name = itemName[itemId];
 		data=[];
-		data.push({heroId:itemId,name:name,amount:amount,weight:weight,remove:remove});
+		data.push({heroId:itemId,name:name,amount:amount,gotoWeight:gotoWeight,getWeight:getWeight,remove:remove});
 		itemBtable.bootstrapTable("append", data);
 	}else{
 		itemBtable.bootstrapTable('load', tableData);
@@ -516,15 +650,21 @@ function initTable() {
 			text+='<tr>';
 			if(row.proType==1){
 				text+='<td colspan="2"><b>'+[[#{activity.recruit.rare.probability}]]+'</b></td><td colspan="2">'+[[#{activity.recruit.average.type}]]+'</td>';
-				text+='<td colspan="2"><b>'+[[#{activity.recruit.average}]]+'</b></td><td colspan="2">'+row.average+'</td>';
+				text+='<td colspan="2"><b>'+[[#{activity.recruit.average}]]+'</b></td><td colspan="2">'+row.probability+'</td>';
 			}else{
 				text+='<td colspan=""><b>'+[[#{activity.recruit.rare.probability}]]+'</b></td><td colspan="2">'+[[#{activity.recruit.probabilityUp.type}]]+'</td>';
 				text+='<td colspan=""><b>'+[[#{activity.recruit.probability}]]+'</b></td><td colspan="">'+row.probability+'</td>';
 				text+='<td colspan=""><b>'+[[#{activity.recruit.probabilityUp}]]+'</b></td><td colspan="">'+row.probabilityUp+'</td>';
 			}
+			var oneRecruit="";
+			if(row.isOneRecruit){
+				oneRecruit=[[#{sys.true}]];
+			}else{
+				oneRecruit=[[#{sys.false}]];
+			}
 			text+='</tr>';
 			text+='<tr><td colspan="2"><b>'+[[#{activity.recruit.safetyTimes}]]+'</b></td><td colspan="2">'+row.safetyTimes+'</td>';
-			text+='<td colspan="2"><b>'+[[#{activity.recruit.norepeat}]]+'</b></td><td colspan="2">'+row.norepeat+'</td></tr>'
+			text+='<td colspan="2"><b>'+[[#{activity.recruit.is.one}]]+'</b></td><td colspan="2">'+oneRecruit+'</td></tr>'
 			text+='<tr>';
 			var continuous="";
 			if(row.continuous){
@@ -543,23 +683,25 @@ function initTable() {
 			text+='</tr><tr>'
 			text+='<td><b>'+[[#{activity.recruit.alonePrice1}]]+'</b></td><td>'+row.alonePrice1+'</td>';
 			text+='<td><b>'+[[#{activity.recruit.alonePrice2}]]+'</b></td><td>'+row.alonePrice2+'</td>';
+			text+='<td><b>'+[[#{activity.recruit.alonePrice.price}]]+'</b></td><td>'+row.alonePrice3+'</td>';
 			text+='<td><b>'+[[#{activity.recruit.continuousPrice1}]]+'</b></td><td>'+row.continuousPrice1+'</td>';
 			text+='<td><b>'+[[#{activity.recruit.continuousPrice2}]]+'</b></td><td>'+row.continuousPrice2+'</td>';
+			text+='<td><b>'+[[#{activity.recruit.continuousPrice.price}]]+'</b></td><td>'+row.continuousPrice3+'</td>';
 			text+='</tr>';
 			//A池数据
 			text+='<tr><td colspan="8"><b>A'+[[#{activity.recruit.content}]]+'</b></td></tr>'
 			text+='<tr><table class="table">';
-			text+='<thead><tr><td>ID</td><td>'+[[#{sys.item.amount}]]+'</td><td>'+[[#{activity.weight}]]+'</td></tr></thead>'
+			text+='<thead><tr><td>ID</td><td>'+[[#{sys.item.amount}]]+'</td><td>'+[[#{activity.recruit.goto.weight}]]+'</td><td>'+[[#{activity.recruit.get.weight}]]+'</td></tr></thead>'
 			$.each(row.aData,function(index,val){
-				text+='<tr><td>'+val.heroId+'</td><td>'+val.amount+'</td><td>'+val.weight+'</td></tr>';
+				text+='<tr><td>'+val.heroId+'</td><td>'+val.amount+'</td><td>'+val.gotoWeight+'</td><td>'+val.getWeight+'</td></tr>';
 			});
 			text+='</table></tr>';
 			//B池数据
 		 	text+='<tr><td colspan="8"><b>B'+[[#{activity.recruit.content}]]+'</b></td></tr>'
 			text+='<tr><table class="table">';
-			text+='<thead><tr><td>ID</td><td>'+[[#{sys.item.amount}]]+'</td><td>'+[[#{activity.weight}]]+'</td></tr></thead>'
+			text+='<thead><tr><td>ID</td><td>'+[[#{sys.item.amount}]]+'</td><td>'+[[#{activity.recruit.goto.weight}]]+'</td><td>'+[[#{activity.recruit.get.weight}]]+'</td></tr></thead>'
 			$.each(row.bData,function(index,val){
-				text+='<tr><td>'+val.heroId+'</td><td>'+val.amount+'</td><td>'+val.weight+'</td></tr>';
+				text+='<tr><td>'+val.heroId+'</td><td>'+val.amount+'</td><td>'+val.gotoWeight+'</td><td>'+val.getWeight+'</td></tr>';
 			});
 			text+='</table></tr>'; 
 			
@@ -603,25 +745,24 @@ function initTable() {
 				},
 			},
 			{
-				title : [[#{activity.shop.vip.limt}]],
-				field : "limtVip",
-			},
-			{
-				title : [[#{activity.shop.number}]],
-				field : "number",
-				sortable: true,
-				editable : {
-					url : "/recruit/update",
-					validate : function(value) {
-						if(value == ""){
-							return "not null!";
-						}
-					},
-					error : function(response, newValue) {
-					    alert("error:" + newValue);
-					}
+				title : [[#{activity.recruit.probability}]],
+				field : "probability",
+				formatter:function(value){
+					return value*100+"%";
 				}
 			},
+			{
+				title : [[#{activity.recruit.safetyTimes}]],
+				field : "safetyTimes",
+			},
+			{
+				title : [[#{activity.shop.vip.limt}]],
+				field : "state",
+				formatter:function(value){
+					return value?'<b style="color:green">'+[[#{activity.recruit.state.open}]]+'</b>':'<b style="color:red">'+[[#{activity.recruit.state.close}]]+'</b>'
+				}
+			},
+			
 			{
 				title : [[#{sys.operate}]],
 				field : "id",
@@ -659,13 +800,16 @@ function onSave(){
 	 var tableDataB=itemBtable.bootstrapTable('getData');
 	 if(tableDataB.length==0){
 		 swal("", [[#{activity.recruit.swal.b.null}]], "warning");
+		 return;
+		 return;
 	 }
 	 var aData=[];
 	 $.each(itemAtable.bootstrapTable('getData'),function(index,val){
 		 var temp={};
 		 temp["heroId"]=val.heroId;
 		 temp["amount"]=val.amount;
-		 temp["weight"]=val.weight;
+		 temp["gotoWeight"]=val.gotoWeight;
+		 temp["getWeight"]=val.getWeight;
 		 aData.push(temp);
 	 });
 	 var bData=[];
@@ -673,7 +817,8 @@ function onSave(){
 		 var temp={};
 		 temp["heroId"]=val.heroId;
 		 temp["amount"]=val.amount;
-		 temp["weight"]=val.weight;
+		 temp["gotoWeight"]=val.gotoWeight;
+		 temp["getWeight"]=val.getWeight;
 		 bData.push(temp);
 	 });
 /*<![CDATA[*/
@@ -700,11 +845,15 @@ function edit(activityId){
 	}).resetForm();
 	$("#activityId").val(activityId);
 	initDataTimePicker();
-	initVipLevelSelect();
 	initItemInput($(".itemList"));
 	var data = table.bootstrapTable("getRowByUniqueId", activityId);
 	editZone(data.zoneList);
 	editDataTimePicker(data);
+	if(data.state){
+		$("#stateTrue").iCheck('check');
+	}else{
+		$("#stateFalse").iCheck('check');
+	}
 	$("#name").val(data.name);
 	$("#describe").val(data.describe);
 	/*<![CDATA[*/
@@ -720,27 +869,41 @@ function edit(activityId){
 		$("#itemShow").hide();
 	}
 	/*]]>*/
-	
-	$("#limtVip").val(data.limtVip);
-	
-	$("#number").val(data.number);
 	$("#proType").val(data.proType);
+	$("#probability").val(data.probability);
 	if(data.proType==1){
-		$("#averageShow").show();
-		$("#growUpShow").hide();
-		$("#average").val(data.average);
-		$("#probability").val(0);
-		$("#probabilityUp").val(0);
+		$("#probabilityUpShow").hide();
 	}else{
-		$("#growUpShow").show();
-		$("#averageShow").hide();
-		$("#average").val(0);
-		$("#probability").val(data.probability);
 		$("#probabilityUp").val(data.probabilityUp);
+		$("#probabilityUpShow").show();
 	}
 	
 	$("#safetyTimes").val(data.safetyTimes);
-	$("#norepeat").val(data.norepeat);
+	$("#limitTimesType").val(data.limitTimesType);
+	if(data.limitTimesType!=0){
+		$("#limitTimesDiv").show();
+		$("#limitTimes").val(data.limitTimes);
+	}else{
+		$("#limitTimesDiv").hide();
+	}
+	
+	$("#startA").val(data.startA);
+	$("#startB").val(data.startB);
+	$("#everyTimesB").val(data.everyTimesB);
+	$("#everyTimesA").val(data.everyTimesA);
+	$("#addA").val(data.addA);
+	$("#addB").val(data.addB);
+	if(data.isOneRecruit){
+		$("#oneRecruitTrue").iCheck('check');
+		//改变选中颜色
+		//$("#oneRecruitTrue").parent("div").addClass("checked");
+		//$("#oneRecruitFalse").parent("div").removeClass("checked");  
+	}else{
+		$("#oneRecruitFalse").iCheck('check');
+		//改变选中颜色
+		//$("#oneRecruitFalse").parent("div").addClass("checked");
+		//$("#oneRecruitFalse").parent("div").removeClass("checked");
+	}
 	if(data.continuous){
 		$("#continuous1").iCheck('check');
 		//改变选中颜色
@@ -774,7 +937,7 @@ function edit(activityId){
 	$.each(data.aData,function(index,val){
 		var name = itemName[val.heroId];
 		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removeItemA(\''+val.heroId+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
-		a.push({heroId:val.heroId,name:name,amount:val.amount,weight:val.weight,remove:remove});
+		a.push({heroId:val.heroId,name:name,amount:val.amount,gotoWeight:val.gotoWeight,getWeight:val.getWeight,remove:remove});
 	});
 	itemAtable.bootstrapTable('load', a);
 	//B池数据
@@ -782,7 +945,7 @@ function edit(activityId){
 	$.each(data.bData,function(index,val){
 		var name = itemName[val.heroId];
 		var remove= '<a class="remove" href="javascript:void(0)" title="Remove" onclick="removeItemB(\''+val.heroId+'\')"><i class="glyphicon glyphicon-remove"></i></a>';
-		b.push({heroId:val.heroId,name:name,amount:val.amount,weight:val.weight,remove:remove});
+		b.push({heroId:val.heroId,name:name,amount:val.amount,gotoWeight:val.gotoWeight,getWeight:val.getWeight,remove:remove});
 	});
 	itemBtable.bootstrapTable('load', b);
 	$("#addModal").modal("show");

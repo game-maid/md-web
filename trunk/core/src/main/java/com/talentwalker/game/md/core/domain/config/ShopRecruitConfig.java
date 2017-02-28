@@ -43,11 +43,6 @@ public class ShopRecruitConfig extends BaseDomain {
     @Transient
     protected String itemId;
     /**
-     * 限定vip等级
-     */
-    @Field("limt_vip")
-    protected int limtVip;
-    /**
      * 活动开始时间
      */
     @Field("start_time")
@@ -68,14 +63,18 @@ public class ShopRecruitConfig extends BaseDomain {
     @Transient
     protected String endDate;
     /**
-     * 活动排序
+     * 状态(true:开启，false：关闭)
      */
-    protected int number;
+    protected boolean state;
     /**
      * 稀有获取概率模式（1平均型、2成长型）
      */
     @Field("proType")
     protected int proType;
+    /**
+     * 不重复次数
+     */
+    protected int norepeat;
     /**
      * 平均概率
      */
@@ -95,9 +94,17 @@ public class ShopRecruitConfig extends BaseDomain {
     @Field("safety_times")
     protected int safetyTimes;
     /**
-     * 不重复间隔
+     * 次数限制类型（0：不限次，1：每日限次，2：总限次）
      */
-    protected int norepeat;
+    protected int limitTimesType;
+    /**
+     * 限制次数
+     */
+    protected int limitTimes;
+    /**
+     * 是否单抽
+     */
+    protected boolean isOneRecruit;
     /**
      * 是否十连抽
      */
@@ -151,6 +158,25 @@ public class ShopRecruitConfig extends BaseDomain {
      */
     @Field("b_data")
     protected List<Map<String, Object>> bData;
+    /**
+     * 初始稀有卡牌数量
+     */
+    protected int startA;
+    /**
+     * 初始普通卡牌数
+     */
+    protected int startB;
+    /**
+     * 每everyTimesA次抽卡 增加addA张卡牌
+     */
+    protected int everyTimesA;
+    protected int addA;
+    /**
+     * 每everyTimesB次抽卡 增加addB张卡牌
+     */
+    protected int everyTimesB;
+    protected int addB;
+
     /**
      * A池数据
      */
@@ -216,34 +242,6 @@ public class ShopRecruitConfig extends BaseDomain {
      */
     public void setItemId(String itemId) {
         this.itemId = itemId;
-    }
-
-    /**
-     * @return limtVip
-     */
-    public int getLimtVip() {
-        return limtVip;
-    }
-
-    /**
-     * @param limtVip 要设置的 limtVip
-     */
-    public void setLimtVip(int limtVip) {
-        this.limtVip = limtVip;
-    }
-
-    /**
-     * @return number
-     */
-    public int getNumber() {
-        return number;
-    }
-
-    /**
-     * @param number 要设置的 number
-     */
-    public void setNumber(int number) {
-        this.number = number;
     }
 
     /**
@@ -333,7 +331,7 @@ public class ShopRecruitConfig extends BaseDomain {
     /**
      * @return continuous
      */
-    public boolean isContinuous() {
+    public boolean getContinuous() {
         return continuous;
     }
 
@@ -347,7 +345,7 @@ public class ShopRecruitConfig extends BaseDomain {
     /**
      * @return discount
      */
-    public boolean isDiscount() {
+    public boolean getDiscount() {
         return discount;
     }
 
@@ -566,6 +564,146 @@ public class ShopRecruitConfig extends BaseDomain {
      */
     public void setContinuousPrice3(int continuousPrice3) {
         this.continuousPrice3 = continuousPrice3;
+    }
+
+    /**
+     * @return state
+     */
+    public boolean getState() {
+        return state;
+    }
+
+    /**
+     * @param state 要设置的 state
+     */
+    public void setState(boolean state) {
+        this.state = state;
+    }
+
+    /**
+     * @return limitTimesType
+     */
+    public int getLimitTimesType() {
+        return limitTimesType;
+    }
+
+    /**
+     * @param limitTimesType 要设置的 limitTimesType
+     */
+    public void setLimitTimesType(int limitTimesType) {
+        this.limitTimesType = limitTimesType;
+    }
+
+    /**
+     * @return limitTimes
+     */
+    public int getLimitTimes() {
+        return limitTimes;
+    }
+
+    /**
+     * @param limitTimes 要设置的 limitTimes
+     */
+    public void setLimitTimes(int limitTimes) {
+        this.limitTimes = limitTimes;
+    }
+
+    /**
+     * @return isOneRecruit
+     */
+    public boolean getIsOneRecruit() {
+        return isOneRecruit;
+    }
+
+    /**
+     * @param isOneRecruit 要设置的 isOneRecruit
+     */
+    public void setOneRecruit(boolean isOneRecruit) {
+        this.isOneRecruit = isOneRecruit;
+    }
+
+    /**
+     * @return startA
+     */
+    public int getStartA() {
+        return startA;
+    }
+
+    /**
+     * @param startA 要设置的 startA
+     */
+    public void setStartA(int startA) {
+        this.startA = startA;
+    }
+
+    /**
+     * @return startB
+     */
+    public int getStartB() {
+        return startB;
+    }
+
+    /**
+     * @param startB 要设置的 startB
+     */
+    public void setStartB(int startB) {
+        this.startB = startB;
+    }
+
+    /**
+     * @return everyTimesA
+     */
+    public int getEveryTimesA() {
+        return everyTimesA;
+    }
+
+    /**
+     * @param everyTimesA 要设置的 everyTimesA
+     */
+    public void setEveryTimesA(int everyTimesA) {
+        this.everyTimesA = everyTimesA;
+    }
+
+    /**
+     * @return addA
+     */
+    public int getAddA() {
+        return addA;
+    }
+
+    /**
+     * @param addA 要设置的 addA
+     */
+    public void setAddA(int addA) {
+        this.addA = addA;
+    }
+
+    /**
+     * @return everyTimesB
+     */
+    public int getEveryTimesB() {
+        return everyTimesB;
+    }
+
+    /**
+     * @param everyTimesB 要设置的 everyTimesB
+     */
+    public void setEveryTimesB(int everyTimesB) {
+        this.everyTimesB = everyTimesB;
+    }
+
+    /**
+     * @return addB
+     */
+    public int getAddB() {
+        return addB;
+    }
+
+    /**
+     * @param addB 要设置的 addB
+     */
+    public void setAddB(int addB) {
+        this.addB = addB;
     }
 
 }
