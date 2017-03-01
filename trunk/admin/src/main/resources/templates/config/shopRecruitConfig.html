@@ -600,8 +600,8 @@ function addItemB(){
 		if(val.heroId==itemId){
 			amount+=parseInt(val.amount);
 			tableData[index]["amount"]=amount;
-			tableData[index]["gotoWeight"]=gotoWeight;
-			tableData[index]["getWeight"]=getWeight;
+			tableData[index]["gotoWeight"]=parseInt(gotoWeight);
+			tableData[index]["getWeight"]=parseInt(getWeight);
 			isAdd=false;
 		}
 	});
@@ -829,8 +829,8 @@ function onSave(){
 		 var temp={};
 		 temp["heroId"]=val.heroId;
 		 temp["amount"]=val.amount;
-		 temp["gotoWeight"]=val.gotoWeight;
-		 temp["getWeight"]=val.getWeight;
+		 temp["gotoWeight"]=parseInt(val.gotoWeight);
+		 temp["getWeight"]=parseInt(val.getWeight);
 		 aData.push(temp);
 	 });
 	 var bData=[];
@@ -838,8 +838,8 @@ function onSave(){
 		 var temp={};
 		 temp["heroId"]=val.heroId;
 		 temp["amount"]=val.amount;
-		 temp["gotoWeight"]=val.gotoWeight;
-		 temp["getWeight"]=val.getWeight;
+		 temp["gotoWeight"]=parseInt(val.gotoWeight);
+		 temp["getWeight"]=parseInt(val.getWeight);
 		 bData.push(temp);
 	 });
 /*<![CDATA[*/
