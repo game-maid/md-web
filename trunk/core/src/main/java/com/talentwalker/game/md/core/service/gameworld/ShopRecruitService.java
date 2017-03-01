@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,13 +133,18 @@ public class ShopRecruitService extends GameSupport {
     private void commonRecruit(DataConfig config, Map<String, Recruit> recruitMap, Lord lord, ShopRecruit shopRecruit,
             List<Recruit> activityRecruit) {
         // 检查现有活动招募是否过期
-        for (String recruitId : recruitMap.keySet()) {
-            Recruit recruit = recruitMap.get(recruitId);
+        Set<String> keySet = recruitMap.keySet();
+        Iterator<String> iterator = keySet.iterator();
+        while (iterator.hasNext()) {
+            Recruit recruit = recruitMap.get(iterator.next());
             if (recruit.getType() == Recruit.TYPE_ACTIVITY) {// 活动招募
                 ShopRecruitConfig activityConfig = recruit.getConfig();
+                if (activityConfig == null) {
+                    continue;
+                }
                 long endTime = activityConfig.getEndTime();
                 if (System.currentTimeMillis() >= endTime || !activityConfig.getState()) {
-                    recruitMap.remove(recruitId);
+                    iterator.remove();
                 }
             }
         }
