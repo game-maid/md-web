@@ -78,6 +78,7 @@ public class ShopRecruitConfigService extends BaseService {
             shopRecruit.setProbability(recruit.getProbability());
             shopRecruit.setProbabilityUp(recruit.getProbabilityUp());
         }
+        shopRecruit.setSrc(recruit.getSrc());
         shopRecruit.setState(recruit.getState());
         shopRecruit.setStartA(recruit.getStartA());
         shopRecruit.setStartB(recruit.getStartB());

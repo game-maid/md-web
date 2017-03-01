@@ -176,7 +176,10 @@ public class ShopRecruitConfig extends BaseDomain {
      */
     protected int everyTimesB;
     protected int addB;
-
+    /**
+     * 图片地址
+     */
+    protected String src;
     /**
      * A池数据
      */
@@ -704,6 +707,20 @@ public class ShopRecruitConfig extends BaseDomain {
      */
     public void setAddB(int addB) {
         this.addB = addB;
+    }
+
+    /**
+     * @return src
+     */
+    public String getSrc() {
+        return src;
+    }
+
+    /**
+     * @param src 要设置的 src
+     */
+    public void setSrc(String src) {
+        this.src = src;
     }
 
 }
