@@ -18,6 +18,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.domain.config.ShopRecruitConfig;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
@@ -122,14 +123,26 @@ public class ShopRecruitService extends GameSupport {
     /**
      * @Description:日常和活动招募
      * @param config
-     * @param recruitMap
+     * @param recruitMap 原有招募列表
      * @param lord
      * @param shopRecruit
-     * @param activityRecruit
+     * @param activityRecruit 新的招募列表
      * @throws
      */
     private void commonRecruit(DataConfig config, Map<String, Recruit> recruitMap, Lord lord, ShopRecruit shopRecruit,
             List<Recruit> activityRecruit) {
+        // 检查现有活动招募是否过期
+        for (String recruitId : recruitMap.keySet()) {
+            Recruit recruit = recruitMap.get(recruitId);
+            if (recruit.getType() == Recruit.TYPE_ACTIVITY) {// 活动招募
+                ShopRecruitConfig activityConfig = recruit.getConfig();
+                long endTime = activityConfig.getEndTime();
+                if (System.currentTimeMillis() >= endTime || !activityConfig.getState()) {
+                    recruitMap.remove(recruitId);
+                }
+            }
+        }
+        // 普通招募
         Iterator<String> it = config.getJsonObject().keys();
         while (it.hasNext()) {
             String recruitId = it.next();
@@ -142,7 +155,7 @@ public class ShopRecruitService extends GameSupport {
             }
         }
         // 当前存在的活动招募
-        activityRecruit = getActivityRecruit(lord, shopRecruit);
+        getActivityRecruit(lord, shopRecruit, activityRecruit);
     }
 
     public void textTriggeringRecruit(String recruitId) {
@@ -325,8 +338,7 @@ public class ShopRecruitService extends GameSupport {
             resultHeroId = RandomUtils.randomTable(pollC);
         } else {
             // 稀有池B池
-            probability = config.getDouble("probability"); // 清空抽A池概率
-
+            probability = config.getDouble("probability"); // 清空抽B池概率
             Map<String, Integer> pollD = recruit.getPollD();
             resultHeroId = RandomUtils.randomTable(pollD);
         }
@@ -337,7 +349,37 @@ public class ShopRecruitService extends GameSupport {
     }
 
     /**
-     * @Description:刷新C、D卡池
+     * @Description:刷新C、D卡池（活动招募）
+     * @param times
+     * @param recruit
+     * @throws
+     */
+    private void refreshPoll(int times, Recruit recruit, ShopRecruitConfig config) {
+        Map<String, Integer> pollC = recruit.getPollC();
+        Map<String, Integer> pollD = recruit.getPollD();
+        if (times == 0) {
+            Integer startC = config.getStartA();
+            Integer startD = config.getStartB();
+            addPoll(startC, config.getaData(), pollC);
+            addPoll(startD, config.getbData(), pollD);
+        } else {
+            // C卡池
+            Integer limitTimesC = config.getEveryTimesA();
+            if (recruit.getTimes() % limitTimesC == 0) {
+                Integer numC = config.getAddA();
+                addPoll(numC, config.getaData(), pollC);
+            }
+            // D卡池
+            Integer limitTimesD = config.getEveryTimesB();
+            if (recruit.getTimes() % limitTimesD == 0) {
+                Integer numD = config.getAddB();
+                addPoll(numD, config.getbData(), pollD);
+            }
+        }
+    }
+
+    /**
+     * @Description:刷新C、D卡池（配置招募）
      * @param times
      * @param recruit
      * @throws
@@ -369,7 +411,7 @@ public class ShopRecruitService extends GameSupport {
     }
 
     /**
-     * @Description:向C/D池中 添加英雄
+     * @Description:向C/D池中 添加英雄（配置招募）
      * @param num :添加数量
      * @param config ：
      * @param pollRecurit ：目标卡池
@@ -397,6 +439,41 @@ public class ShopRecruitService extends GameSupport {
             for (JSONObject jsonA : poll) {
                 if (jsonA.getString(ConfigKey.SHOP_HERO_RECRUIT_HEROID).equals(heroId)) {
                     int getWeight = jsonA.getInt(ConfigKey.SHOP_HERO_RECRUIT_GETWEIGHT);
+                    pollRecurit.put(heroId, getWeight);
+                }
+            }
+            gotoWeightMap.remove(heroId);
+        }
+    }
+
+    /**
+     * @Description:向C/D池中 添加英雄(活动招募)
+     * @param num :添加数量
+     * @param config ：
+     * @param pollRecurit ：目标卡池
+     * @param pollKey ： ConfigKey.SHOP_HERO_RECRUIT_POLL_A    /  ConfigKey.SHOP_HERO_RECRUIT_POLL_B
+     * @throws
+     */
+    private void addPoll(Integer num, List<Map<String, Object>> poll, Map<String, Integer> pollRecurit) {
+        // 获得添加权重列表 去除CD卡池中已有
+        Map<String, Integer> gotoWeightMap = new HashMap<>();
+        for (Map<String, Object> map : poll) {
+            String heroId = (String) map.get("heroId");
+            if (pollRecurit.containsKey(heroId)) {
+                continue;
+            }
+            int gotoWeight = Integer.parseInt(map.get("gotoWeight").toString());
+            gotoWeightMap.put(heroId, gotoWeight);
+        }
+        // 添加
+        for (int i = 0; i < num; i++) {
+            if (gotoWeightMap.size() == 0) {
+                return;
+            }
+            String heroId = RandomUtils.randomTable(gotoWeightMap);
+            for (Map<String, Object> map : poll) {
+                if (map.get("heroId").equals(heroId)) {
+                    int getWeight = Integer.parseInt(map.get("getWeight").toString());
                     pollRecurit.put(heroId, getWeight);
                 }
             }
@@ -460,9 +537,9 @@ public class ShopRecruitService extends GameSupport {
         ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
         Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
         ShopRecruitConfig config = shopRecruitConfigRepository.findOne(new ObjectId(recruitKey));
-        if (config == null) {
-            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_28003, "未找到活动招募配置");
-        }
+        // 校验
+        checkActiveRecruit(config);
+
         Recruit recruit = recruitMap.get(recruitKey);
         for (int i = 0; i < 10; i++) {
             this.randomActivityHeroId(lord, recruit, config);
@@ -502,13 +579,12 @@ public class ShopRecruitService extends GameSupport {
         this.isLevelOpen(ConfigKey.HERO_RECRUITSOUL, lord, true);
         ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
         Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
-        ShopRecruitConfig config = shopRecruitConfigRepository.findOne(new ObjectId(recruitKey));
-        if (config == null) {
-            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_28003, "未找到活动招募配置");
-        }
+        ShopRecruitConfig config = recruitMap.get(recruitKey).getConfig();
+        // 检查活动招募
+        checkActiveRecruit(config);
         Recruit recruit = recruitMap.get(recruitKey);
-
-        this.randomActivityHeroId(lord, recruit, config);
+        // 抽中英雄
+        String resultHeroId = this.randomActivityHeroId(lord, recruit, config);
         int oneTimes = recruit.getOneTimes() + 1;
         recruit.setOneTimes(oneTimes);
         // 计算消耗
@@ -536,12 +612,31 @@ public class ShopRecruitService extends GameSupport {
     }
 
     /**
-     * @Description:
+     * @Description:检查活动招募是否存在 过期 关闭
+     * @param config
+     * @throws
+     */
+    private void checkActiveRecruit(ShopRecruitConfig config) {
+        if (config == null) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_28003, "未找到活动招募配置");
+        }
+        if (!config.getState() || config.getEndTime() < System.currentTimeMillis()) {// 已经关闭
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_28007, "活动已经结束");
+        }
+    }
+
+    /**
+     * @Description:活动招募抽中武将
+     * @param lord
+     * @param recruit
+     * @param config
      * @return
      * @throws
      */
-    private void randomActivityHeroId(Lord lord, Recruit recruit, ShopRecruitConfig config) {
+    private String randomActivityHeroId(Lord lord, Recruit recruit, ShopRecruitConfig config) {
         int times = recruit.getTimes();
+        // 刷新poll池
+        refreshPoll(times, recruit, config);
         times++;
         // 保底次数
         boolean isRare = false; // true:必抽稀有池，false：普通池
@@ -553,69 +648,38 @@ public class ShopRecruitService extends GameSupport {
         }
         // 抽中稀有池概率
         double probability = recruit.getProbability();
-        if (probability <= 0) {
-            probability = config.getProbability();
-        }
-        int random = RandomUtils.randomInt(1, 10 * 100000);
-        Map<String, Integer> weightMap = new HashMap<String, Integer>();
-        String resultHeroId = "";
+        int random = RandomUtils.randomInt(1, 1 * 100000);
+        String resultHeroId;
         if (!isRare && random > probability * 100000) {
-            // 普通池B池
-            if (config.getProType() == 2) { // 2成长型
-                probability += config.getProbabilityUp(); // 概率成长
-            }
-
-            List<Map<String, Object>> arr = config.getbData();
-            Map<String, Integer> heroAmount = new HashMap<String, Integer>();
-            for (Map<String, Object> heroData : arr) {
-                String heroId = heroData.get("heroId").toString();
-                Integer weight = Integer.parseInt(heroData.get("weight").toString());
-                weightMap.put(heroId, weight);
-                heroAmount.put(heroId, Integer.parseInt(heroData.get("amount").toString()));
-            }
-            // 获得英雄
-            resultHeroId = RandomUtils.randomTable(weightMap);
-            gainPayService.gain(lord, resultHeroId, heroAmount.get(resultHeroId));
-        } else {
-            // 稀有池A池
-            probability = 0; // 清空抽A池概率
+            // 普通池A池
+            double probabilityUp = config.getProbabilityUp();
             int aTimes = recruit.getaTimes();
-            recruit.setaTimes(aTimes++);
-            List<Map<String, Object>> arr = config.getaData();
-            // 稀有池原权重副本（用于条件冲突，导致卡池符合条件权重数据为空时）
-            Map<String, Integer> weightTemp = new HashMap<String, Integer>();
-            Map<String, Integer> heroAmount = new HashMap<String, Integer>();
-            for (Map<String, Object> heroData : arr) {
-                String heroId = heroData.get("heroId").toString();
-                Integer weight = Integer.parseInt(heroData.get("weight").toString());
-                heroAmount.put(heroId, Integer.parseInt(heroData.get("amount").toString()));
-                weightMap.put(heroId, weight);
-                weightTemp.put(heroId, weight);
-            }
-            // 稀有不重复次数
-            int norepeat = config.getNorepeat();
-            List<String> oldHeros = recruit.getOldHeros();
-            if (oldHeros != null && oldHeros.size() > 0) {
-                int end = (oldHeros.size() - norepeat) <= 0 ? 0 : oldHeros.size() - norepeat;
-                for (int i = oldHeros.size() - 1; i >= end; i--) {
-                    if (weightMap.containsKey(oldHeros.get(i))) {
-                        weightMap.remove(oldHeros.get(i));
-                    }
+            recruit.setaTimes(++aTimes);
+            probability += probabilityUp; // 概率成长
+            Map<String, Integer> pollC = recruit.getPollC();
+            resultHeroId = RandomUtils.randomTable(pollC);
+            for (Map<String, Object> map : config.getaData()) {
+                if (map.get("heroId").equals(resultHeroId)) {
+                    gainPayService.gain(lord, resultHeroId, (int) map.get("amount"));
                 }
             }
-            // 容错，条件冲突时
-            if (weightMap.size() <= 0) {
-                weightMap = weightTemp;
+        } else {
+            // 稀有池B池
+            probability = config.getProbability(); // 清空抽B池概率
+            Map<String, Integer> pollD = recruit.getPollD();
+            resultHeroId = RandomUtils.randomTable(pollD);
+            for (Map<String, Object> map : config.getbData()) {
+                if (map.get("heroId").equals(resultHeroId)) {
+                    gainPayService.gain(lord, resultHeroId, (int) map.get("amount"));
+                }
             }
-            // 获得英雄
-            resultHeroId = RandomUtils.randomTable(weightMap);
-            oldHeros.add(resultHeroId);
-            recruit.setOldHeros(oldHeros);
-            gainPayService.gain(lord, resultHeroId, heroAmount.get(resultHeroId));
         }
         recruit.setTimes(times);
         recruit.setProbability(probability);
-        missionService.trigerMissionOnceForRecruit(resultHeroId);
+        if (resultHeroId.startsWith(ItemID.HERO)) {
+            missionService.trigerMissionOnceForRecruit(resultHeroId);
+        }
+        return resultHeroId;
     }
 
     private Recruit initRecruit() {
@@ -635,12 +699,11 @@ public class ShopRecruitService extends GameSupport {
      * @return
      * @throws
      */
-    private List<Recruit> getActivityRecruit(Lord lord, ShopRecruit shopRecruit) {
-        List<Recruit> recruitList = new ArrayList<Recruit>();
+    private void getActivityRecruit(Lord lord, ShopRecruit shopRecruit, List<Recruit> activityRecruit) {
         Map<String, Recruit> map = shopRecruit.getRecruit();
         String zone = this.getGameUser().getGameZoneId();
-        List<ShopRecruitConfig> config = shopRecruitConfigRepository.findByDate(System.currentTimeMillis(),
-                lord.getVipLevel());
+        // 添加新增招募
+        List<ShopRecruitConfig> config = shopRecruitConfigRepository.findByDate(System.currentTimeMillis());
         for (int i = 0; i < config.size(); i++) {
             if (!config.get(i).getZoneList().contains(zone)) {
                 continue;
@@ -648,16 +711,15 @@ public class ShopRecruitService extends GameSupport {
             if (map.containsKey(config.get(i).getId())) {
                 Recruit r = map.get(config.get(i).getId());
                 r.setConfig(config.get(i));
-                recruitList.add(r);
+                activityRecruit.add(r);
                 continue;
             }
             Recruit recruit = this.initRecruit();
-            recruit.setType(3);
+            recruit.setType(Recruit.TYPE_ACTIVITY);
             recruit.setConfig(config.get(i));
             recruit.setId(config.get(i).getId());
-            recruitList.add(recruit);
+            activityRecruit.add(recruit);
         }
-        return recruitList;
     }
 
     /**

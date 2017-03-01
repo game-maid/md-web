@@ -32,4 +32,8 @@ public interface ShopRecruitConfigRepository extends BaseMongoRepository<ShopRec
      */
     @Query("{'$and':[{'end_time':{'$gte':?0}},{'start_time':{ '$lte':?0} },{'limit_vip':{'$lte':?1}}]}")
     List<ShopRecruitConfig> findByDate(long time, int vipLevel);
+
+    @Query("{'$and':[{'end_time':{'$gte':?0}},{'start_time':{ '$lte':?0}},{'state':" + true + "}]}")
+    List<ShopRecruitConfig> findByDate(long time);
+
 }
