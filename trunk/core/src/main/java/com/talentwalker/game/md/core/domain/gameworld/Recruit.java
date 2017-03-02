@@ -8,9 +8,11 @@
 
 package com.talentwalker.game.md.core.domain.gameworld;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import com.talentwalker.game.md.core.domain.BaseDomain;
 import com.talentwalker.game.md.core.domain.config.ShopRecruitConfig;
@@ -23,6 +25,22 @@ import com.talentwalker.game.md.core.domain.config.ShopRecruitConfig;
 
 public class Recruit extends BaseDomain {
     private static final long serialVersionUID = 8893675373611708397L;
+    /**
+     * 普通招募（配置）
+     */
+    public static final int TYPE_COMMON = 1;
+    /**
+     * 触发招募（配置）
+     */
+    public static final int TYPE_STRIKE = 2;
+    /**
+     * 活动招募（后台）
+     */
+    public static final int TYPE_ACTIVITY = 3;
+    /**
+     * 新手招募（配置）
+     */
+    public static final int TYPE_NEW = 4;
     /**
      * 招募总次数
      */
@@ -51,14 +69,31 @@ public class Recruit extends BaseDomain {
      * 稀有不重复数组（数组内heroId不能被招募）
      */
     protected List<String> oldHeros;
+
+    /**
+     * C池
+     */
+    protected Map<String, Integer> pollC;
+    /**
+     * D池
+     */
+    protected Map<String, Integer> pollD;
     /**
      * 触发时间
      */
     protected long triggeringTime;
     /**
+     * 今天第一次抽卡的时间
+     */
+    protected long recruitTime;
+    /**
+     * 今天抽卡次数
+     */
+    protected int todayTimes;
+    /**
      * 配置
      */
-    @Transient
+    @DBRef
     protected ShopRecruitConfig config;
 
     /**
@@ -179,6 +214,68 @@ public class Recruit extends BaseDomain {
      */
     public void setTenTimes(int tenTimes) {
         this.tenTimes = tenTimes;
+    }
+
+    /**
+     * @return pollC
+     */
+    public Map<String, Integer> getPollC() {
+        if (pollC == null) {
+            pollC = new HashMap<>();
+        }
+        return pollC;
+    }
+
+    /**
+     * @param pollC 要设置的 pollC
+     */
+    public void setPollC(Map<String, Integer> pollC) {
+        this.pollC = pollC;
+    }
+
+    /**
+     * @return pollD
+     */
+    public Map<String, Integer> getPollD() {
+        if (pollD == null) {
+            pollD = new HashMap<>();
+        }
+        return pollD;
+    }
+
+    /**
+     * @param pollD 要设置的 pollD
+     */
+    public void setPollD(Map<String, Integer> pollD) {
+        this.pollD = pollD;
+    }
+
+    /**
+     * @return recruitTime
+     */
+    public long getRecruitTime() {
+        return recruitTime;
+    }
+
+    /**
+     * @param recruitTime 要设置的 recruitTime
+     */
+    public void setRecruitTime(long recruitTime) {
+        this.recruitTime = recruitTime;
+    }
+
+    /**
+     * @return todayTimes
+     */
+    public int getTodayTimes() {
+        return todayTimes;
+    }
+
+    /**
+     * @param todayTimes 要设置的 todayTimes
+     */
+    public void setTodayTimes(int todayTimes) {
+        this.todayTimes = todayTimes;
     }
 
 }

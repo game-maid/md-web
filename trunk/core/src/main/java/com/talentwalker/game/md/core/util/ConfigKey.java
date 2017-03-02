@@ -93,17 +93,89 @@ public class ConfigKey {
     /**********************英雄招募*****************************/
     public static final String SHOP_HERO_RECRUIT = "shop_heroRecruit";
     /**
-     * 新手招募第一次key
-     */
-    public static final String SHOP_HERO_RECRUIT_FIRST = "recruit_0001";
-    /**
-     * 新手招募第二次key
-     */
-    public static final String SHOP_HERO_RECRUIT_SECOND = "recruit_0002";
-    /**
      * 新手招募招募类型
      */
     public static final String SHOP_HERO_RECRUIT_TYPE = "type";
+    /**
+     * 剧情招募
+     */
+    public static final String SHOP_HERO_RECRUIT_FIRST = "recruit_0001";
+    /**
+     * 保底次数
+     */
+    public static final String SHOP_HERO_RECRUIT_SAFETY_TIMES = "safetyTimes";
+    /**
+     * 消耗类型
+     */
+    public static final String SHOP_HERO_RECRUIT_COST = "cost";
+    /**
+     * A池内容
+     */
+    public static final String SHOP_HERO_RECRUIT_POLL_A = "poll_A";
+    /**
+     * B池内容
+     */
+    public static final String SHOP_HERO_RECRUIT_POLL_B = "poll_B";
+    /**
+     * 起始投入C数量
+     */
+    public static final String SHOP_HERO_RECRUIT_START_C = "start_C";
+    /**
+     * 起始投入D数量
+     */
+    public static final String SHOP_HERO_RECRUIT_START_D = "start_D";
+    /**
+     * 投放C间隔及数量
+     */
+    public static final String SHOP_HERO_RECRUIT_GOING_C = "going_C";
+    /**
+     * 投放D间隔及数量
+     */
+    public static final String SHOP_HERO_RECRUIT_GOING_D = "going_D";
+    /**
+     * 抽中稀有的基礎概率
+     */
+    public static final String SHOP_HERO_RECRUIT_PROBABILITY = "probability";
+    /**
+     * 概率成長
+     */
+    public static final String SHOP_HERO_RECRUIT_PROBABILITYUP = "probabilityUp";
+    /**
+     * 單抽第一次
+     */
+    public static final String SHOP_HERO_RECRUIT_SINGLE_1 = "single_1";
+    /**
+     * 單抽第二次
+     */
+    public static final String SHOP_HERO_RECRUIT_SINGLE_2 = "single_2";
+    /**
+     * 單抽第三次
+     */
+    public static final String SHOP_HERO_RECRUIT_SINGLE_3 = "single_3";
+    /**
+     * 十连抽第一次
+     */
+    public static final String SHOP_HERO_RECRUIT_TENTIMES_1 = "tentimes_1";
+    /**
+     * 十连抽第二次
+     */
+    public static final String SHOP_HERO_RECRUIT_TENTIMES_2 = "tentimes_2";
+    /**
+     * 十连抽第三次
+     */
+    public static final String SHOP_HERO_RECRUIT_TENTIMES_3 = "tentimes_3";
+    /**
+     * 武将id
+     */
+    public static final String SHOP_HERO_RECRUIT_HEROID = "ID";
+    /**
+     * 武将添加到卡池的权重
+     */
+    public static final String SHOP_HERO_RECRUIT_GOTOWEIGHT = "gotoWeight";
+    /**
+     * 武将被抽取到的权重
+     */
+    public static final String SHOP_HERO_RECRUIT_GETWEIGHT = "getWeight";
     /**********************突破计算*****************************/
     public static final String RANK_UP = "rankUp";
 
