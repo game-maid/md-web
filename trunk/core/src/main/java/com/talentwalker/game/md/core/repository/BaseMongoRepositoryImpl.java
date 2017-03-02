@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -65,6 +66,22 @@ public class BaseMongoRepositoryImpl<T, ID extends Serializable> extends SimpleM
         List<T> list = mongoOperations.find(query, entityInformation.getJavaType(),
                 entityInformation.getCollectionName());
         return new PageImpl<T>(list, searchFilter.getPageable(), count);
+    }
+
+    /**.
+     * <p>Title: findAllList</p>
+     * <p>Description: </p>
+     * @param pageable
+     * @return
+     * @see com.talentwalker.game.md.core.repository.BaseMongoRepository#findAllList(org.springframework.data.domain.Pageable)
+     */
+    @Override
+    public List<T> findAllList(Pageable pageable) {
+        Query query = new Query();
+        query.with(pageable);
+        List<T> list = mongoOperations.find(query, entityInformation.getJavaType(),
+                entityInformation.getCollectionName());
+        return list;
     }
 
 }

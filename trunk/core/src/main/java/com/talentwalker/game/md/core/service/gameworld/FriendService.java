@@ -32,6 +32,7 @@ import com.talentwalker.game.md.core.domain.gameworld.LeagueLord;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.gameworld.PrivateMessage;
 import com.talentwalker.game.md.core.domain.gameworld.PrivateMessageStatus;
+import com.talentwalker.game.md.core.domain.gameworld.PublicMessage;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.exception.GameException;
 import com.talentwalker.game.md.core.repository.gameworld.FriendRepository;
@@ -41,6 +42,7 @@ import com.talentwalker.game.md.core.repository.gameworld.LeagueRepository;
 import com.talentwalker.game.md.core.repository.gameworld.LordRepository;
 import com.talentwalker.game.md.core.repository.gameworld.PrivateMessageRepository;
 import com.talentwalker.game.md.core.repository.gameworld.PrivateMessageStatusRepository;
+import com.talentwalker.game.md.core.repository.gameworld.PublicMessageRepository;
 import com.talentwalker.game.md.core.response.FriendInfo;
 import com.talentwalker.game.md.core.response.LordInfo;
 import com.talentwalker.game.md.core.sensitiveword.SensitiveWord;
@@ -73,6 +75,8 @@ public class FriendService extends GameSupport {
     private GainPayService gainPayService;
     @Autowired
     private PrivateMessageStatusRepository privateMessageStatusRepository;
+    @Autowired
+    private PublicMessageRepository publicMessageRepository;
     /**
      * 推荐好友数量
      */
@@ -370,6 +374,8 @@ public class FriendService extends GameSupport {
         findFriendInfo(lord);
         // 体力赠送记录
         this.getStrengthRecord(lord);
+        // 好友私聊信息
+        this.findNowMessages(lord);
     }
 
     /**
@@ -536,25 +542,114 @@ public class FriendService extends GameSupport {
      */
     public void sendPrivateMessag(String content, String receiverId) {
         Lord lord = this.getLord();
+        String[] minMax = StringUtils.getMinMax(lord.getId(), receiverId);
         // 构造消息
         PrivateMessage message = new PrivateMessage();
         message.setSenderId(lord.getId());
         message.setReceiverId(receiverId);
         message.setContent(SensitiveWord.replaceSensitiveWord(content, '*'));
         message.setSendTime(new Date().getTime());
+        message.setMinId(minMax[0]);
+        message.setMaxId(minMax[1]);
         // 消息状态
         PrivateMessageStatus status = privateMessageStatusRepository.findOne(lord.getId() + "_" + receiverId);
         if (status == null) {
             status = new PrivateMessageStatus();
             status.setId(lord.getId() + "_" + receiverId);
-            status.setSender(lord);
+            status.setSenderId(lord.getId());
             status.setReceiverId(receiverId);
             status.setUnReadCount(0);
         }
         status.setUnReadCount(status.getUnReadCount() + 1);
-        message = privateMessageRepository.insert(message);
-        status.setLastMessage(message);
+        privateMessageRepository.insert(message);
         privateMessageStatusRepository.save(status);
-        this.gameModel.addObject("privateMessage", message);
+        this.findPrivateMessages(receiverId, 0);
+    }
+
+    /**
+     * @Description:刷新和某人的聊天记录
+     * @param player
+     * @param friendId
+     * @return
+     * @throws
+     */
+    public void findPrivateMessages(String friendId, int count) {
+        Lord lord = this.getLord();
+        List<PrivateMessage> privateMessages = null;
+        int privateMessageCount = this.getDataConfig().get(ConfigKey.FRIEND_ENERGY).get("privateMessageCount")
+                .getInteger("value");
+        PrivateMessageStatus status = privateMessageStatusRepository.findOne(friendId + "_" + lord.getId());
+        if (status != null && status.getUnReadCount() > 0) {
+            if (status.getUnReadCount() > privateMessageCount) {
+                // 显示所有未读消息
+                privateMessageCount = status.getUnReadCount();
+            }
+            status.setUnReadCount(0);
+            privateMessageStatusRepository.save(status);
+        }
+        privateMessageCount += count;
+        String[] minMax = StringUtils.getMinMax(lord.getId(), friendId);
+        privateMessages = privateMessageRepository.findByMinIdAndMaxId(minMax[0], minMax[1],
+                new PageRequest(0, privateMessageCount, new Sort(Direction.DESC, "sendTime")));
+
+        if (privateMessages == null) {
+            privateMessages = new ArrayList<>();
+        }
+        this.gameModel.addObject("privateMessage", privateMessages);
+        // 好友私聊信息
+        this.findNowMessages(lord);
+    }
+
+    /**
+     * @Description:查询最新的消息列表
+     * @param player
+     * @return
+     * @throws
+     */
+    public void findNowMessages(Lord lord) {
+        List<PrivateMessageStatus> statusList = privateMessageStatusRepository
+                .findByReceiverIdAndUnReadCount(lord.getId(), 0);
+        this.gameModel.addObject("privateMessageStatusList", statusList);
+    }
+
+    /**
+     * @Description:发送世界消息
+     * @param content
+     * @throws
+     */
+    public void sendPublicMessag(String content) {
+        Lord lord = this.getLord();
+        // 构造消息
+        PublicMessage message = new PublicMessage();
+        message.setSender(new LordInfo(lord));
+        message.setContent(SensitiveWord.replaceSensitiveWord(content, '*'));
+        message.setSendTime(new Date().getTime());
+        publicMessageRepository.save(message);
+        this.findPublicMessage(0);
+
+    }
+
+    /**
+     * @Description:世界聊天刷新
+     * @param count
+     * @throws
+     */
+    public void findPublicMessage(int count) {
+        int publicMessageCount = this.getDataConfig().get(ConfigKey.FRIEND_ENERGY).get("privateMessageCount")
+                .getInteger("value");
+        publicMessageCount += count;
+        List<PublicMessage> messages = publicMessageRepository
+                .findAllList(new PageRequest(0, publicMessageCount, new Sort(Direction.DESC, "sendTime")));
+        this.gameModel.addObject("publicMessage", messages);
+    }
+
+    /**
+     * @Description:世界聊天最新消息
+     * @throws
+     */
+    public void findPublicMessage() {
+        List<PublicMessage> messages = publicMessageRepository
+                .findAllList(new PageRequest(0, 1, new Sort(Direction.DESC, "sendTime")));
+        this.gameModel.addObject("publicMessage", messages);
     }
 }

@@ -8,7 +8,7 @@
 
 package com.talentwalker.game.md.core.domain.gameworld;
 
-import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.talentwalker.game.md.core.domain.BaseDomain;
@@ -23,12 +23,10 @@ public class PrivateMessageStatus extends BaseDomain {
 
     private static final long serialVersionUID = -7753557600338052044L;
 
-    @DBRef
-    private Lord sender;
+    private String senderId;
+    @Indexed
     private String receiverId;
     private int unReadCount;
-    @DBRef
-    private PrivateMessage lastMessage;
 
     public String getReceiverId() {
         return receiverId;
@@ -47,25 +45,17 @@ public class PrivateMessageStatus extends BaseDomain {
     }
 
     /**
-     * @return sender
+     * @return senderId
      */
-    public Lord getSender() {
-        return sender;
+    public String getSenderId() {
+        return senderId;
     }
 
     /**
-     * @param sender 要设置的 sender
+     * @param senderId 要设置的 senderId
      */
-    public void setSender(Lord sender) {
-        this.sender = sender;
-    }
-
-    public PrivateMessage getLastMessage() {
-        return lastMessage;
-    }
-
-    public void setLastMessage(PrivateMessage lastMessage) {
-        this.lastMessage = lastMessage;
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 
 }
