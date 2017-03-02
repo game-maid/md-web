@@ -15,178 +15,116 @@
 	<script th:src="@{/static/js/plugins/pickList/pickList.js}"></script>
 	<script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
 	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+	<link th:href="@{/static/css/plugins/colpick/colpick.css}" rel="stylesheet"/>
+	<script th:src="@{/static/js/plugins/colpick/colpick.js}"></script>
 </head>
 <body class="gray-bg">
 	<div class="wrapper wrapper-content animated fadeInRight">
 		<div class="ibox float-e-margins">
 			<div class="ibox-title">
-				<button type="button" class="btn btn-sm btn-info" onclick="showModel()">
-				        <i class="glyphicon glyphicon-plus" aria-hidden="true"></i>&nbsp;<span th:text="#{gmtool.mail.title}">发送邮件</span>
+				<button type="button" class="btn btn-sm btn-info"
+					onclick="showModel()">
+					<i class="glyphicon glyphicon-plus" aria-hidden="true"></i>&nbsp;<span
+						th:text="#{gmtool.mail.title}">发送邮件</span>
 				</button>
 			</div>
 			<div class="ibox-content">
-				<div class="form-group" style="width: 800px">
-						<div class="col-sm-2" style="float: right;">
-							<button class="btn btn-primary" type="button" id="select" th:text="#{sys.select}">查询</button>
-						</div>
-						<div class="col-sm-1" >
-							<label class="control-label" style="margin-top: 10px;" th:text="#{sys.time}">时间</label>
-						</div>
-						<div class="col-sm-8 input-daterange input-group" id="datepicker">
-                        	<input type="text" name="startTime" class="form-control" required="required" id="startDatetimepicker" />
-                            <span class="input-group-addon">-</span>
-                            <input type="text" name="endTime" class="form-control" required="required" id="endDatetimepicker" />
-                        </div>
-                    </div>
-				<table id="panelTable" class="table-striped" data-mobile-responsive="true"></table>
-			</div>
-		</div>
-	</div>
-	<div class="modal fade" id="addModal">
-		<div class="modal-dialog">
-			<div class="modal-content">
 				<form class="form-horizontal" id="addForm">
-					<input type="hidden" name="id" id="mailFormId" value="" />
-					<div class="form-horizontal">
-						<div class="modal-header">
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-							<h3 class="modal-title" id="roleLabel" th:text="#{gmtool.mail.title}">发送道具</h3>
+					<div class="form-group contentClass">
+					</div>
+					<div class="form-group">
+						<label class="col-sm-3 control-label"></label>
+						<div class="col-sm-7">
+							<button type="button" class="btn btn-primary" id="" onclick="addOneItem()">添加</button>
+							<button type="button" class="btn btn-primary" id="" onclick="removeItem()">删除</button>
 						</div>
-						<div class="modal-body">
-							<div class="form-group">
-								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.sender}">发送者：</label>
-								<div class="col-sm-7">
-									<input type="text" name="sender" id="sender" class="form-control" required="required" />
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.sender.headicon}">发送者头像：</label>
-								<div class="col-sm-7">
-									<input type="text" name="senderHeadIcon" id="senderHeadIcon" class="form-control" required="required" />
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.valid.daytimes}">有效天数：</label>
-								<div class="col-sm-7">
-									<select class="form-control" id="validDay" name="validDay" required="required" >
-										<option value="0" th:text="#{gmtool.mail.valid.long}">永久有效</option>
-										<option value="7" th:text="7 + #{gmtool.mail.valid.day}">7天</option>
-										<option value="15" th:text="15 + #{gmtool.mail.valid.day}">15天</option>
-										<option value="30" th:text="30 + #{gmtool.mail.valid.day}">30天</option>
-									</select>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.goal}">发送目标：</label>
-								<div class="col-sm-7">
-									<select class="form-control" id="goal" name="goal">
-										<option value="1" th:text="#{gmtool.mail.one}">单一玩家</option>
-										<option value="2" th:text="#{gmtool.mail.all}">全体玩家</option>
-										<option value="3" th:text="#{gmtool.mail.condition}">条件玩家</option>
-									</select>
-								</div>
-							</div>
-							<div class="form-group" id="palyer_div">
-								<label class="col-sm-3 control-label" th:text="#{sys.player}">玩家：</label>
-								<div class="col-sm-7">
-									<div class="input-group col-sm-12">
-										<input type="text" placeholder="玩家ID" class="form-control" id="playerId" name="playerId" /> 
-										<span class="input-group-btn">
-											<button type="button" class="btn btn-info" onclick="addPlayer()" th:text="#{sys.add}">添加</button>
-										</span>
-									</div>
-								</div>
-							</div>
-							<div class="form-group" style="display:none;" id="playerData">
-		      					<label class="col-sm-3"></label>
-		      					<div class="col-sm-7">
-									<table id="playerTable" class="table-striped" data-toggle="table" data-unique-id="id" data-mobile-responsive="true">
-										<thead>
-											<tr>
-												<th data-field="id">ID</th>
-												<th data-field="name" th:text="#{sys.item.name}">name</th>
-												<th data-field="remove" th:text="#{sys.operate}">操作</th>
-											</tr>
-										</thead>
-									</table>
-								</div>
-							</div>
-							<div class="form-group" id="condition_div" style="display: none;">
-								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.condition.select}">条件选择：</label>
-								<div class="col-sm-7">
-									<select class="form-control" id="condition" name="condition">
-									</select>
-								</div>
-							</div>
-							<div class="form-group" id="zone_div" style="display: none;">
-								<label class="col-sm-3 control-label" th:text="#{sys.zone.select}">区服：</label>
-								<div class="col-sm-7">
-									<div id="zonelist"></div>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-3 control-label" th:text="#{sys.time}">时间：</label>
-								<div class="col-sm-7 input-daterange">
-                        			<input type="text" name="sendDate" class="form-control" required="required" id="sendDatetimepicker" />
-                        		</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.show.title}">标题：</label>
-								<div class="col-sm-7">
-									<textarea rows="2" class="form-control" id="title" name="title" required="required" ></textarea>
-								</div>
-							</div>
-							<div class="form-group">
-								<label class="col-sm-3 control-label" th:text="#{gmtool.mail.show.content}">描述：</label>
-								<div class="col-sm-7">
-									<textarea rows="2" class="form-control" id="content" name="content" required="required" ></textarea>
-								</div>
-							</div>
-		      				<div class="form-group">
-	                        	<label class="col-sm-3 control-label" th:text="#{sys.item}">道具：</label>
-		      					<div class="col-sm-7" >
-		      						<div class="form-group">
-										<div class="col-sm-7" style="padding-right: 0px;">
-											<input placeholder="选择道具" class="form-control" id="itemId" name="itemId" th:placeholder="#{sys.item.select}"/> 
-										</div>
-										<div class="col-sm-5" style="padding-left: 0px;">
-	                            			<div class="input-group">
-	                                			<input type="text" placeholder="数量" class="form-control" id="amount" name="amount" onkeyup="this.value=this.value.replace(/\D/g,'')" autocomplete="off" th:placeholder="#{sys.item.amount}"/> 
-	                                			<span class="input-group-btn">
-	                                				<button type="button" class="btn btn-info" onclick="addItem()" th:text="#{sys.add}">添加</button> 
-	                                			</span>
-	                            			</div>
-	                            		</div>
-	                            	</div>
-	                        	</div>
-		      				</div>
-		      				<div class="form-group" style="display:none;" id="itemData">
-		      					<label class="col-sm-3"></label>
-		      					<div class="col-sm-7">
-									<table id="itemTable" class="table-striped" data-toggle="table" data-unique-id="id" data-mobile-responsive="true">
-										<thead>
-											<tr>
-												<th data-field="id">ID</th>
-												<th data-field="name" th:text="#{sys.item.name}">Name</th>
-												<th data-field="amount" th:text="#{sys.item.amount}">amount</th>
-												<th data-field="remove" th:text="#{sys.operate}">操作</th>
-											</tr>
-										</thead>
-									</table>
-								</div>
-							</div>
-						</div>
-						<div class="modal-footer">
-							<button class="btn btn-primary" th:text="#{sys.send}">发送</button>
-						</div>
+					</div>
+					<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="preview">预览</button>
+						<button type="submit" class="btn btn-primary"
+							th:text="#{sys.save}" id="submit">保存</button>
 					</div>
 				</form>
 			</div>
 		</div>
 	</div>
 </body>
+<!-- 取色模板 -->
+<div id="itemTample" style="display: none;">
+	<div class="form-group">
+		<label class="col-sm-3 control-label">文本</label>
+		<div class="col-sm-7">
+			<textarea name="content[]" class="form-control" style="resize: vertical;color: #ff8800 "
+				required="required"></textarea>
+		</div>
+		<div class="col-sm-2 ColorTipDiv">
+			<input type="hidden" value="232,193,138" name="crgb[]" />
+			<div class="color-box" style="width: 30px; height: 30px"></div>
+		</div>
+	</div>
+</div>
 
 <script type="text/javascript" th:inline="javascript">
+//文本输入框数量初始化
+var itemNum = 1;
+//初始化 默认一个文本框 
+addOneItem();
 
+function initColorBox(num){
+	var colorBoxId = "#color-box-"+itemNum;
+	var contentText = "#content-id-"+itemNum;
+	$(colorBoxId).colpick({
+
+		colorScheme:'dark',
+
+		layout:'rgbhex',
+
+		color:'ff8800',
+
+		onSubmit:function(hsb,hex,rgb,el) {
+			$(contentText).css('color','#'+hex);
+			$(el).css('background-color', '#'+hex);
+
+			$(el).colpickHide();
+			var rgb=rgb.r+","+rgb.g+","+rgb.b;
+			$(el).parent(".ColorTipDiv").children("input").val(rgb);
+		}
+	}).css('background-color', '#ff8800'); //默认颜色
+}
+
+function addOneItem(){
+	var colorBoxId = "color-box-"+itemNum;
+	var contentText = "content-id-"+itemNum;
+	var cloneItem = $("#itemTample").clone();
+	cloneItem.removeAttr("id");
+	cloneItem.addClass("oneItems");
+	cloneItem.find("textarea").first().addClass("hpf");
+	cloneItem.find("textarea").attr("id",contentText);
+	cloneItem.find(".color-box").attr("id",colorBoxId);
+	cloneItem.find(".removeItem").show();
+	cloneItem.show();
+	$(".contentClass").append(cloneItem);
+	initColorBox(itemNum);
+	itemNum++;
+}
+function removeItem(){
+	$(".contentClass div.oneItems:last").remove();
+	itemNum--;
+} 
+
+//预览 ps先不做
+/*<![CDATA[*/
+$("#preview").click(function(){
+	
+	var html = "<div>";
+	for(var i=1;i<itemNum;i++){
+		var colorBoxId = "#color-box-"+i;
+		var contentText = "#content-id-"+i;
+		html += "<p style='color:"+$(contentText).css("color")+" '>"+$(contentText).val()+"</p>"
+	}
+	html += "</div>";
+	$("#preview-div").append();
+});
+/*]]>*/
 </script>
 </html>
