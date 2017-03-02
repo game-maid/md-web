@@ -145,7 +145,7 @@ $(function(){
  * 单选框改变
  */
  function redioChange(){
-	$("[name='allZone']").on('ifChecked',function(event){
+	 $("[name='allZone']").on('ifChecked',function(event){
 		var value=$(event.target).val();
 		if(value=="true"){
 			$("#zonelistDiv").hide();
@@ -201,10 +201,13 @@ function onSave(){
 	}
 	
 	var zonelist=$("#zonelist").getValues();
-	if(zonelist.length==0){
+	/*<![CDATA[*/
+	if($("[name='allZone']").val()=="fasle" && zonelist.length==0){
 		swal("", [[#{activity.zone.null}]], "warning");
 		return;
 	}
+/*]]>*/
+	
 	
 	var endLong=  new Date(endDate.replace(/-/g,'/')).getTime() ;
 	var startLong=  new Date(startDate.replace(/-/g,'/')).getTime() ;
@@ -214,20 +217,12 @@ function onSave(){
 	}
 	
 	var putrush =$("#putrush").val();
-	var reg = new RegExp("^[0-9]*$");
-	if(!reg.test(putrush)){
-		$("#putrush").val("").focus();
-		//swal("",[[#{activity.putrush.num}]],"warning")
-		return ;
-	}
 	
-	 var tableData=itemtable.bootstrapTable('getData');
-	 if(tableData.length==0){
-		 swal("", [[#{activity.shop.select.kanban}]], "warning");
-		 return;
-	 }
 	 /*<![CDATA[*/
-		var data=$("#addForm").serialize()+"&zoneList="+$("#zonelist").getValues();
+		var data=$("#addForm").serialize();
+	 	if($("[name='allZone']").val()=="false"){
+	 		data+="&zoneList="+$("#zonelist").getValues();
+	 	}
 		if(id!=null&&id!=""&&id!=undefined){
 			data+="&id="+id;
 		}
@@ -355,10 +350,21 @@ function edit(activityId){
 	}).resetForm();
 	$("#activityId").val(activityId);
 	initDataTimePicker();
-	initKanBanInput($(".itemList"));
 	var data = table.bootstrapTable("getRowByUniqueId", activityId);
-	editZone(data.zoneList);
+	if(!data.allZone){
+		editZone(data.zoneList);
+	}
 	editDataTimePicker(data);
+	if(data.allZone){
+		$("#allZoneTrue").iCheck("check");
+	}else{
+		$("#allZoneFalse").iCheck("check");
+	}
+	if(data.state){
+		$("#stateTrue").iCheck("check");
+	}else{
+		$("#stateFalse").iCheck("check");
+	}
 	
 	$("#name").val(data.name);
 	$("#imgDiv").find(" img").attr("src",data.src);
