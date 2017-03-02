@@ -8,11 +8,16 @@
 
 package com.talentwalker.game.md.admin.controller.config;
 
+import javax.annotation.Resource;
+
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.talentwalker.game.md.admin.controller.BaseController;
+import com.talentwalker.game.md.admin.service.config.AdvertisementService;
+import com.talentwalker.game.md.core.domain.config.AdvertisementConfig;
 import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 
 /**
@@ -23,6 +28,10 @@ import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 @RequestMapping(value = "advertisement", method = RequestMethod.GET)
 @Controller
 public class AdvertisementController extends BaseController {
+
+    @Resource
+    private AdvertisementService advertisementService;
+
     /**
      * @Description:
      * @return
@@ -34,14 +43,45 @@ public class AdvertisementController extends BaseController {
     }
 
     /**
-     * 
      * @Description:
      * @return
      * @throws
      */
     @RequestMapping(value = "add", method = RequestMethod.POST)
     @GameResponse
-    public Object add() {
+    public Object add(AdvertisementConfig advertisementConfig) {
+        advertisementService.add(advertisementConfig);
+        return null;
+    }
+
+    /**
+     * @Description:分页查询
+     * @return
+     * @throws
+     */
+    @RequestMapping(value = "findList", method = RequestMethod.POST)
+    @GameResponse
+    public Page<AdvertisementConfig> findList() {
+        return advertisementService.findList();
+    }
+
+    /**
+     * @Description:根据id删除
+     * @param id
+     * @return
+     * @throws
+     */
+    @RequestMapping(value = "delete", method = RequestMethod.POST)
+    @GameResponse
+    public Object deleteById(String id) {
+        advertisementService.deleteById(id);
+        return null;
+    }
+
+    @GameResponse
+    @RequestMapping(value = "update", method = RequestMethod.POST)
+    public Object update(String pk, String name, String value) {
+        advertisementService.update(pk, name, value);
         return null;
     }
 }

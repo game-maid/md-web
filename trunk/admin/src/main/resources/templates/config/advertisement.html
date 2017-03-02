@@ -91,10 +91,10 @@
 								</div>
 							</div>
 						</div>
-						<div class="form-group">
+						<div class="form-group putrush">
 							<label class="col-sm-3 control-label"  th:text="#{activity.shop.number}">商店序号：</label>
 							<div class="col-sm-7">
-								<input type="text" id="putrush" name="putrush" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
+								<input type="text" id="putrush" name="putrush" class="form-control" required="required" />
 							</div>
 						</div>
 
@@ -102,7 +102,7 @@
 						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{activity.recruit.img.src}" >输入图片src</label>
 							<div class="col-sm-5">
-								<input type="text" id="src" name="src" class="form-control"  required="required" />
+								<input type="text" id="src" name="src" class="form-control"  />
 							</div>
 						</div>
 						<div class="form-group" id="imgDiv" >
@@ -124,6 +124,8 @@
 $(".modal-dialog").css({
 	width:"900px",
 }); 
+
+allZoneFalg="false";
 
 $(function(){
 	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
@@ -148,9 +150,21 @@ $(function(){
 	 $("[name='allZone']").on('ifChecked',function(event){
 		var value=$(event.target).val();
 		if(value=="true"){
+			allZoneFalg=value;
 			$("#zonelistDiv").hide();
 		}else{
+			allZoneFalg=value;
 			$("#zonelistDiv").show();
+		}
+	});
+	$("[name='state']").on('ifChecked',function(event){
+		var value =$(event.target).val();
+		if(value=='true'){
+			$("#putrush").val("");
+			$(".putrush").show();
+		}else{
+			$("#putrush").val("N/A");
+			$(".putrush").hide();
 		}
 	});
 }
@@ -167,7 +181,8 @@ function add() {
 	//初始化区服
 	initZone();
 	initDataTimePicker();
-	
+	$("#allZoneFalse").iCheck("check");
+	$("#stateTrue").iCheck("check");
 	$("#addModal").modal("show");
 }
 
@@ -202,12 +217,11 @@ function onSave(){
 	
 	var zonelist=$("#zonelist").getValues();
 	/*<![CDATA[*/
-	if($("[name='allZone']").val()=="fasle" && zonelist.length==0){
+	if(allZoneFalg=="fasle" && zonelist.length==0){
 		swal("", [[#{activity.zone.null}]], "warning");
 		return;
 	}
-/*]]>*/
-	
+	/*]]>*/
 	
 	var endLong=  new Date(endDate.replace(/-/g,'/')).getTime() ;
 	var startLong=  new Date(startDate.replace(/-/g,'/')).getTime() ;
@@ -219,17 +233,17 @@ function onSave(){
 	var putrush =$("#putrush").val();
 	
 	 /*<![CDATA[*/
-		var data=$("#addForm").serialize();
-	 	if($("[name='allZone']").val()=="false"){
+		var data=$("#addForm").serialize()+"&startLong="+startLong+"&endLong="+endLong;
+	 	if(allZoneFalg=="false"){
+	 		console.log($("#zonelist").getValues());
 	 		data+="&zoneList="+$("#zonelist").getValues();
 	 	}
 		if(id!=null&&id!=""&&id!=undefined){
 			data+="&id="+id;
 		}
 	/*]]>*/
-		$("#zonelist").getValues();
 	 	gameAjax({
-			url : "/kanBan/add",
+			url : "/advertisement/add",
 			data:data,
 			callback : function(val) {
 				$("#addModal").modal("hide");
@@ -240,7 +254,7 @@ function onSave(){
 function initTable() {
 	table.bootstrapTable({
 		ajax : function(params) {
-			gameBootstrapTable("/kanBan/list", params);
+			gameBootstrapTable("/advertisement/findList", params);
 		},
 		queryParams : function(params) {
 			var query = {
@@ -257,36 +271,29 @@ function initTable() {
 		detailView:true,
 		detailFormatter:function(index, row){
 			var text='<table class="table">';
-			//区服
-			var zone="";
-			$.each(row.zoneList,function(index,zoneId){
-				zone+=zoneId+"-"+zoneMap[zoneId]+"&nbsp;,&nbsp;";
-			});
-			text+='<tr><td><b>'+[[#{sys.zone.select}]]+'</b></td><td>'+zone+'</td></tr>';
-			text+='<tr><td><b>'+[[#{activity.describe}]]+'</b></td><td >'+row.explain+'</td></tr>';
-			//出售道具
-			text+='<tr><td colspan="8"><b>'+[[#{activity.shop.kan.ban}]]+'</b></td></tr>'
-			text+='<tr><td colspan="8"><table class="table">';
-			text+='<thead><tr><td>ID</td><td>'+[[#{activity.shop.kan.ban}]]+[[#{sys.menu.name}]]+'</td><td>'+[[#{activity.shop.request.item}]]+[[#{sys.menu.name}]]+'</td><td>'+[[#{activity.shop.discount.amount}]]+'</td><td>'+[[#{activity.shop.discount}]]+'</td></tr></thead>'
-			$.each(row.good,function(id,discountNum){
-				var name = itemAll[id];//看板娘名称
-				var item =itemAll[kanbanRequest[id]];//需求道具名称
-				var num =Math.ceil(kanbanRequest[kanbanRequest[id]]*discountNum/10);//折后需求数量
-				var disc = discountNum==10?"无折扣":discountNum+"折";
-				text+='<tr><td>'+id+'</td><td>'+name+'</td><td>'+item+'</td><td>'+num+'</td><td>'+disc+'</td></tr>';
-			});
-			text+='</table></td></tr>';
+			if(row.allZone){
+				text+='<tr><td><b>'+[[#{advertisement.is.all.zone}]]+'</b></td><td>'+[[#{sys.true}]]+'</td></tr>'
+			}else{
+				//区服
+				var zone="";
+				$.each(row.zoneList,function(index,zoneId){
+					zone+=zoneId+"-"+zoneMap[zoneId]+"&nbsp;,&nbsp;";
+				});
+				text+='<tr><td><b>'+[[#{sys.zone.select}]]+'</b></td><td>'+zone+'</td></tr>';
+			}
+			//图片
+			text+='<tr><td><b>'+[[#{advertisement.img}]]+'</b></td><td><img src="'+row.src+'"/></td></tr>';
 			text+='</table>';
 			return text;
 		},
 		uniqueId : "id",
 		idField : "id",
 		sidePagination : "server",
-		sortName : "endTime",
+		sortName : "putrush",
 		sortOrder : "asc",
 		columns : [
 			{
-				title : "活动ID",
+				title : [[#{advertisement.id}]],
 				field : "id",
 			},
 			{
@@ -296,7 +303,7 @@ function initTable() {
 			},
 			{
 				title : [[#{activity.start.time}]],
-				field : "startTime",
+				field : "startLong",
 				sortable: true,
 				formatter : function(value) {
 					return new Date(value).format("yyyy-MM-dd hh:mm:ss");
@@ -304,9 +311,12 @@ function initTable() {
 			},
 			{
 				title : [[#{activity.end.time}]],
-				field : "endTime",
+				field : "endLong",
 				sortable: true,
 				formatter : function(value) {
+					if(new Date().getTime()>value){
+						return new Date(value).format("yyyy-MM-dd hh:mm:ss")+'-'+'<b style="color:gray">'+[[#{gmtool.cdk.status.due}]]+'</b>';
+					}
 					return new Date(value).format("yyyy-MM-dd hh:mm:ss");
 				},
 			},
@@ -314,8 +324,11 @@ function initTable() {
 				title : [[#{activity.shop.number}]],
 				field : "putrush",
 				sortable: true,
+				formatter:function(value){
+					return value;
+				},
 				editable : {
-					url : "/kanBan/update",
+					url : "/advertisement/update",
 					validate : function(value) {
 						if(value == ""){
 							return "not null!";
@@ -323,6 +336,18 @@ function initTable() {
 					},
 					error : function(response, newValue) {
 					    alert("error:" + newValue);
+					}
+				}
+			},
+			{
+				title : [[#{sys.isenable}]],
+				field : "state",
+				sortable: true,
+				formatter:function(value){
+					if(value){
+						return '<b style="color:gray">'+[[#{activity.recruit.state.open}]]+'</b>';
+					}else{
+						return '<b style="color:red">'+[[#{activity.recruit.state.close}]]+'</b>';
 					}
 				}
 			},
@@ -365,7 +390,6 @@ function edit(activityId){
 	}else{
 		$("#stateFalse").iCheck("check");
 	}
-	
 	$("#name").val(data.name);
 	$("#imgDiv").find(" img").attr("src",data.src);
 	$("#putrush").val(data.putrush);
@@ -392,8 +416,8 @@ function editZone(zoneList){
 	$("#zonelist").pickList({data: zoneData,add:true});
 }
 function editDataTimePicker(data){
-	$("#startDatetimepicker").val(new Date(data.startTime).format("yyyy-MM-dd hh:mm:ss"));
-	$("#endDatetimepicker").val(new Date(data.endTime).format("yyyy-MM-dd hh:mm:ss"));
+	$("#startDatetimepicker").val(new Date(data.startLong).format("yyyy-MM-dd hh:mm:ss"));
+	$("#endDatetimepicker").val(new Date(data.endLong).format("yyyy-MM-dd hh:mm:ss"));
 }
 function deleteData(itemId){
 	swal({
@@ -408,7 +432,7 @@ function deleteData(itemId){
 	}, function(isConfirm) {
 		if (isConfirm) {
 			gameAjax({
-				url : "/kanBan/delete",
+				url : "/advertisement/delete",
 				data:"id="+itemId,
 				callback : function(val) {
 					swal([[#{sys.delete.success}]],"","success");
