@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:include="fragments/include::header">
+</head>
+<head>
+	<link th:href="@{/static/css/plugins/bootstrap-table/bootstrap-table.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/autocompleter/jquery.autocompleter.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/datetimepicker/bootstrap-datetimepicker.min.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/pickList/pickList.css}" rel="stylesheet"/>
+		<link th:href="@{/static/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/bootstrap-table/extensions/editable/bootstrap-editable.css}" rel="stylesheet"/>
+	
+    <script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.js}"></script>
+	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/autocompleter/jquery.autocompleter.min.js}"></script>
+	<script th:src="@{/static/js/plugins/datetimepicker/bootstrap-datetimepicker.min.js}"></script>
+	<script th:src="@{/static/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{'/static/js/plugins/validate/messages_'+${#ctx.locale.language}+'.min.js'}"></script>
+	<script th:src="@{/static/js/plugins/pickList/pickList.js}"></script>
+	<script th:src="@{/static/js/plugins/iCheck/icheck.min.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/extensions/editable/bootstrap-table-editable.min.js}"></script>
+	<script th:src="@{/static/js/plugins/bootstrap-table/extensions/editable/bootstrap-editable.min.js}"></script>
+</head>
+<body class="gray-bg">
+	<div class="wrapper wrapper-content animated fadeInRight">
+		<div class="ibox float-e-margins">
+			<div class="ibox-title">
+				<div class="btn-group hidden-xs"
+					th:replace="fragments/include::toolbar(true,false)"></div>
+			</div>
+			<div class="ibox-content">
+				<table id="panelTable" class="table-striped"
+					data-mobile-responsive="true"></table>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="addModal" >
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<form class="form-horizontal" id="addForm">
+					<input type="hidden" name="activityId" id="activityId" value="" />
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h3 class="modal-title" th:text="#{sys.add}+#{sys.menu.advertisement}">添加广告</h3>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{advertisement.is.all.zone}">是否全服</label>
+							<div class="col-sm-7">
+								<label class="radio-inline i-checks"> 
+									<input type="radio"  checked="checked"  value="true" id="stateTrue" name="allZone" th:text="#{sys.true}" />
+								</label> 
+								<label class="radio-inline i-checks"> 
+									<input type="radio" value="false" id="stateFalse" name="allZone" th:text="#{sys.fasle}" />
+								</label>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.zone.select}">区服：</label>
+							<div class="col-sm-7">
+								<div id="zonelist"></div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.gamezone.status}">状态</label>
+							<div class="col-sm-7">
+								<label class="radio-inline i-checks"> 
+									<input type="radio"  checked="checked"  value="true" id="stateTrue" name="state" th:text="#{activity.recruit.state.open}" />
+								</label> 
+								<label class="radio-inline i-checks"> 
+									<input type="radio" value="false" id="stateFalse" name="state" th:text="#{activity.recruit.state.close}" />
+								</label>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{activity.name}">名称：</label>
+							<div class="col-sm-7">
+								<input type="text" name="name" id="name" class="form-control" required="required" />
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{sys.time}">时间：</label>
+							<div class="col-sm-7" id="datepicker">
+								<div class="input-daterange input-group">
+									<input type="text" name="startDate" class="form-control" id="startDatetimepicker" />
+									<span class="input-group-addon">-</span> 
+									<input type="text" name="endDate" class="form-control" id="endDatetimepicker" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label"  th:text="#{activity.shop.number}">商店序号：</label>
+							<div class="col-sm-7">
+								<input type="text" id="putrush" name="putrush" class="form-control" onkeyup="this.value=this.value.replace(/\D/g,'')" required="required" />
+							</div>
+						</div>
+
+						<div class="hr-line-dashed"></div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary"
+							th:text="#{sys.save}">保存</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript" th:inline="javascript">
+$(".modal-dialog").css({
+	width:"900px",
+}); 
+
+$(function(){
+	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
+	table=$("#panelTable");
+	initTable();
+	itemtable=$("#itemtable");
+	itemNames();
+	initKanBanInput($(".itemList"));
+	itemName=window.itemAll;
+	zoneMap=loadZoneMap();
+});
+function add() {
+	$("#addForm")[0].reset();
+	$("#addForm").validate({
+		submitHandler:function(form){
+			onSave();
+        }
+	}).resetForm();
+	$("#activityId").val("");
+	itemtable.bootstrapTable("load", []);
+	//初始化区服
+	initZone();
+	initDataTimePicker();
+	
+	$("#addModal").modal("show");
+	
+}
+
+function initZone(){
+	var data=loadZonePickList();
+	$("#zonelist").empty();
+	$("#zonelist").pickList({data: data,add:true});
+}
+function initDataTimePicker(){
+	$("#startDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
+	    autoclose : true,
+	    todayBtn :true,
+	    endDate : new Date()
+	});
+	$("#endDatetimepicker").datetimepicker({
+	    format : "yyyy-mm-dd hh:ii:ss",
+	    autoclose : true,
+	    todayBtn :true,
+	});
+}
+
+function onSave(){
+	var id=$("#activityId").val();
+	//时间校验
+	var startDate=$("#startDatetimepicker").val();
+	var endDate=$("#endDatetimepicker").val();
+	if(startDate.length==0||endDate==0){
+		swal("", [[#{activity.time.not.null}]], "warning");
+		return;
+	}
+	
+	var zonelist=$("#zonelist").getValues();
+	if(zonelist.length==0){
+		swal("", [[#{activity.zone.null}]], "warning");
+		return;
+	}
+	
+	var putrush =$("#putrush").val();
+	var reg = new RegExp("^[0-9]*$");
+	if(!reg.test(putrush)){
+		$("#putrush").val("").focus();
+		//swal("",[[#{activity.putrush.num}]],"warning")
+		return ;
+	}
+	
+	 var tableData=itemtable.bootstrapTable('getData');
+	 if(tableData.length==0){
+		 swal("", [[#{activity.shop.select.kanban}]], "warning");
+		 return;
+	 }
+	 /*<![CDATA[*/
+		var data=$("#addForm").serialize()+"&zoneList="+$("#zonelist").getValues();
+		if(id!=null&&id!=""&&id!=undefined){
+			data+="&id="+id;
+		}
+	/*]]>*/
+		$("#zonelist").getValues();
+	 	gameAjax({
+			url : "/kanBan/add",
+			data:data,
+			callback : function(val) {
+				$("#addModal").modal("hide");
+				table.bootstrapTable("refresh");
+			}
+		}) 
+}
+function initTable() {
+	table.bootstrapTable({
+		ajax : function(params) {
+			gameBootstrapTable("/kanBan/list", params);
+		},
+		queryParams : function(params) {
+			var query = {
+				limit : params.limit,
+				offset : params.offset,
+				order :params.order,
+				sort :params.sort,
+				condition : params.search
+			};
+			return query;
+		},
+		pagination : true,
+		singleSelect : false,
+		detailView:true,
+		detailFormatter:function(index, row){
+			var text='<table class="table">';
+			//区服
+			var zone="";
+			$.each(row.zoneList,function(index,zoneId){
+				zone+=zoneId+"-"+zoneMap[zoneId]+"&nbsp;,&nbsp;";
+			});
+			text+='<tr><td><b>'+[[#{sys.zone.select}]]+'</b></td><td>'+zone+'</td></tr>';
+			text+='<tr><td><b>'+[[#{activity.describe}]]+'</b></td><td >'+row.explain+'</td></tr>';
+			//出售道具
+			text+='<tr><td colspan="8"><b>'+[[#{activity.shop.kan.ban}]]+'</b></td></tr>'
+			text+='<tr><td colspan="8"><table class="table">';
+			text+='<thead><tr><td>ID</td><td>'+[[#{activity.shop.kan.ban}]]+[[#{sys.menu.name}]]+'</td><td>'+[[#{activity.shop.request.item}]]+[[#{sys.menu.name}]]+'</td><td>'+[[#{activity.shop.discount.amount}]]+'</td><td>'+[[#{activity.shop.discount}]]+'</td></tr></thead>'
+			$.each(row.good,function(id,discountNum){
+				var name = itemAll[id];//看板娘名称
+				var item =itemAll[kanbanRequest[id]];//需求道具名称
+				var num =Math.ceil(kanbanRequest[kanbanRequest[id]]*discountNum/10);//折后需求数量
+				var disc = discountNum==10?"无折扣":discountNum+"折";
+				text+='<tr><td>'+id+'</td><td>'+name+'</td><td>'+item+'</td><td>'+num+'</td><td>'+disc+'</td></tr>';
+			});
+			text+='</table></td></tr>';
+			text+='</table>';
+			return text;
+		},
+		uniqueId : "id",
+		idField : "id",
+		sidePagination : "server",
+		sortName : "endTime",
+		sortOrder : "asc",
+		columns : [
+			{
+				title : "活动ID",
+				field : "id",
+			},
+			{
+				title : [[#{activity.name}]],
+				field : "name",
+				align : "center",
+			},
+			{
+				title : [[#{activity.start.time}]],
+				field : "startTime",
+				sortable: true,
+				formatter : function(value) {
+					return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+				},
+			},
+			{
+				title : [[#{activity.end.time}]],
+				field : "endTime",
+				sortable: true,
+				formatter : function(value) {
+					return new Date(value).format("yyyy-MM-dd hh:mm:ss");
+				},
+			},
+			{
+				title : [[#{activity.shop.number}]],
+				field : "putrush",
+				sortable: true,
+				editable : {
+					url : "/kanBan/update",
+					validate : function(value) {
+						if(value == ""){
+							return "not null!";
+						}
+					},
+					error : function(response, newValue) {
+					    alert("error:" + newValue);
+					}
+				}
+			},
+			{
+				title : [[#{sys.operate}]],
+				field : "id",
+				align : "center",
+				formatter : function(value) {
+					var	formatter = '<div class="btn-group hidden-xs"><button type="button" class="btn btn-xs btn-primary" onclick="edit(\''
+										+ value + '\')" th:text="#{sys.edit}">编辑</button>';
+						formatter += '<button type="button" class="btn btn-xs btn-danger" onclick="deleteData(\''
+										+ value + '\')"  th:text="#{sys.delete}">删除</button></div>';
+					return formatter;
+					},
+				} 
+			]
+	});
+}
+function edit(activityId){
+	$("#addForm")[0].reset();
+	$("#addForm").validate({
+		submitHandler:function(form){
+			onSave();
+        }
+	}).resetForm();
+	$("#activityId").val(activityId);
+	initDataTimePicker();
+	initKanBanInput($(".itemList"));
+	var data = table.bootstrapTable("getRowByUniqueId", activityId);
+	editZone(data.zoneList);
+	editDataTimePicker(data);
+	
+	$("#name").val(data.name);
+	$("#explain").val(data.explain);
+	
+	$("#putrush").val(data.putrush);
+	$("#addModal").modal("show");
+}
+function editZone(zoneList){
+	var data=loadZonePickList();
+	var zoneData=[];
+	var zoneNames={};
+	$.each(data,function(index,val){
+		zoneNames[val.id]=val.text;
+		if(!($.inArray(val.id, zoneList)>=0)){
+			zoneData.push(val);
+		}
+	});
+	$.each(zoneList,function(index,id){
+		var map={};
+		map["id"] = id;
+		map["text"] = zoneNames[id];
+		map["option"] = "selected";
+		zoneData.push(map);
+	}); 
+	$("#zonelist").empty();
+	$("#zonelist").pickList({data: zoneData,add:true});
+}
+function editDataTimePicker(data){
+	$("#startDatetimepicker").val(new Date(data.startTime).format("yyyy-MM-dd hh:mm:ss"));
+	$("#endDatetimepicker").val(new Date(data.endTime).format("yyyy-MM-dd hh:mm:ss"));
+}
+function deleteData(itemId){
+	swal({
+		title : [[#{sys.confirm.title}]],
+		text : [[#{sys.confirm.text}]],
+		type : "warning",
+		showCancelButton : true,
+		confirmButtonColor : "#DD6B55",
+		confirmButtonText : [[#{sys.confirm.confirmtext}]],
+		cancelButtonText : [[#{sys.confirm.canceltext}]],
+		closeOnConfirm: false
+	}, function(isConfirm) {
+		if (isConfirm) {
+			gameAjax({
+				url : "/kanBan/delete",
+				data:"id="+itemId,
+				callback : function(val) {
+					swal([[#{sys.delete.success}]],"","success");
+					table.bootstrapTable("refresh");
+				}
+			});
+		}
+	})
+}
+</script>
+</html>
