@@ -36,6 +36,7 @@ import com.talentwalker.game.md.core.repository.gameworld.LeagueRepository;
 import com.talentwalker.game.md.core.repository.gameworld.LordRepository;
 import com.talentwalker.game.md.core.response.ResponseKey;
 import com.talentwalker.game.md.core.sensitiveword.SensitiveWord;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.StringUtils;
@@ -133,12 +134,29 @@ public class LeagueService extends GameSupport {
     private static final String EXIT = "exit";
 
     /**
+     * @Description:登陆获取公会数据
+     * @throws
+     */
+    public void loginInfo(Lord lord) {
+        LeagueLord leagueLord = this.getLeagueLord(lord);
+        League league = null;
+        if (leagueLord.getLeagueId() != null) {
+            league = leagueRepository.findOne(leagueLord.getLeagueId());
+        }
+        leagueLordRepository.save(leagueLord);
+        this.gameModel.addObject(ResponseKey.LEAGUE, league);
+        this.gameModel.addObject(ResponseKey.LEAGUE_LORD, leagueLord);
+    }
+
+    /**
      * 
      * @Description:
      * @throws
      */
     public void main() {
         Lord lord = this.getLord();
+        // 等级校验
+        this.isLevelOpen(ConfigKey.LEAGUE, lord, true);
         LeagueLord leagueLord = this.getLeagueLord(lord);
         League league = null;
         if (leagueLord.getLeagueId() != null) {

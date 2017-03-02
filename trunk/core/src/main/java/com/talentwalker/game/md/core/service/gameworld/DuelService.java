@@ -29,7 +29,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import com.talentwalker.game.md.core.config.ConfigKey;
 import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.domain.gameworld.Duel;
@@ -47,6 +46,7 @@ import com.talentwalker.game.md.core.repository.GameZoneRepository;
 import com.talentwalker.game.md.core.repository.gameworld.DuelRepository;
 import com.talentwalker.game.md.core.repository.gameworld.MailRepository;
 import com.talentwalker.game.md.core.response.ResponseKey;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.RandomUtils;
@@ -132,6 +132,9 @@ public class DuelService extends GameSupport {
      * @throws
      */
     public Duel getMain(Lord lord) {
+        if (this.isLevelOpen(ConfigKey.DUEL, lord, false)) {
+            return null;
+        }
         Duel duel = getDuel(lord);
         return duel;
     }
@@ -143,6 +146,7 @@ public class DuelService extends GameSupport {
     public void duelMain() {
         Lord lord = this.getLord();
         // 校验等级
+        this.isLevelOpen(ConfigKey.DUEL, lord, true);
         Duel duel = getDuel(lord);
         this.getRankList(duel, lord);
         // duel.setStore(null);

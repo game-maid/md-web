@@ -136,5 +136,12 @@ public class ResponseKey {
      * 开服时间
      */
     public static final String ZONE_CREATE_TIME = "zoneCreateTime";
-
+    /**
+     * 好感度
+     */
+    public static final String ROMANCE = "romance";
+    /**
+     * 当前随机好感度剧情
+     */
+    public static final String ROMANCE_RANDOM_STORY = "romanceRandomStory";
 }

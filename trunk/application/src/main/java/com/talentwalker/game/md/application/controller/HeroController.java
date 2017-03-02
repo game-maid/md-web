@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.talentwalker.game.md.core.domain.gameworld.Romance;
 import com.talentwalker.game.md.core.response.GameModel;
 import com.talentwalker.game.md.core.service.gameworld.HeroService;
 import com.talentwalker.game.md.core.service.gameworld.MissionService;
@@ -77,17 +78,59 @@ public class HeroController extends GameSupport {
     }
 
     /**
-     * @Description:提升好感度
-     * @param heroUid
-     * @param items 经验道具
+     * @Description:好感度等级剧情
+     * @param state 剧情的状态： 0：未进入剧情   1：进入剧情中间退出     2：剧情完成（解锁该等级立绘）
+     * @param romanceLevel 好感度等级 
+     * @param heroId 英雄Id
      * @return
      * @throws
      */
     @GameResponse
-    @RequestMapping(value = "addLoveExp/{heroUid}")
-    public GameModel addLoveExp(@PathVariable String heroUid, @RequestBody JSONObject items) {
-        heroService.addHeroLoveExp(heroUid, items);
+    @RequestMapping(value = "romance/story/{state}/{romanceLevel}/{heroId}")
+    public GameModel romanceStory(@PathVariable Integer state, @PathVariable Integer romanceLevel,
+            @PathVariable String heroId) {
+        heroService.romanceStory(Romance.STORY_TYPE_LEVEL, state, romanceLevel, heroId);
         return this.gameModel;
     }
 
+    /**
+     * @Description:好感度随机剧情
+     * @param state
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping(value = "romance/story/{state}")
+    public GameModel romanceStory(@PathVariable Integer state) {
+        heroService.romanceStory(Romance.STORY_TYPE_RANDOM, state, null, null);
+        return this.gameModel;
+    }
+
+    /**
+     * @Description: 使用提升武将好感度
+     * @param heroId
+     * @param items
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping(value = "romance/addExp/{heroId}")
+    public GameModel romanceAddExp(@PathVariable String heroId, @RequestBody JSONObject items) {
+        heroService.addHeroRomanceExp(heroId, items);
+        return this.gameModel;
+    }
+
+    /**
+     * @Description:选择武将默认立绘图
+     * @param level
+     * @param heroId
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping(value = "romance/addpic/{level}/{heroId}")
+    public GameModel romanceAddpic(@PathVariable Integer level, @PathVariable String heroId) {
+        heroService.romanceAddpic(level, heroId);
+        return this.gameModel;
+    }
 }

@@ -230,7 +230,6 @@ public class RandomUtils {
                 + RandomUtils.fakeRandomTableWithPriorityAndLimit(weightList, 100, seed));
         System.out.println("fakeRandomTableWithPriorityAndLimit："
                 + RandomUtils.fakeRandomTableWithPriorityAndLimitAndNeedSize(weightList, 100, 2, seed));
-
     }
 
     /**

@@ -159,28 +159,27 @@ public class FriendController extends GameSupport {
     }
 
     /**
-     * @Description: 赠送体力
-     * @param receiverId
+     * @Description: 可领取体力列表
      * @return
      * @throws
      */
     @GameResponse
     @RequestMapping("getStrengthList")
     public GameModel getStrengthList() {
-        friendService.getStrengthList();
+        friendService.getStrengthList(this.getLord());
         return this.gameModel;
     }
 
     /**
      * @Description: 领取体力
-     * @param receiverId
+     * @param id 体力赠送唯一键值id
      * @return
      * @throws
      */
     @GameResponse
-    @RequestMapping("getAward/{lordId}")
-    public GameModel getAward(@PathVariable String lordId) {
-        friendService.getAward(lordId);
+    @RequestMapping("getAward/{id}")
+    public GameModel getAward(@PathVariable String id) {
+        friendService.getAward(id);
         return this.gameModel;
     }
 
@@ -192,9 +191,65 @@ public class FriendController extends GameSupport {
      * @throws
      */
     @GameResponse
-    @RequestMapping("send/{content}/{receiverId}")
+    @RequestMapping("send/private/{content}/{receiverId}")
     public GameModel sendPrivateMessag(@PathVariable String content, @PathVariable String receiverId) {
         friendService.sendPrivateMessag(content, receiverId);
         return this.gameModel;
     }
+
+    /**
+     * @Description:刷新和某人的聊天记录
+     * @param friendId
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping(value = "findPrivateMessages/{friendId}/{count}")
+    public Object findPrivateMessages(@PathVariable String friendId, @PathVariable Integer count) {
+        friendService.findPrivateMessages(friendId, count);
+        return this.gameModel;
+    }
+
+    /**
+     * @Description: 发送世界消息
+     * @param content
+     * @param receiverId
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping("send/public/{content}")
+    public GameModel sendPrivateMessag(@PathVariable String content) {
+        friendService.sendPublicMessag(content);
+        return this.gameModel;
+    }
+
+    /**
+     * @Description: 发送世界消息
+     * @param content
+     * @param receiverId
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping("findPublicMessage/{count}")
+    public GameModel findPublicMessag(@PathVariable Integer count) {
+        friendService.findPublicMessage(count);
+        return this.gameModel;
+    }
+
+    /**
+     * @Description: 世界最新消息
+     * @param content
+     * @param receiverId
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping("findPublicMessage/now")
+    public GameModel findPublicMessage() {
+        friendService.findPublicMessage();
+        return this.gameModel;
+    }
+
 }

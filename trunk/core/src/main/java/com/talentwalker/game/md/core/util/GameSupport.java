@@ -11,6 +11,7 @@ package com.talentwalker.game.md.core.util;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,15 +24,23 @@ import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.dataconfig.IDataConfigManager;
 import com.talentwalker.game.md.core.domain.GameUser;
 import com.talentwalker.game.md.core.domain.GameZone;
+import com.talentwalker.game.md.core.domain.gameworld.Duel;
+import com.talentwalker.game.md.core.domain.gameworld.FormHold;
+import com.talentwalker.game.md.core.domain.gameworld.Hero;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.gameworld.MonthCard;
+import com.talentwalker.game.md.core.domain.gameworld.Romance;
 import com.talentwalker.game.md.core.domain.gameworld.SignInRecord;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.repository.GameUserRepository;
 import com.talentwalker.game.md.core.repository.GameZoneRepository;
+import com.talentwalker.game.md.core.repository.gameworld.DuelRepository;
 import com.talentwalker.game.md.core.repository.gameworld.LordRepository;
+import com.talentwalker.game.md.core.response.ResponseKey;
 import com.talentwalker.game.md.core.service.IGameUserServiceRemote;
 import com.talentwalker.game.md.core.service.gameworld.TopUpCardService;
+
+import net.sf.json.JSONArray;
 
 /**
  * @ClassName: GameSupport
@@ -49,7 +58,9 @@ public class GameSupport extends BaseGameSupport {
     @Autowired
     protected GameUserRepository gameUserRepository;
     @Autowired
-    private GameZoneRepository gameZoneRepository;
+    protected GameZoneRepository gameZoneRepository;
+    @Autowired
+    protected DuelRepository duelRepository;
 
     /**
      * @Description:获得当前的GameUser对象
@@ -111,11 +122,15 @@ public class GameSupport extends BaseGameSupport {
                 lord.setReplenishSignTimes(0);
             }
         }
-        // 刷新赠送体力记录
-        if (!DateUtils.isSameDay(new Date(lord.getGivesStrengthTime()), new Date())) {
+        // 刷新赠送体力领取次数
+        if (!DateUtils.isSameDay(new Date(), new Date(lord.getGivesStrengthTime()))) {
             lord.setGivesStrengthTime(System.currentTimeMillis());
-            lord.setGivesStrengthRecord(new HashMap<>());
+            lord.setGivesStrengthTimes(0);
         }
+        // if (!DateUtils.isSameDay(new Date(), lord.getGivesStrengthTime())) {
+        // lord.setGivesStrengthTime(new Date());
+        // lord.setGivesStrengthTimes(0);
+        // }
 
         return lord;
     }
@@ -232,4 +247,145 @@ public class GameSupport extends BaseGameSupport {
             return true;
         return false;
     }
+
+    /**
+     * @Description:功能是否开启
+     * @param functionName
+     * @param lord
+     * @param isError 是否抛出异常
+     * @return true 开启；false 关闭
+     * @throws
+     */
+    public boolean isLevelOpen(String functionName, Lord lord, boolean isError) {
+        DataConfig config = this.getDataConfig().get(ConfigKey.FUNCTION_LEVEL_OPEN);
+        if (config.get(functionName).getInteger("control") == 1) {
+            if (config.get(functionName).getJsonObject().containsKey("openlevel")
+                    && lord.getLevel() < config.get(functionName).getInteger("openlevel")) {
+                if (isError) {
+                    GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_39001);
+                }
+                return false;
+            }
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @Description:随机产生触发剧情
+     * @param lord
+     * @param type 触发剧情的条件
+     * @throws
+     */
+    protected void romanceRandomStroy(Lord lord, RandomStoryType type) {
+        int lordLevel = lord.getLevel();
+        /**
+         *  判断是否触发随机剧情
+         */
+        DataConfig probabilityConfig = getDataConfig().get(ConfigKey.ROMANCE_THEATER_PROBABILITY).get(lordLevel + "");
+        Double limitPro = probabilityConfig.getDouble(ConfigKey.ROMANCE_THEATER_PROBABILITY_TRIGGERPRO);// 触发概率
+        JSONArray timeJson = probabilityConfig.get(ConfigKey.ROMANCE_THEATER_PROBABILITY_TRIGGERTIMING).getJsonArray();
+
+        int timeMin = timeJson.getInt(0);
+        int timeMax = timeJson.getInt(1);
+        int timeLimit = RandomUtils.randomInt(timeMin, timeMax);
+        // 检查是否有随机剧情
+        Map<String, Integer> romanceRandomStory = lord.getRomanceRandomStory();
+        if (romanceRandomStory != null) {
+            Set<String> heroSet = romanceRandomStory.keySet();
+            for (String storyId : heroSet) {
+                Integer state = romanceRandomStory.get(storyId);
+                if (Romance.STORY_STATE_END != state) {
+                    return;
+                }
+            }
+        }
+        // 检查剧情时间限制
+        long romanceStoryTime = lord.getRomanceStoryTime();
+        if (System.currentTimeMillis() < (romanceStoryTime + DateUtils.MILLIS_PER_MINUTE * timeLimit)) {
+            return;
+        }
+        // 根据概率计算是否触发随机剧情
+        if (Math.random() > limitPro) {
+            return;
+        }
+
+        /**
+         *  计算随机剧情
+         */
+        if (type == RandomStoryType.PVP_WIN || type == RandomStoryType.PVP_LOSE) {
+            Duel duelLord = duelRepository.findOne(lord.getId());
+            List<FormHold> formDefend = duelLord.getFormDefend();
+            randomStory(lord, formDefend, type.getType());
+        } else {
+            List<FormHold> formHoldList = lord.getForm().get(0);
+            randomStory(lord, formHoldList, type.getType());
+        }
+    }
+
+    /**
+     * @Description:根据阵容计算好感度随机剧情
+     * @param lord
+     * @param formHoldList
+     * @throws
+     */
+    private void randomStory(Lord lord, List<FormHold> formHoldList, String type) {
+        Map<String, Hero> heros = lord.getHeros();
+        DataConfig randomTheaterConfig = getDataConfig().get(ConfigKey.ROMANCE_THEATERID);// 剧情配置
+        Map<String, Map<Integer, Integer>> heroWeightMap = new HashMap<>();
+        Map<String, Integer> randomStoryMap = null;
+
+        // 权重总和
+        int weightTotal = 0;
+        for (FormHold formHold : formHoldList) {
+            String heroUid = formHold.getHeroUid();
+            String heroId = heros.get(heroUid).getHeroId();
+            if (randomTheaterConfig.get(heroId) != null) {
+                DataConfig heroTheaterConfig = randomTheaterConfig.get(heroId).get(ConfigKey.ROMANCE_THEATERID_THEATER);
+                Map<Integer, Integer> weightMap = new HashMap<>();
+                heroWeightMap.put(heroId, weightMap);
+                for (int index = 1;; index++) {
+                    DataConfig theaterConfig = heroTheaterConfig.get(index + "");
+                    if (theaterConfig == null) {
+                        break;
+                    }
+                    String configType = theaterConfig.getString(type);
+                    if (!type.equals(configType)) {
+                        continue;
+                    }
+                    int weight = theaterConfig.getInteger(ConfigKey.ROMANCE_THEATERID_WEIGHT);
+                    weightTotal += weight;
+                    weightMap.put(index, weight);
+                }
+            }
+        }
+        // 计算随机数
+        int randomInt = RandomUtils.randomInt(0, weightTotal);
+        // 计算随机剧情
+        int tempTotal = 0;
+        boolean flag = false;
+        for (String heroId : heroWeightMap.keySet()) {
+            Map<Integer, Integer> weightMap = heroWeightMap.get(heroId);
+            for (Integer index : weightMap.keySet()) {
+                Integer weight = weightMap.get(index);
+                tempTotal += weight;
+                if (tempTotal >= randomInt) {
+                    // 产生随机剧情
+                    String storyId = randomTheaterConfig.get(heroId).get(ConfigKey.ROMANCE_THEATERID_THEATER)
+                            .get(index + "").getString(ConfigKey.ROMANCE_THEATERID_WEIGHT_ID);
+                    randomStoryMap.put(storyId, Romance.STORY_STATE_LOCK);
+                    lord.setRomanceStoryTime(System.currentTimeMillis());
+                    flag = true;
+                    break;
+                }
+            }
+            if (flag) {
+                break;
+            }
+        }
+        lord.setRomanceRandomStory(randomStoryMap);
+        this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY, randomStoryMap);
+    }
+
 }

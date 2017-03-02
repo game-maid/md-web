@@ -9,6 +9,7 @@
 package com.talentwalker.game.md.core.domain.gameworld;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +51,13 @@ public class Lord extends BaseDomain {
      */
     protected int exp;
     /**
-     * 钻石
+     * 充钱买的钻石
      */
     protected int diamond;
+    /**
+     * 赠送的钻石
+     */
+    protected int persentDiamond;
     /**
      * 金币
      */
@@ -267,10 +272,10 @@ public class Lord extends BaseDomain {
     /**
      * 赠送体力记录
      */
-    protected Map<String, Integer> givesStrengthRecord;
+    protected int givesStrengthTimes;
 
     /**
-     * 赠送奖励时间
+     * 最后一次赠送奖励领取时间
      */
     protected long givesStrengthTime;
     /**
@@ -278,6 +283,24 @@ public class Lord extends BaseDomain {
      */
     @Field("guidance_recruit")
     protected int guidanceRcruit;
+
+    /**
+     * 好感度
+     * Map<武将id，好感度>
+     */
+    protected Map<String, Romance> romance;
+    /**
+     * 当前随机好感度剧情（状态）
+     * Map<剧情iD，剧情完成状态>>（）
+     */
+    @Field("romance_random_story")
+    protected Map<String, Integer> romanceRandomStory;
+
+    /**
+     * 随机好感度剧情生成时间
+     */
+    @Field("romance_story_time")
+    protected long romanceStoryTime;
 
     /**
      * 每天第一次免费体力开始领取的时间
@@ -875,17 +898,38 @@ public class Lord extends BaseDomain {
     }
 
     /**
-     * @return givesStrengthRecord
+     * @return givesStrengthTimes
      */
-    public Map<String, Integer> getGivesStrengthRecord() {
-        return givesStrengthRecord;
+    public int getGivesStrengthTimes() {
+        return givesStrengthTimes;
     }
 
     /**
-     * @param givesStrengthRecord 要设置的 givesStrengthRecord
+     * @param givesStrengthTimes 要设置的 givesStrengthTimes
      */
-    public void setGivesStrengthRecord(Map<String, Integer> givesStrengthRecord) {
-        this.givesStrengthRecord = givesStrengthRecord;
+    public void setGivesStrengthTimes(int givesStrengthTimes) {
+        this.givesStrengthTimes = givesStrengthTimes;
+    }
+
+//    /**
+//     * @return givesStrengthTime
+//     */
+//    public Date getGivesStrengthTime() {
+//        if (givesStrengthTime == null) {
+//            givesStrengthTime = new Date();
+//        }
+//        return givesStrengthTime;
+//    }
+//
+//    /**
+//     * @param givesStrengthTime 要设置的 givesStrengthTime
+//     */
+//    public void setGivesStrengthTime(Date givesStrengthTime) {
+//        this.givesStrengthTime = givesStrengthTime;
+//    }
+
+    public Long getDailyFirstFreeStrenthStartTime() {
+        return dailyFirstFreeStrenthStartTime;
     }
 
     /**
@@ -900,10 +944,6 @@ public class Lord extends BaseDomain {
      */
     public void setGivesStrengthTime(long givesStrengthTime) {
         this.givesStrengthTime = givesStrengthTime;
-    }
-
-    public Long getDailyFirstFreeStrenthStartTime() {
-        return dailyFirstFreeStrenthStartTime;
     }
 
     public void setDailyFirstFreeStrenthStartTime(Long dailyFirstFreeStrenthStartTime) {
@@ -946,6 +986,62 @@ public class Lord extends BaseDomain {
      */
     public void setGuidanceRcruit(int guidanceRcruit) {
         this.guidanceRcruit = guidanceRcruit;
+    }
+
+    /**
+     * @return romance
+     */
+    public Map<String, Romance> getRomance() {
+        return romance;
+    }
+
+    /**
+     * @param romance 要设置的 romance
+     */
+    public void setRomance(Map<String, Romance> romance) {
+        this.romance = romance;
+    }
+
+    /**
+     * @return romanceRandomStory
+     */
+    public Map<String, Integer> getRomanceRandomStory() {
+        return romanceRandomStory;
+    }
+
+    /**
+     * @param romanceRandomStory 要设置的 romanceRandomStory
+     */
+    public void setRomanceRandomStory(Map<String, Integer> romanceRandomStory) {
+        this.romanceRandomStory = romanceRandomStory;
+    }
+
+    /**
+     * @return romanceStoryTime
+     */
+    public long getRomanceStoryTime() {
+        return romanceStoryTime;
+    }
+
+    /**
+     * @param romanceStoryTime 要设置的 romanceStoryTime
+     */
+    public void setRomanceStoryTime(long romanceStoryTime) {
+        this.romanceStoryTime = romanceStoryTime;
+    }
+
+    /**
+     * @return persentDiamond
+     */
+    public int getPersentDiamond() {
+        return persentDiamond;
+    }
+
+    /**
+     * @param persentDiamond 要设置的 persentDiamond
+     */
+    public void setPersentDiamond(int persentDiamond) {
+        this.persentDiamond = persentDiamond;
     }
 
 }

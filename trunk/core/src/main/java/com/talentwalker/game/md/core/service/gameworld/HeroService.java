@@ -9,6 +9,7 @@ package com.talentwalker.game.md.core.service.gameworld;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.talentwalker.game.md.core.config.ConfigKey;
 import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.domain.gameworld.Duel;
@@ -29,11 +29,14 @@ import com.talentwalker.game.md.core.domain.gameworld.FormHold;
 import com.talentwalker.game.md.core.domain.gameworld.Hero;
 import com.talentwalker.game.md.core.domain.gameworld.HeroInfo;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
+import com.talentwalker.game.md.core.domain.gameworld.Romance;
 import com.talentwalker.game.md.core.domain.gameworld.Skill;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.response.ResponseKey;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
+import com.talentwalker.game.md.core.util.RandomUtils;
 import com.talentwalker.game.md.core.util.UuidUtils;
 
 import net.sf.json.JSONArray;
@@ -136,17 +139,17 @@ public class HeroService extends GameSupport {
 
     private void addExp(Lord lord, Hero hero, int exp) {
         // 根据武将好感度增加武将经验值
-        int loveLevel = hero.getLoveLevel();
-        DataConfig dataConfig = getDataConfig().get("loveup").get(hero.getHeroId()).get("love").get(loveLevel + "");
-        if (dataConfig != null) {
-            DataConfig attrConfig = dataConfig.get("attr");
-            if (attrConfig != null) {
-                Integer increase = (Integer) attrConfig.getJsonObject().get("exp");
-                if (increase != null) {
-                    exp *= (increase / 100 + 1);
-                }
-            }
-        }
+        // int loveLevel = hero.getLoveLevel();
+        // DataConfig dataConfig = getDataConfig().get("loveup").get(hero.getHeroId()).get("love").get(loveLevel + "");
+        // if (dataConfig != null) {
+        // DataConfig attrConfig = dataConfig.get("attr");
+        // if (attrConfig != null) {
+        // Integer increase = (Integer) attrConfig.getJsonObject().get("exp");
+        // if (increase != null) {
+        // exp *= (increase / 100 + 1);
+        // }
+        // }
+        // }
         Map<String, Object> addExpHero = (Map<String, Object>) this.gameModel.getModel("addExpHero");
         if (addExpHero == null) {
             addExpHero = new HashMap<>();
@@ -216,6 +219,8 @@ public class HeroService extends GameSupport {
 
     public void breakHero(String heroUid, List<String> cost) {
         Lord lord = this.getLord();
+        // 校验等级
+        this.isLevelOpen(ConfigKey.HERO_BREAK, lord, true);
         this.isHave(lord, heroUid);
 
         Map<String, Hero> heros = lord.getHeros();
@@ -274,15 +279,18 @@ public class HeroService extends GameSupport {
         this.gameModel.addObject(ResponseKey.HEROES, map);
     }
 
-    private void isHave(Lord lord, String heroUid) {
+    private Hero isHave(Lord lord, String heroUid) {
         Map<String, Hero> heros = lord.getHeros();
         if (!heros.containsKey(heroUid)) {
             GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_23001);
         }
+        return heros.get(heroUid);
     }
 
     public void awake(String heroUid, List<String> cost) {
         Lord lord = this.getLord();
+        // 校验等级
+        this.isLevelOpen(ConfigKey.AWAVE, lord, true);
         this.isHave(lord, heroUid);
 
         Map<String, Hero> heros = lord.getHeros();
@@ -351,63 +359,41 @@ public class HeroService extends GameSupport {
 
     /**
      * @Description:提升高感度
-     * @param heroUid
+     * @param heroId
      * @param items
      * @throws
      */
-    public void addHeroLoveExp(String heroUid, JSONObject items) {
+    public void addHeroRomanceExp(String heroId, JSONObject items) {
         Lord lord = getLord();
-        Map<String, Hero> heros = lord.getHeros();
-        // 英雄校验
-        this.isHave(lord, heroUid);
-        Hero hero = heros.get(heroUid);
-        String heroId = hero.getHeroId();
-        int loveLevel = hero.getLoveLevel();
-        int loveExp = hero.getLoveExp();
+        Romance romance = lord.getRomance().get(heroId);
+        if (romance == null) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24022, "玩家从未获得过该类型武将");
+        }
+        int romanceLevel = romance.getLevel();
+        int romanceExp = romance.getExp();
         // 检查好感度最高等级
-        DataConfig heroConfig = getDataConfig().get(ConfigKey.HERO_CONFIG).get(heroId);
-        Integer star = heroConfig.getInteger(ConfigKey.HERO_CONFIG_STAR);
-        Integer loveLevelMax = getDataConfig().get(ConfigKey.LOVEOPEN).get(star + "")
-                .getInteger(ConfigKey.LOVEOPEN_LEVELMAX);
-        if (loveLevelMax <= loveLevel) {
+        DataConfig heroRomanceConfig = getDataConfig().get(ConfigKey.ROMANCE_BASE).get(heroId);
+        if (heroRomanceConfig.getInteger(ConfigKey.ROMANCE_BASE_MAXLV) <= romanceLevel) {
             GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24020, "好感度等级已经最高");
         }
-        // 好感值道具校验
-        Iterator<String> itemIds = items.keys();
-        DataConfig heroLoveConfig = getDataConfig().get(ConfigKey.LOVEUP).get(heroId).get(ConfigKey.LOVEUP_LOVE)
-                .get(loveLevel + 1 + "");
-        int loveExpCost = intValue(heroLoveConfig.getInteger(ConfigKey.LOVEUP_COST));
-        JSONArray itemsLimit = heroLoveConfig.get(ConfigKey.LOVEUP_ITEM).getJsonArray();
+
+        // 好感度道具校验
+        DataConfig dataConfig = heroRomanceConfig.get(ConfigKey.ROMANCE_BASE_ROMANCE).get(romanceLevel + 1 + "")
+                .get(ConfigKey.ROMANCE_BASE_ITEM);
+        JSONArray itemsJson = dataConfig.getJsonArray();
         DataConfig itemConfig = getDataConfig().get(ConfigKey.ITEM);
-        while (itemIds.hasNext()) {
-            String itemId = itemIds.next();
-            if (!itemsLimit.contains(itemId)) {
+        Set<String> itemKeySet = items.keySet();
+        for (String itemId : itemKeySet) {
+            Integer rank = itemConfig.get(itemId).getInteger(ConfigKey.ITEM_RANK);
+            if (!itemsJson.contains(rank)) {
                 GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24016, "该道具不能使用");
             }
-            int amount = items.getInt(itemId);
-            loveExp += amount * itemConfig.get(itemId).getInteger(ConfigKey.ITEM_PARAMS);
-            gainPayService.pay(lord, itemId, amount);
+            gainPayService.pay(lord, itemId, items.getInt(itemId));
+            romanceExp += itemConfig.get(itemId).getInteger(ConfigKey.ITEM_PARAMS) * items.getInt(itemId);
         }
         // 加经验
-        while (loveExp >= loveExpCost) {// 升级
-            loveLevel++;
-            loveExp -= loveExpCost;
-            if (loveLevelMax <= loveLevel) {
-                break;
-            }
-            loveExpCost = intValue(getDataConfig().get(ConfigKey.LOVEUP).get(heroId).get(ConfigKey.LOVEUP_LOVE)
-                    .get(loveLevel + 1 + "").getInteger(ConfigKey.LOVEUP_COST));
-        }
-
-        hero.setLoveLevel(loveLevel);
-        hero.setLoveExp(loveExp);
-        heros.put(heroUid, hero);
-        lord.setHeros(heros);
-
+        gainPayService.gain(lord, ItemID.ROMANCE_EXP + "--" + heroId, romanceExp);
         lordRepository.save(lord);
-        Map<String, Object> map = new HashMap<>();
-        map.put(heroUid, hero);
-        gameModel.addObject("heroes", map);
 
     }
 
@@ -805,4 +791,188 @@ public class HeroService extends GameSupport {
             return 0;
         return integer;
     }
+
+    /**
+     * @Description:好感度添加武将记录
+     * @param heroId  
+     * @param lord
+     * @throws
+     */
+    public void romanceAddHero(String heroId, Lord lord) {
+        Map<String, Romance> romance = lord.getRomance();
+        if (romance == null) {
+            romance = new HashMap<>();
+            lord.setRomance(romance);
+        }
+        checkHero(heroId);
+        if (!romance.containsKey(heroId)) {
+            Romance newRomance = new Romance();
+            romance.put(heroId, newRomance);
+            HashMap<Object, Object> updateMap = new HashMap<>();
+            updateMap.put(heroId, newRomance);
+            this.gameModel.addObject(ResponseKey.ROMANCE, updateMap);
+        }
+    }
+
+    /**
+     * @Description:好感度剧情
+     * @param type 剧情类型 0：等级剧情 1：随机剧情
+     * @param state 剧情的状态： 0：未进入剧情   1：进入剧情中间退出     2：剧情完成（解锁该等级立绘）
+     * @param romanceLevel 好感度等级 （随机剧情-1）
+     * @param heroUid 武将uid
+     * @return
+     * @throws
+     */
+    public void romanceStory(Integer type, Integer state, Integer romanceLevel, String heroId) {
+        Lord lord = getLord();
+        if (Romance.STORY_TYPE_LEVEL == type) {
+            // 等级剧情
+            // 校验好感度等级
+            Map<String, Romance> romanceMap = lord.getRomance();
+            Romance romance = romanceMap.get(heroId);
+            if (romance == null) {
+                GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24022, "玩家从未获得过该类型武将");
+            }
+            if (romanceLevel > romance.getLevel()) {
+                GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24021, "好感度等级不够");
+            }
+            Map<Integer, Integer> storyMap = romance.getStory();
+            if (state == Romance.STORY_STATE_END && storyMap.get(romanceLevel) != Romance.STORY_STATE_END) {// 剧情完成
+                // 发放奖励
+                DataConfig awardConfig = getDataConfig().get(ConfigKey.ROMANCE_BASE).get(heroId)
+                        .get(ConfigKey.ROMANCE_BASE_ROMANCE).get(romanceLevel + "").get(ConfigKey.ROMANCE_BASE_AWARD);
+                if (awardConfig != null) {
+                    JSONObject jsonObject = awardConfig.getJsonObject();
+                    Set<String> keySet = jsonObject.keySet();
+                    for (String itemId : keySet) {
+                        gainPayService.gain(lord, itemId, jsonObject.getInt(itemId));
+                    }
+
+                }
+            }
+            storyMap.put(romanceLevel, state);
+
+            Map<String, Romance> updateRomance = new HashMap<>();
+            updateRomance.put(heroId, romance);
+            this.gameModel.addObject(ResponseKey.ROMANCE, updateRomance);
+        } else if (Romance.STORY_TYPE_RANDOM == type) {
+            // 随机剧情
+            Map<String, Integer> randomStory = lord.getRomanceRandomStory();
+
+            Set<String> heroIdSet = randomStory.keySet();
+            String storyId = "";// 剧情id
+            for (String string : heroIdSet) {
+                storyId = string;
+            }
+            Integer oldState = randomStory.get(storyId);
+            if (state == Romance.STORY_STATE_END && oldState != Romance.STORY_STATE_END) {
+                // 发送奖励
+                getRomanceTHeaterAward(lord);
+                // 记录随机剧情历史记录
+                recordRomanceRandomStory(lord);
+            }
+            randomStory.put(storyId, state);
+            this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY, randomStory);
+        }
+        lordRepository.save(lord);
+    }
+
+    /**
+     * @Description:计算好感度随机剧情，通过奖励
+     * @param lord
+     * @throws
+     */
+    private void getRomanceTHeaterAward(Lord lord) {
+        int weightTotal = 0;
+        DataConfig awardsConfig = getDataConfig().get(ConfigKey.ROMANCE_THRETER_AWARD).get(lord.getLevel() + "")
+                .get(ConfigKey.ROMANCE_THRETER_AWARD_AND_WEIGHT);
+        List<Map<String, Object>> awardAndWeightList = new ArrayList<>();
+        for (int i = 1;; i++) {
+            DataConfig weightConfig = awardsConfig.get(i + "");
+            if (weightConfig == null) {
+                break;
+            }
+            Map<String, Object> awardAndWeightMap = new HashMap<>();
+            awardAndWeightMap.put(ConfigKey.ROMANCE_THRETER_AWARD_ITEMID,
+                    weightConfig.getString(ConfigKey.ROMANCE_THRETER_AWARD_ITEMID));
+            awardAndWeightMap.put(ConfigKey.ROMANCE_THEATERID_WEIGHT,
+                    weightConfig.getInteger(ConfigKey.ROMANCE_THEATERID_WEIGHT));
+            awardAndWeightMap.put(ConfigKey.ROMANCE_THRETER_AWARD_NUM,
+                    weightConfig.getInteger(ConfigKey.ROMANCE_THRETER_AWARD_NUM));
+            weightTotal += weightConfig.getInteger(ConfigKey.ROMANCE_THRETER_AWARD_WEIGHT);
+            awardAndWeightList.add(awardAndWeightMap);
+        }
+        // 随机数
+        int random = RandomUtils.randomInt(0, weightTotal);
+        weightTotal = 0;
+        for (Map<String, Object> map : awardAndWeightList) {
+            weightTotal += (int) map.get(ConfigKey.ROMANCE_THRETER_AWARD_WEIGHT);
+            if (weightTotal >= random) {
+                gainPayService.gain(lord, (String) map.get(ConfigKey.ROMANCE_THRETER_AWARD_ITEMID),
+                        (int) map.get(ConfigKey.ROMANCE_THRETER_AWARD_NUM));
+                break;
+            }
+        }
+    }
+
+    /**
+     * @Description:记录随机剧情历史记录
+     * @param lord
+     * @throws
+     */
+    private void recordRomanceRandomStory(Lord lord) {
+        Map<String, Integer> curStory = lord.getRomanceRandomStory();
+
+        Map<String, Romance> romanceMap = lord.getRomance();
+        for (String storyId : curStory.keySet()) {
+            Integer state = curStory.get(storyId);
+            if (state == Romance.STORY_STATE_END) {
+                Romance romance = romanceMap.get(storyId);
+                Set<String> randomStoryRecord = romance.getRandomStoryRecord();
+                if (randomStoryRecord == null) {
+                    randomStoryRecord = new HashSet<>();
+                    romance.setRandomStoryRecord(randomStoryRecord);
+                }
+                randomStoryRecord.add(storyId);
+            }
+        }
+    }
+
+    /**
+     * @Description:获取武将id
+     * @param heroUid
+     * @param lord
+     * @return
+     * @throws
+     */
+    private String getHeroId(String heroUid, Lord lord) {
+        Map<String, Hero> heros = lord.getHeros();
+        Hero hero = heros.get(heroUid);
+        if (hero == null) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_21005, "武将uid不存在");
+        }
+        return hero.getHeroId();
+    }
+
+    /**
+     * @Description:选择武将默认立绘图
+     * @param level
+     * @param heroId
+     * @throws
+     */
+    public void romanceAddpic(Integer level, String heroId) {
+        Lord lord = getLord();
+        Map<String, Romance> romanceMap = lord.getRomance();
+        Romance romance = romanceMap.get(heroId);
+        // 好感度等级校验
+        if (romance.getLevel() < level || level < 0) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_24021, "好感度等级不够");
+        }
+        romance.setAddpic(level);
+        HashMap<Object, Object> updateRomance = new HashMap<>();
+        updateRomance.put(heroId, romance);
+        this.gameModel.addObject(ResponseKey.ROMANCE, updateRomance);
+        lordRepository.save(lord);
+    }
+
 }

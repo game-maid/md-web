@@ -11,6 +11,7 @@ package com.talentwalker.game.md.application.aspect;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -42,6 +43,8 @@ public class LogAspect extends GameSupport {
 
     @Autowired
     private GameLogRepository gameLogRepository;
+    @Autowired
+    private final static Logger LOGGER = Logger.getLogger(LogAspect.class);
 
     @Pointcut("execution(* com.talentwalker.game.md.application.controller..*(..))")
     public void logPoincut() {
@@ -74,7 +77,9 @@ public class LogAspect extends GameSupport {
             throw e;
         } finally {
             log.setCost(System.currentTimeMillis() - start);
+            long startTime = System.currentTimeMillis();
             gameLogRepository.insert(log);
+            LOGGER.info("游戏日志保存耗时：" + (System.currentTimeMillis() - startTime));
         }
         return result;
     }
@@ -108,6 +113,7 @@ public class LogAspect extends GameSupport {
         log.setSessionId(getGameUser().getGamesessionId());
         if (!isThrough()) {
             log.setPreDiamond(getLord().getDiamond());
+            log.setPostPersentDiamond(getLord().getPersentDiamond());
             log.setPreGold(getLord().getGold());
             log.setPreLevel(getLord().getLevel());
             log.setPreVipscore(getLord().getVipScore());
@@ -120,11 +126,15 @@ public class LogAspect extends GameSupport {
         log.setExpendItems(expendItems);
         if (!isThrough()) {
             log.setPostDiamond(getLord().getDiamond());
+            log.setPostPersentDiamond(getLord().getPersentDiamond());
             log.setPostGold(getLord().getGold());
             log.setPostLevel(getLord().getLevel());
             log.setPostVipscore(getLord().getVipScore());
-            if (log.getPreDiamond() > log.getPostDiamond()) {// 消耗钻石
+            if (log.getPreDiamond() > log.getPostDiamond()) {// 消耗充值钻石
                 expendItems.add(ItemID.DIAMOND);
+            }
+            if (log.getPrePersentDiamond() > log.getPostPersentDiamond()) {// 消耗赠送钻石
+                expendItems.add(ItemID.PERSENT_DIAMOND);
             }
             if (log.getPreGold() > log.getPostGold()) {// 消耗金币
                 expendItems.add(ItemID.GOLD);

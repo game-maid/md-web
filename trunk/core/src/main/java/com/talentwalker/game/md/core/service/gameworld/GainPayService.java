@@ -24,10 +24,12 @@ import com.talentwalker.game.md.core.domain.gameworld.Hero;
 import com.talentwalker.game.md.core.domain.gameworld.LeagueLord;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.gameworld.Mail;
+import com.talentwalker.game.md.core.domain.gameworld.Romance;
 import com.talentwalker.game.md.core.domain.gameworld.Skill;
 import com.talentwalker.game.md.core.domain.gameworld.SoulStore;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.response.ResponseKey;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
 
@@ -74,14 +76,30 @@ public class GainPayService extends GameSupport {
             Lord lord = (Lord) obj;
             if (ItemID.DIAMOND.equals(itemId)) { // 钻石
                 int diamond = lord.getDiamond();
-                if (number < 0) {
+                int persentDiamond = lord.getPersentDiamond();
+                if (number < 0) {// 消耗钻石
                     // this.check(diamond, number);
-                    if (diamond + number < 0) {
+                    // 优先消耗充值钻石
+                    if (diamond + number >= 0) {// 消耗充值钻石
+                        lord.setDiamond(diamond + number);
+                        this.lordResponse(itemId, number, lord.getDiamond());
+                    } else if (diamond + persentDiamond + number >= 0) {// 消耗充值钻石和赠送钻石
+                        if (diamond != 0) {
+                            lord.setDiamond(0);
+                            this.lordResponse(itemId, -diamond, lord.getDiamond());
+                        }
+                        lord.setPersentDiamond(diamond + persentDiamond + number);
+                        this.lordResponse(ItemID.PERSENT_DIAMOND, number + diamond, lord.getPersentDiamond());
+                    } else {
                         GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_21019, "钻石不足");
                     }
+                } else {// 获得充值钻石
+                    lord.setDiamond(diamond + number);
+                    this.lordResponse(itemId, number, lord.getDiamond());
                 }
-                lord.setDiamond(diamond + number);
-                this.lordResponse(itemId, number, lord.getDiamond());
+            } else if (ItemID.PERSENT_DIAMOND.equals(itemId)) {// 增加赠送的钻石
+                lord.setPersentDiamond(number + lord.getPersentDiamond());
+                this.lordResponse(itemId, number, lord.getPersentDiamond());
             } else if (ItemID.GOLD.equals(itemId)) { // 金币
                 int gold = lord.getGold();
                 if (number < 0) {
@@ -282,6 +300,8 @@ public class GainPayService extends GameSupport {
                     // 技能图鉴
                     String skillId = getDataConfig().get("heroConfig").get(itemId).getString("skillult");
                     lordService.heroHandbook(ItemID.SKILL, skillId, lord);
+                    // 好感度
+                    heroService.romanceAddHero(itemId, lord);
                     if (heros.size() + number > lord.getHeroLimit()) {
                         int diff = lord.getHeroLimit() - heros.size();
                         // 发邮件补(number - diff)个道具
@@ -305,6 +325,39 @@ public class GainPayService extends GameSupport {
                     }
                 }
                 lord.setHeros(heros);
+            } else if (itemId.startsWith(ItemID.ROMANCE_EXP)) {// 好感度经验
+                if (number > 0) {
+                    String[] items = itemId.split("--");
+                    itemId = items[1];
+                    Romance romance = lord.getRomance().get(itemId);
+                    int romanceLevel = romance.getLevel();
+                    DataConfig romanceLevelsConfig = getDataConfig().get(ConfigKey.ROMANCE_BASE).get(itemId)
+                            .get(ConfigKey.ROMANCE_BASE_ROMANCE);
+                    DataConfig romanceConfig = romanceLevelsConfig.get(romanceLevel + 1 + "");
+                    Integer romanceExpCost = romanceConfig.getInteger(ConfigKey.ROMANCE_BASE_COST);
+                    int romanceMaxLv = getDataConfig().get(ConfigKey.ROMANCE_BASE).get(itemId)
+                            .getInteger(ConfigKey.ROMANCE_BASE_MAXLV);
+                    while (number >= romanceExpCost) {// 升级
+                        Map<Integer, Integer> storyMap = romance.getStory();
+                        if (storyMap == null) {
+                            storyMap = new HashMap<>();
+                            romance.setStory(storyMap);
+                        }
+                        romanceLevel++;
+                        storyMap.put(romanceLevel, Romance.STORY_STATE_LOCK);
+                        number -= romanceExpCost;
+                        if (romanceMaxLv <= romanceLevel) {
+                            break;
+                        }
+                        romanceExpCost = romanceLevelsConfig.get(romanceLevel + 1 + "")
+                                .getInteger(ConfigKey.ROMANCE_BASE_COST);
+                    }
+                    romance.setExp(number);
+                    romance.setLevel(romanceLevel);
+                    HashMap<Object, Object> updateRomanceMap = new HashMap<>();
+                    updateRomanceMap.put(itemId, romance);
+                    this.gameModel.addObject(ResponseKey.ROMANCE, updateRomanceMap);
+                }
             } else if (StringUtils.startsWith(itemId, ItemID.SOUL)) { // 魂
                 Map<String, Integer> souls = lord.getSouls();
                 int count = 0;

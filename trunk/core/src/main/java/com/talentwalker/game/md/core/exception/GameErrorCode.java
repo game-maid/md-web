@@ -349,6 +349,14 @@ public class GameErrorCode extends ErrorCode {
     * 武将好感度已经满
     */
     public static final Integer GAME_ERROR_24020 = 24020;
+    /**
+     * 武将好感度等级不够
+     */
+    public static final Integer GAME_ERROR_24021 = 24021;
+    /**
+     * 玩家从未获得过该类型武将
+     */
+    public static final Integer GAME_ERROR_24022 = 24022;
     /*********************** 技能************************/
     /**
      * 技能等级达到满级，不能升级
@@ -693,6 +701,18 @@ public class GameErrorCode extends ErrorCode {
      * 当天已经送过体力给该好友
      */
     public static final Integer GAME_ERROR_37002 = 37002;
+    /**
+     * 赠送体力数据不存在
+     */
+    public static final Integer GAME_ERROR_37003 = 37003;
+    /**
+     * 玩家每天可以收取体力的次数达到上限
+     */
+    public static final Integer GAME_ERROR_37004 = 37004;
+    /**
+     * 不能重复领取
+     */
+    public static final Integer GAME_ERROR_37005 = 37005;
     /*******************签到*************************/
     /**
      * 已经签到
@@ -702,5 +722,10 @@ public class GameErrorCode extends ErrorCode {
      * 不能领取该天的奖励
      */
     public static final Integer GAME_ERROR_38002 = 38002;
+    /*******************其它*************************/
+    /**
+     * 未达到开启等级
+     */
+    public static final Integer GAME_ERROR_39001 = 39001;
 
 }

@@ -29,6 +29,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -68,7 +69,7 @@ public class GoldDiamondExpendService extends BaseService {
      * @throws
      */
     public Page<Map<String, Object>> findList(String startStr, String endStr, String zoneId, String itemType,
-            Integer userType, String lordId, Integer payType, Integer registerCondition, Integer function) {
+            Integer userType, String lordId, Integer payType, Integer registerCondition, String function) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         long startDate = 0L;
         long endDate = 0L;
@@ -78,14 +79,19 @@ public class GoldDiamondExpendService extends BaseService {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        String lordIds = null;
+        if (userType != 0) {
+            lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition);// 符合要求的玩家id
+        }
+
         // 计算总数
         long total = countTotal(startDate, endDate, zoneId, itemType, userType, lordId, payType, registerCondition,
-                function);
+                function, lordIds);
         // 查询列表
         ArrayList<Map<String, Object>> content = new ArrayList<>();
         Pageable pageable = SearchFilter.newSearchFilter().getPageable();
         findContent(startDate, endDate, zoneId, itemType, userType, lordId, payType, registerCondition, function,
-                pageable, content);
+                pageable, content, lordIds);
         return new PageImpl<>(content, pageable, total);
     }
 
@@ -104,13 +110,13 @@ public class GoldDiamondExpendService extends BaseService {
      * @throws
      */
     private long countTotal(long startDate, long endDate, String zoneId, String itemType, Integer userType,
-            String lordId, Integer payType, Integer registerCondition, Integer function) {
+            String lordId, Integer payType, Integer registerCondition, String function, String lordIds) {
         AggregationOutput totalOutPut = null;
         String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
         String matchTime = "{$match:{$and:[{request_time:{$gte:" + startDate + "}},{request_time:{$lt:" + endDate
                 + "}}]}}";
         String matchItemType = "{$match:{expend_items:{$in:['" + itemType + "']}}}";
-
+        String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
         if (userType == 0) {// 单个用户 根据用户id查询
             // 分组 统计总数 count
             List<DBObject> countList = new ArrayList<>();
@@ -125,13 +131,8 @@ public class GoldDiamondExpendService extends BaseService {
             countList.add((DBObject) JSON.parse(groupNum));
             totalOutPut = mongoTemplate.getCollection("game_log").aggregate(countList);
         } else {// 整体用户 根据条件查询
-            String lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition);// 符合要求的玩家id
             String matchLordIds = "";
-            if (payType == 2 && registerCondition == 0) {
-                matchLordIds = "{$match:{player_id:{$nin:[" + lordIds + "]}}}";
-            } else {
-                matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
-            }
+            matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
             // 分组 统计总数 count
             List<DBObject> countList = new ArrayList<>();
             String discountUri = "{$group:{_id:'$uri'}}";
@@ -139,8 +140,9 @@ public class GoldDiamondExpendService extends BaseService {
             countList.add((DBObject) JSON.parse(matchZoneId));
             countList.add((DBObject) JSON.parse(matchTime));
             countList.add((DBObject) JSON.parse(matchItemType));
-            if (payType != 0 || registerCondition != 0) {
-                countList.add((DBObject) JSON.parse(matchLordIds));
+            countList.add((DBObject) JSON.parse(matchLordIds));
+            if (!StringUtils.isEmpty(function)) {
+                countList.add((DBObject) JSON.parse(matchUri));
             }
             countList.add((DBObject) JSON.parse(discountUri));
             countList.add((DBObject) JSON.parse(groupNum));
@@ -172,8 +174,8 @@ public class GoldDiamondExpendService extends BaseService {
      * @throws
      */
     private void findContent(long startDate, long endDate, String zoneId, String itemType, Integer userType,
-            String lordId, Integer payType, Integer registerCondition, Integer function, Pageable pageable,
-            List<Map<String, Object>> content) {
+            String lordId, Integer payType, Integer registerCondition, String function, Pageable pageable,
+            List<Map<String, Object>> content, String lordIds) {
         String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
         String matchTime = "{$match:{$and:[{request_time:{$gte:" + startDate + "}},{request_time:{$lt:" + endDate
                 + "}}]}}";
@@ -181,8 +183,8 @@ public class GoldDiamondExpendService extends BaseService {
         String limitStr = "";
         String offsetStr = "";
         if (pageable != null) {
-            limitStr = "{$limit:" + pageable.getPageSize() + "}";
             offsetStr = "{$skip:" + pageable.getOffset() + "}";
+            limitStr = "{$limit:" + pageable.getPageSize() + "}";
         }
         AggregationOutput selectOutPut = null;
         AggregationOutput payOutPut = null;
@@ -223,13 +225,9 @@ public class GoldDiamondExpendService extends BaseService {
             payOutPut = mongoTemplate.getCollection("game_log").aggregate(payList);
 
         } else {// 整体用户 根据条件查询
-            String lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition);// 符合要求的玩家id
             String matchLordIds = "";
-            if (payType == 2 && registerCondition == 0) {
-                matchLordIds = "{$match:{player_id:{$nin:[" + lordIds + "]}}}";
-            } else {
-                matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
-            }
+            matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
+            String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
             // 道具数量 、消费次数
             List<DBObject> selectList = new ArrayList<>();
             String groupItemNum = "{$group:{_id:{uri:'$uri'},expendTimes:{$sum:1},num:{$sum:'$result.pay.lord."
@@ -238,8 +236,9 @@ public class GoldDiamondExpendService extends BaseService {
             selectList.add((DBObject) JSON.parse(matchZoneId));
             selectList.add((DBObject) JSON.parse(matchTime));
             selectList.add((DBObject) JSON.parse(matchItemType));
-            if (payType != 0 || registerCondition != 0) {
-                selectList.add((DBObject) JSON.parse(matchLordIds));
+            selectList.add((DBObject) JSON.parse(matchLordIds));
+            if (!StringUtils.isEmpty(function)) {
+                selectList.add((DBObject) JSON.parse(matchUri));
             }
             selectList.add((DBObject) JSON.parse(groupItemNum));
             selectList.add((DBObject) JSON.parse(sortByUri));
@@ -256,8 +255,9 @@ public class GoldDiamondExpendService extends BaseService {
             payList.add((DBObject) JSON.parse(matchZoneId));
             payList.add((DBObject) JSON.parse(matchTime));
             payList.add((DBObject) JSON.parse(matchItemType));
-            if (payType != 0 || registerCondition != 0) {
-                payList.add((DBObject) JSON.parse(matchLordIds));
+            payList.add((DBObject) JSON.parse(matchLordIds));
+            if (!StringUtils.isEmpty(function)) {
+                payList.add((DBObject) JSON.parse(matchUri));
             }
             payList.add((DBObject) JSON.parse(discountLordId));
             payList.add((DBObject) JSON.parse(groupPayNum));
@@ -327,29 +327,39 @@ public class GoldDiamondExpendService extends BaseService {
                 String lordId = ((BasicDBObject) next.get("_id")).getString("lord_id");
                 payTypeLordList.add(lordId);
             }
-            if (registerCondition != 0) {// 注册条件
-                if (payType == 1) {// 付费用户
-                    for (String lordId : payTypeLordList) {
-                        if (!registerLordIdList.contains(lordId)) {
-                            payTypeLordList.remove(lordId);
-                        }
+            if (payType == 1) {// 付费用户
+                Iterator<String> it = payTypeLordList.iterator();
+                while (it.hasNext()) {
+                    String lordId = it.next();
+                    if (!registerLordIdList.contains(lordId)) {
+                        it.remove();
                     }
-                    lordIdList = payTypeLordList;
-                } else {// 未付费用户
-                    for (String lordId : registerLordIdList) {
-                        if (payTypeLordList.contains(lordId)) {
-                            registerLordIdList.remove(lordId);
-                        }
-                    }
-                    lordIdList = registerLordIdList;
                 }
-            } else {
+
+                // for (String lordId : payTypeLordList) {
+                // if (!registerLordIdList.contains(lordId)) {
+                // payTypeLordList.remove(lordId);
+                // }
+                // }
                 lordIdList = payTypeLordList;
+            } else {// 未付费用户
+                Iterator<String> it = registerLordIdList.iterator();
+                while (it.hasNext()) {
+                    String lordId = it.next();
+                    if (payTypeLordList.contains(lordId)) {
+                        it.remove();
+                    }
+                }
+
+                // for (String lordId : registerLordIdList) {
+                // if (payTypeLordList.contains(lordId)) {
+                // registerLordIdList.remove(lordId);
+                // }
+                // }
+                lordIdList = registerLordIdList;
             }
-        } else if (registerCondition != 0) {// 没有付费条件 按注册条件查询
+        } else {// 没有付费条件 按注册条件查询
             lordIdList = registerLordIdList;
-        } else {// 查询所有用户
-            return null;
         }
         for (int i = 0; i < lordIdList.size(); i++) {
             lordIds.append("'").append(lordIdList.get(i)).append("'");
@@ -421,7 +431,7 @@ public class GoldDiamondExpendService extends BaseService {
      * @throws
      */
     public void export(String startStr, String endStr, String zoneId, String itemType, Integer userType, String lordId,
-            Integer payType, Integer registerCondition, Integer function, HttpServletRequest request,
+            Integer payType, Integer registerCondition, String function, HttpServletRequest request,
             HttpServletResponse response) {
         // 查询
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -434,9 +444,12 @@ public class GoldDiamondExpendService extends BaseService {
             e.printStackTrace();
         }
         ArrayList<Map<String, Object>> content = new ArrayList<>();
+        String lordIds = null;
+        if (userType != 0) {
+            lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition);// 符合要求的玩家id
+        }
         findContent(startDate, endDate, zoneId, itemType, userType, lordId, payType, registerCondition, function, null,
-                content);
-        System.out.println(content.size());
+                content, lordIds);
         // 生成excel文件
         // excel 内容
         List<GoldDiamondStatisticsExcel> excelList = new ArrayList<>();

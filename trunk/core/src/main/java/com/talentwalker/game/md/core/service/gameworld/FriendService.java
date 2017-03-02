@@ -8,6 +8,7 @@
 
 package com.talentwalker.game.md.core.service.gameworld;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -22,25 +23,30 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import com.talentwalker.game.md.core.constant.ItemID;
+import com.talentwalker.game.md.core.dataconfig.DataConfig;
 import com.talentwalker.game.md.core.domain.gameworld.Friend;
 import com.talentwalker.game.md.core.domain.gameworld.FriendStrength;
-import com.talentwalker.game.md.core.domain.gameworld.FriendStrengthStatus;
 import com.talentwalker.game.md.core.domain.gameworld.League;
 import com.talentwalker.game.md.core.domain.gameworld.LeagueLord;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
 import com.talentwalker.game.md.core.domain.gameworld.PrivateMessage;
+import com.talentwalker.game.md.core.domain.gameworld.PrivateMessageStatus;
+import com.talentwalker.game.md.core.domain.gameworld.PublicMessage;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.exception.GameException;
 import com.talentwalker.game.md.core.repository.gameworld.FriendRepository;
 import com.talentwalker.game.md.core.repository.gameworld.FriendStrengthRepository;
-import com.talentwalker.game.md.core.repository.gameworld.FriendStrengthStatusRepository;
 import com.talentwalker.game.md.core.repository.gameworld.LeagueLordRepository;
 import com.talentwalker.game.md.core.repository.gameworld.LeagueRepository;
 import com.talentwalker.game.md.core.repository.gameworld.LordRepository;
 import com.talentwalker.game.md.core.repository.gameworld.PrivateMessageRepository;
+import com.talentwalker.game.md.core.repository.gameworld.PrivateMessageStatusRepository;
+import com.talentwalker.game.md.core.repository.gameworld.PublicMessageRepository;
 import com.talentwalker.game.md.core.response.FriendInfo;
 import com.talentwalker.game.md.core.response.LordInfo;
 import com.talentwalker.game.md.core.sensitiveword.SensitiveWord;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.StringUtils;
@@ -66,7 +72,11 @@ public class FriendService extends GameSupport {
     @Autowired
     private FriendStrengthRepository friendSendStrengthRepository;
     @Autowired
-    private FriendStrengthStatusRepository friendStrengthStatusRepository;
+    private GainPayService gainPayService;
+    @Autowired
+    private PrivateMessageStatusRepository privateMessageStatusRepository;
+    @Autowired
+    private PublicMessageRepository publicMessageRepository;
     /**
      * 推荐好友数量
      */
@@ -259,8 +269,7 @@ public class FriendService extends GameSupport {
             leagueName.put(league.getId(), league.getName());
         }
         for (Lord lord : lords) {
-            LordInfo lordInfo = new LordInfo();
-            lordInfo.lordInfo(lord);
+            LordInfo lordInfo = new LordInfo(lord);
             lordInfo.setLeagueName(leagueName.get(leagueLordMap.get(lord.getId())));
             lordInfoMap.put(lord.getId(), lordInfo);
         }
@@ -363,6 +372,10 @@ public class FriendService extends GameSupport {
     public void friendInfo() {
         Lord lord = this.getLord();
         findFriendInfo(lord);
+        // 体力赠送记录
+        this.getStrengthRecord(lord);
+        // 好友私聊信息
+        this.findNowMessages(lord);
     }
 
     /**
@@ -389,9 +402,11 @@ public class FriendService extends GameSupport {
         friendSendStrength.setSenderId(lord.getId());
         friendSendStrength.setReceiverId(receiverId);
         friendSendStrength.setSendTime(new Date());
+        friendSendStrength.setSendDate(this.nowDateStr());
+        friendSendStrength.setReceive(false);
         friendSendStrength = friendSendStrengthRepository.insert(friendSendStrength);
-        // friendStrengthStatus.getFriendStrengths().add(friendSendStrength);
-        // friendStrengthStatusRepository.save(friendStrengthStatus);
+        // 返回发送体力记录列表
+        this.getStrengthRecord(lord);
     }
 
     /**
@@ -400,11 +415,23 @@ public class FriendService extends GameSupport {
      * @throws
      */
     private void checkSendRepetition(Lord lord, String receiverId) {
-        Map<String, Integer> record = lord.getGivesStrengthRecord();
-        if (record.containsKey(receiverId)) {
+        FriendStrength friendStrength = friendSendStrengthRepository.findByReceiverIdAndSenderIdAndSendDate(receiverId,
+                lord.getId(), this.nowDateStr());
+        if (friendStrength != null) {
             // 已经发送过体力了
             GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_37002);
         }
+    }
+
+    /**
+     * @Description:当前日期yyyy-MM-dd
+     * @return
+     * @throws
+     */
+    private String nowDateStr() {
+        Date d = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(d);
     }
 
     // /**
@@ -424,22 +451,33 @@ public class FriendService extends GameSupport {
     // }
 
     /**
-     * @Description:
-     * @param lordId
+     * @Description:领取奖励
+     * @param id
      * @throws
      */
-    public void getAward(String lordId) {
+    public void getAward(String id) {
         Lord lord = this.getLord();
-        // 领取状态
-
-        FriendStrengthStatus friendStrengthStatus = friendStrengthStatusRepository.findOne(lord.getId());
-        if (friendStrengthStatus == null) {
-            friendStrengthStatus = new FriendStrengthStatus();
-            friendStrengthStatus.setId(lord.getId());
-            friendStrengthStatus.setTimes(0);
-            friendStrengthStatus.setGetTime(System.currentTimeMillis());
+        DataConfig config = this.getDataConfig().get(ConfigKey.FRIEND_ENERGY);
+        // 领取数量上限
+        if (lord.getGivesStrengthTimes() >= config.get(ConfigKey.RECEIVE_ENERGY).getInteger("value")) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_37004);
         }
-
+        FriendStrength friendStrength = friendSendStrengthRepository.findOne(id);
+        if (friendStrength == null) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_37003);
+        }
+        if (friendStrength.isReceive()) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_37005);
+        }
+        friendStrength.setReceive(true);
+        friendStrength.setFailureTime(new Date());
+        int energy = config.get(ConfigKey.SEND_ENERGY).getInteger("value");
+        lord.setGivesStrengthTimes(lord.getGivesStrengthTimes() + 1);
+        lord.setGivesStrengthTime(System.currentTimeMillis());
+        gainPayService.gain(lord, ItemID.STRENGTH, energy);
+        lordRepository.save(lord);
+        friendSendStrengthRepository.save(friendStrength);
+        // 刷新赠送体力列表？？？？？？？？？？？？？？？？？？？？？？？
     }
 
     private Long getStartTime() {
@@ -464,13 +502,36 @@ public class FriendService extends GameSupport {
      * @Description:获取体力列表
      * @throws
      */
-    public void getStrengthList() {
-        Lord lord = this.getLord();
+    public void getStrengthList(Lord lord) {
         List<FriendStrength> list = friendSendStrengthRepository.findByReceiverId(lord.getId());
+        List<String> lordIds = new ArrayList<>();
         for (FriendStrength strength : list) {
-
+            if (strength.isReceive()) {
+                continue;
+            }
+            lordIds.add(strength.getSenderId());
         }
+        List<Lord> listLord = lordRepository.findByIdIn(lordIds);
+        Map<String, Lord> mapLord = new HashMap<>();
+        for (Lord senderLord : listLord) {
+            mapLord.put(senderLord.getId(), senderLord);
+        }
+        for (FriendStrength strength : list) {
+            LordInfo lordInfo = new LordInfo(mapLord.get(strength.getSenderId()));
+            strength.setLordInfo(lordInfo);
+        }
+
         this.gameModel.addObject("sendStrengthList", list);
+    }
+
+    /**
+     * @Description:获取发送体力记录（当天）
+     * @throws
+     */
+    public void getStrengthRecord(Lord lord) {
+        List<FriendStrength> list = friendSendStrengthRepository.findBySenderIdAndSendDate(lord.getId(),
+                this.nowDateStr());
+        this.gameModel.addObject("sendStrengthRecord", list);
     }
 
     /**
@@ -481,12 +542,114 @@ public class FriendService extends GameSupport {
      */
     public void sendPrivateMessag(String content, String receiverId) {
         Lord lord = this.getLord();
+        String[] minMax = StringUtils.getMinMax(lord.getId(), receiverId);
         // 构造消息
         PrivateMessage message = new PrivateMessage();
         message.setSenderId(lord.getId());
         message.setReceiverId(receiverId);
         message.setContent(SensitiveWord.replaceSensitiveWord(content, '*'));
         message.setSendTime(new Date().getTime());
+        message.setMinId(minMax[0]);
+        message.setMaxId(minMax[1]);
+        // 消息状态
+        PrivateMessageStatus status = privateMessageStatusRepository.findOne(lord.getId() + "_" + receiverId);
+        if (status == null) {
+            status = new PrivateMessageStatus();
+            status.setId(lord.getId() + "_" + receiverId);
+            status.setSenderId(lord.getId());
+            status.setReceiverId(receiverId);
+            status.setUnReadCount(0);
+        }
+        status.setUnReadCount(status.getUnReadCount() + 1);
         privateMessageRepository.insert(message);
+        privateMessageStatusRepository.save(status);
+        this.findPrivateMessages(receiverId, 0);
+    }
+
+    /**
+     * @Description:刷新和某人的聊天记录
+     * @param player
+     * @param friendId
+     * @return
+     * @throws
+     */
+    public void findPrivateMessages(String friendId, int count) {
+        Lord lord = this.getLord();
+        List<PrivateMessage> privateMessages = null;
+        int privateMessageCount = this.getDataConfig().get(ConfigKey.FRIEND_ENERGY).get("privateMessageCount")
+                .getInteger("value");
+        PrivateMessageStatus status = privateMessageStatusRepository.findOne(friendId + "_" + lord.getId());
+        if (status != null && status.getUnReadCount() > 0) {
+            if (status.getUnReadCount() > privateMessageCount) {
+                // 显示所有未读消息
+                privateMessageCount = status.getUnReadCount();
+            }
+            status.setUnReadCount(0);
+            privateMessageStatusRepository.save(status);
+        }
+        privateMessageCount += count;
+        String[] minMax = StringUtils.getMinMax(lord.getId(), friendId);
+        privateMessages = privateMessageRepository.findByMinIdAndMaxId(minMax[0], minMax[1],
+                new PageRequest(0, privateMessageCount, new Sort(Direction.DESC, "sendTime")));
+
+        if (privateMessages == null) {
+            privateMessages = new ArrayList<>();
+        }
+        this.gameModel.addObject("privateMessage", privateMessages);
+        // 好友私聊信息
+        this.findNowMessages(lord);
+    }
+
+    /**
+     * @Description:查询最新的消息列表
+     * @param player
+     * @return
+     * @throws
+     */
+    public void findNowMessages(Lord lord) {
+        List<PrivateMessageStatus> statusList = privateMessageStatusRepository
+                .findByReceiverIdAndUnReadCount(lord.getId(), 0);
+        this.gameModel.addObject("privateMessageStatusList", statusList);
+    }
+
+    /**
+     * @Description:发送世界消息
+     * @param content
+     * @throws
+     */
+    public void sendPublicMessag(String content) {
+        Lord lord = this.getLord();
+        // 构造消息
+        PublicMessage message = new PublicMessage();
+        message.setSender(new LordInfo(lord));
+        message.setContent(SensitiveWord.replaceSensitiveWord(content, '*'));
+        message.setSendTime(new Date().getTime());
+        publicMessageRepository.save(message);
+        this.findPublicMessage(0);
+
+    }
+
+    /**
+     * @Description:世界聊天刷新
+     * @param count
+     * @throws
+     */
+    public void findPublicMessage(int count) {
+        int publicMessageCount = this.getDataConfig().get(ConfigKey.FRIEND_ENERGY).get("privateMessageCount")
+                .getInteger("value");
+        publicMessageCount += count;
+        List<PublicMessage> messages = publicMessageRepository
+                .findAllList(new PageRequest(0, publicMessageCount, new Sort(Direction.DESC, "sendTime")));
+        this.gameModel.addObject("publicMessage", messages);
+    }
+
+    /**
+     * @Description:世界聊天最新消息
+     * @throws
+     */
+    public void findPublicMessage() {
+        List<PublicMessage> messages = publicMessageRepository
+                .findAllList(new PageRequest(0, 1, new Sort(Direction.DESC, "sendTime")));
+        this.gameModel.addObject("publicMessage", messages);
     }
 }

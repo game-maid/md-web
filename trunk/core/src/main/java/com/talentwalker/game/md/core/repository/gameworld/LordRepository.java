@@ -28,4 +28,5 @@ public interface LordRepository extends BaseMongoRepository<Lord, String> {
     public Lord findByName(String name);
 
     public List<Lord> findByIdNotInAndLevel(Collection<String> notInIds, int level, Pageable pageable);
+
 }

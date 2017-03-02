@@ -214,19 +214,6 @@ function initZone(){
 	});
 }
 
-//选择日期类型
-$("#date-type").change(function(){
-	var dateType = $("#date-type").val();
-	$(".date-div").hide();
-	if(dateType=='day'){
-		$("#day-date-div").show();		
-	}else if(dateType=='week'){
-		$("#week-date-div").show();
-	}else if(dateType=='month'){
-		$("#month-date-div").show();
-	}
-});
-
 
 //查询
 $("#select").click(function(){

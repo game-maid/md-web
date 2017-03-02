@@ -453,12 +453,15 @@ public class LordService extends GameSupport {
         this.gameModel.addObject(ResponseKey.MISSION_ONCE, missionService.getOnceMissions(lord));
         this.gameModel.addObject(ResponseKey.HANDBOOK, this.getHandbook(lord));
         this.gameModel.addObject(ResponseKey.MAIL, mailService.getMailNCP());
-        this.gameModel.addObject(ResponseKey.LEAGUE_LORD, leagueService.getLeagueLord(lord));
         this.gameModel.addObject(ResponseKey.DUEL, duelService.getMain(lord));
         this.gameModel.addObject(ResponseKey.SOUL_STORE, soulStoreService.getSoulStore(lord));
         this.gameModel.addObject(ResponseKey.TOP_UP_FIRST_RECORD, topUpFirstRecordRepository.findOne(lord.getId()));
         this.gameModel.addObject(ResponseKey.TOP_UP_FIRST_AWARD, lord.isTopUpFirstAward());
         this.gameModel.addObject(ResponseKey.ZONE_CREATE_TIME, lord.getRegisterTime());
+        this.gameModel.addObject(ResponseKey.ROMANCE, lord.getRomance());
+        this.gameModel.addObject(ResponseKey.ROMANCE_RANDOM_STORY, lord.getRomanceRandomStory());
+        // 公会数据
+        leagueService.loginInfo(lord);
 
     }
 
@@ -1130,7 +1133,8 @@ public class LordService extends GameSupport {
     public void updateLord() {
         Lord lord = getLord();
         Map<String, Object> map = new HashMap<>();
-        map.put("diamond", lord.getDiamond());
+        map.put(ItemID.DIAMOND, lord.getDiamond());
+        map.put(ItemID.PERSENT_DIAMOND, lord.getPersentDiamond());
         map.put("monthCard", lord.getMonthCard());
         map.put("vipLevel", lord.getVipLevel());
         map.put("vipScore", lord.getVipScore());

@@ -17,6 +17,8 @@ public class ItemID {
 
     public final static String DIAMOND = "diamond";
 
+    public final static String PERSENT_DIAMOND = "persentDiamond";
+
     public final static String GOLD = "gold";
 
     public final static String EXP = "exp";
@@ -58,5 +60,9 @@ public class ItemID {
      * 技能经验道具类型
      */
     public final static String SKILL_TYPE = "expSkill";
+    /**
+     * 好感度经验
+     */
+    public final static String ROMANCE_EXP = "romanceExp";
 
 }
