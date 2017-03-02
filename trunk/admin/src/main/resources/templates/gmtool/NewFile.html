@@ -32,7 +32,7 @@
 				<form class="form-horizontal" id="addForm">
 					<div class="form-group contentClass">
 					</div>
-						<div class="form-group">
+					<div class="form-group">
 						<label class="col-sm-3 control-label"></label>
 						<div class="col-sm-7">
 							<button type="button" class="btn btn-primary" id="" onclick="addOneItem()">添加</button>
@@ -40,12 +40,11 @@
 						</div>
 					</div>
 					<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="preview">预览</button>
 						<button type="submit" class="btn btn-primary"
 							th:text="#{sys.save}" id="submit">保存</button>
 					</div>
 				</form>
-				<table id="panelTable" class="table-striped"
-					data-mobile-responsive="true"></table>
 			</div>
 		</div>
 	</div>
@@ -55,7 +54,7 @@
 	<div class="form-group">
 		<label class="col-sm-3 control-label">文本</label>
 		<div class="col-sm-7">
-			<textarea name="content[]" id="id" class="form-control" style="resize: vertical"
+			<textarea name="content[]" class="form-control" style="resize: vertical;color: #ff8800 "
 				required="required"></textarea>
 		</div>
 		<div class="col-sm-2 ColorTipDiv">
@@ -71,8 +70,10 @@ var itemNum = 1;
 //初始化 默认一个文本框 
 addOneItem();
 
-function initColorBox(id){
-	$(id).colpick({
+function initColorBox(num){
+	var colorBoxId = "#color-box-"+itemNum;
+	var contentText = "#content-id-"+itemNum;
+	$(colorBoxId).colpick({
 
 		colorScheme:'dark',
 
@@ -81,7 +82,7 @@ function initColorBox(id){
 		color:'ff8800',
 
 		onSubmit:function(hsb,hex,rgb,el) {
-
+			$(contentText).css('color','#'+hex);
 			$(el).css('background-color', '#'+hex);
 
 			$(el).colpickHide();
@@ -92,21 +93,38 @@ function initColorBox(id){
 }
 
 function addOneItem(){
-	var colorBoxId="color-box-"+itemNum;
+	var colorBoxId = "color-box-"+itemNum;
+	var contentText = "content-id-"+itemNum;
 	var cloneItem = $("#itemTample").clone();
 	cloneItem.removeAttr("id");
 	cloneItem.addClass("oneItems");
 	cloneItem.find("textarea").first().addClass("hpf");
+	cloneItem.find("textarea").attr("id",contentText);
 	cloneItem.find(".color-box").attr("id",colorBoxId);
 	cloneItem.find(".removeItem").show();
 	cloneItem.show();
 	$(".contentClass").append(cloneItem);
-	colorBoxId = "#" + colorBoxId;
-	initColorBox(colorBoxId);
+	initColorBox(itemNum);
 	itemNum++;
 }
 function removeItem(){
 	$(".contentClass div.oneItems:last").remove();
+	itemNum--;
 } 
+
+//预览 ps先不做
+/*<![CDATA[*/
+$("#preview").click(function(){
+	
+	var html = "<div>";
+	for(var i=1;i<itemNum;i++){
+		var colorBoxId = "#color-box-"+i;
+		var contentText = "#content-id-"+i;
+		html += "<p style='color:"+$(contentText).css("color")+" '>"+$(contentText).val()+"</p>"
+	}
+	html += "</div>";
+	$("#preview-div").append();
+});
+/*]]>*/
 </script>
 </html>
