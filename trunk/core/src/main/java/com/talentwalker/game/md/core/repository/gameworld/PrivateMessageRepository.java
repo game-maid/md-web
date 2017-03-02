@@ -8,6 +8,10 @@
 
 package com.talentwalker.game.md.core.repository.gameworld;
 
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
+
 import com.talentwalker.game.md.core.domain.gameworld.PrivateMessage;
 import com.talentwalker.game.md.core.repository.BaseMongoRepository;
 
@@ -18,5 +22,5 @@ import com.talentwalker.game.md.core.repository.BaseMongoRepository;
  */
 
 public interface PrivateMessageRepository extends BaseMongoRepository<PrivateMessage, String> {
-
+    List<PrivateMessage> findByMinIdAndMaxId(String minId, String maxId, Pageable pageable);
 }
