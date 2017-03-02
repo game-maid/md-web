@@ -423,7 +423,6 @@ $(function(){
 function redioChange(){
 	//是否单抽
 	$(".isOneRecruit").on('ifChecked',function(event){
-		console.log($("#discountDiv input:radio:checked").val())
 		var isOneRecruit =$(event.target).val();
 		if(isOneRecruit=="true" ){ 
 			if($("#discountDiv input:radio:checked").val()=="true"){

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.talentwalker.game.md.admin.controller.BaseController;
+import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 
 /**
  * @ClassName: AdvertisementController
@@ -22,9 +23,25 @@ import com.talentwalker.game.md.admin.controller.BaseController;
 @RequestMapping(value = "advertisement", method = RequestMethod.GET)
 @Controller
 public class AdvertisementController extends BaseController {
-
+    /**
+     * @Description:
+     * @return
+     * @throws
+     */
     @RequestMapping(value = "list")
     public String list() {
         return "config/advertisement";
+    }
+
+    /**
+     * 
+     * @Description:
+     * @return
+     * @throws
+     */
+    @RequestMapping(value = "add", method = RequestMethod.POST)
+    @GameResponse
+    public Object add() {
+        return null;
     }
 }

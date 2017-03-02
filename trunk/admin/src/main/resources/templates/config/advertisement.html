@@ -51,14 +51,14 @@
 							<label class="col-sm-3 control-label" th:text="#{advertisement.is.all.zone}">是否全服</label>
 							<div class="col-sm-7">
 								<label class="radio-inline i-checks"> 
-									<input type="radio"  checked="checked"  value="true" id="stateTrue" name="allZone" th:text="#{sys.true}" />
+									<input type="radio"  checked="checked"  value="true" id="allZoneTrue" name="allZone" th:text="#{sys.true}" />
 								</label> 
 								<label class="radio-inline i-checks"> 
-									<input type="radio" value="false" id="stateFalse" name="allZone" th:text="#{sys.fasle}" />
+									<input type="radio" checked="checked" value="false" id="allZoneFalse" name="allZone" th:text="#{sys.false}" />
 								</label>
 							</div>
 						</div>
-						<div class="form-group zonelistDiv" >
+						<div class="form-group " id="zonelistDiv" >
 							<label class="col-sm-3 control-label" th:text="#{sys.zone.select}">区服：</label>
 							<div class="col-sm-7">
 								<div id="zonelist"></div>
@@ -99,6 +99,17 @@
 						</div>
 
 						<div class="hr-line-dashed"></div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{activity.recruit.img.src}" >输入图片src</label>
+							<div class="col-sm-5">
+								<input type="text" id="src" name="src" class="form-control"  required="required" />
+							</div>
+						</div>
+						<div class="form-group" id="imgDiv" >
+							<div  class="col-sm-3 control-label" style="padding-left:20%" >
+								<img  />
+							</div>
+						</div>
 					</div>
 					<div class="modal-footer">
 						<button type="submit" class="btn btn-primary"
@@ -123,7 +134,27 @@ $(function(){
 	initKanBanInput($(".itemList"));
 	itemName=window.itemAll;
 	zoneMap=loadZoneMap();
+	//iCheckChange
+	redioChange();
+	//加载图片事件
+	$("#src").keyup(function(){
+		$("#imgDiv").find(" img").attr("src",$(this).val());
+	});
 });
+/**
+ * 单选框改变
+ */
+ function redioChange(){
+	$("[name='allZone']").on('ifChecked',function(event){
+		var value=$(event.target).val();
+		if(value=="true"){
+			$("#zonelistDiv").hide();
+		}else{
+			$("#zonelistDiv").show();
+		}
+	});
+}
+
 function add() {
 	$("#addForm")[0].reset();
 	$("#addForm").validate({
@@ -138,7 +169,6 @@ function add() {
 	initDataTimePicker();
 	
 	$("#addModal").modal("show");
-	
 }
 
 function initZone(){
@@ -174,6 +204,13 @@ function onSave(){
 	if(zonelist.length==0){
 		swal("", [[#{activity.zone.null}]], "warning");
 		return;
+	}
+	
+	var endLong=  new Date(endDate.replace(/-/g,'/')).getTime() ;
+	var startLong=  new Date(startDate.replace(/-/g,'/')).getTime() ;
+	if(startLong >= endLong){
+		swal('',[[#{config.shop.recruit.time.error}]],'warning');
+		return ;
 	}
 	
 	var putrush =$("#putrush").val();
@@ -324,8 +361,7 @@ function edit(activityId){
 	editDataTimePicker(data);
 	
 	$("#name").val(data.name);
-	$("#explain").val(data.explain);
-	
+	$("#imgDiv").find(" img").attr("src",data.src);
 	$("#putrush").val(data.putrush);
 	$("#addModal").modal("show");
 }
