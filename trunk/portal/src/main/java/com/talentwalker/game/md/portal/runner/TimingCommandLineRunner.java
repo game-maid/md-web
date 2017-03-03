@@ -70,15 +70,13 @@ public class TimingCommandLineRunner implements CommandLineRunner {
             Timer timer = new Timer(TIMER_NAME + data.getId());
             timer.scheduleAtFixedRate(
                     new PvpTimerTask(mongoTemplate, mailRepository, dataConfigManager, data.getId(), dateValue),
-                    // new Date(time), DateUtils.MILLIS_PER_DAY);1000
-                    new Date(), 2 * 60 * 1000);
+                    new Date(time), DateUtils.MILLIS_PER_DAY);
         }
         // 启动活跃与存留定时统计任务
         Date activeAndPersistenceStartTime = DateUtils.parseDate(dateValue + " 23:55:00", "yyyy-MM-dd HH:mm:ss");
         Timer timer = new Timer("activeAndPersistenceStartTime:" + dateValue + " 23:55:00");
         timer.scheduleAtFixedRate(new StatisticsActiveAndPersistenceTimerTask(activeAndPesistenceService),
-                // activeAndPersistenceStartTime, DateUtils.MILLIS_PER_DAY);
-                new Date(), 3 * 60 * 1000);
+                activeAndPersistenceStartTime, DateUtils.MILLIS_PER_DAY);
     }
 
 }
