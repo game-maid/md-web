@@ -27,7 +27,6 @@ import com.talentwalker.game.md.core.repository.DataZoneRepository;
 import com.talentwalker.game.md.core.repository.gameworld.MailRepository;
 import com.talentwalker.game.md.core.service.statistics.ActiveAndPersistenceService;
 import com.talentwalker.game.md.core.timing.PvpTimerTask;
-import com.talentwalker.game.md.core.timing.StatisticsActiveAndPersistenceTimerTask;
 
 /**
  * @ClassName: TimingCommandLineRunner
@@ -73,10 +72,10 @@ public class TimingCommandLineRunner implements CommandLineRunner {
                     new Date(time), DateUtils.MILLIS_PER_DAY);
         }
         // 启动活跃与存留定时统计任务
-        Date activeAndPersistenceStartTime = DateUtils.parseDate(dateValue + " 23:55:00", "yyyy-MM-dd HH:mm:ss");
-        Timer timer = new Timer("activeAndPersistenceStartTime:" + dateValue + " 23:55:00");
-        timer.scheduleAtFixedRate(new StatisticsActiveAndPersistenceTimerTask(activeAndPesistenceService),
-                activeAndPersistenceStartTime, DateUtils.MILLIS_PER_DAY);
+        // Date activeAndPersistenceStartTime = DateUtils.parseDate(dateValue + " 23:55:00", "yyyy-MM-dd HH:mm:ss");
+        // Timer timer = new Timer("activeAndPersistenceStartTime:" + dateValue + " 23:55:00");
+        // timer.scheduleAtFixedRate(new StatisticsActiveAndPersistenceTimerTask(activeAndPesistenceService),
+        // activeAndPersistenceStartTime, DateUtils.MILLIS_PER_DAY);
     }
 
 }
