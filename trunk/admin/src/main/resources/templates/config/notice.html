@@ -108,11 +108,9 @@
 						<div class="form-group contentClass" >
 						     <!-- 文本内容 -->
 						</div>
-						<div class="form-group contentShow" >
+						<div class="ibox form-group " style="padding-left:27%" >
 						     <!-- 预览内容 -->
-						     <label class="col-sm-3 control-label"></label>
-							<div class="col-sm-7">
-								<textarea  class="form-control" sytle="height:200; "></textarea>
+							<div class="col-sm-7 ibox-content contentShow">
 							</div>
 						</div>
 
@@ -195,6 +193,7 @@ function initColorBox(num,color){
 			$(el).colpickHide();
 			var rgb=rgb.r+","+rgb.g+","+rgb.b;
 			$(el).parent(".ColorTipDiv").children("input").val(rgb);
+			previewShow();
 		}
 	}).css('background-color',color ); //默认颜色
 }
@@ -247,23 +246,39 @@ $(function(){
 	});
 });
 //预览事件 
+/*<![CDATA[*/
 function preview(parent){
 	
 	parent.find(" textarea").keyup(function(){
-		var parentList =$(".contentClass").find(".parent");
+		previewShow();
 		
-		var textList="";
-		$.each(parentList,function(index,parentDiv){
-			/*<![CDATA[*/
-				textList+='<span style="color:rgb('+$(parentDiv).find("input").val()+')">';
-				textList+=$(parentDiv).find("textarea").val();
-				textList+='</span>';
-           /*]]>*/
-		});
-		$(".contentShow").find(" textarea").val('');
-		$(".contentShow").find(" textarea").val(textList);
 	});
 }
+//预览
+function previewShow(){
+	var parentList =$(".contentClass").find(".parent");
+	var html="<div><p>";
+	$.each(parentList,function(index,parentDiv){
+		html+="<span style='color:rgb("+$(parentDiv).find("input").val()+")'>"+$(parentDiv).find("textarea").val().replace(/[ ]/g,"&nbsp;")+"</span>";
+	});
+	html+="</p></div>";
+	transferString(html);
+	$(".contentShow").empty();
+	$(".contentShow").append(html);
+}
+
+//替换空格 回车 换行
+function transferString(str){
+	console.log(str);
+	try{  
+		str=str.replace(/\r\n/g,"<BR>"); 
+        str=str.replace(/\n/g,"<BR>");  
+    }catch(e) {  
+        alert(e.message);  
+    }  
+    return str;
+}
+ /*]]>*/
 
 /**
  * 单选框改变
