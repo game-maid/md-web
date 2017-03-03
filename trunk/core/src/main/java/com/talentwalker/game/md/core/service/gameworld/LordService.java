@@ -120,6 +120,10 @@ public class LordService extends GameSupport {
 
     @Autowired
     private HeroService heroService;
+    @Autowired
+    private AdvertisementService advertisementService;
+    @Autowired
+    private NoticeService noticeService;
 
     /**
      * 默认
@@ -271,7 +275,10 @@ public class LordService extends GameSupport {
         // heroService.setFormHoldFP(lord);
 
         recordLogin(lord);
-
+        // 广告
+        advertisementService.main();
+        // 公告
+        noticeService.main();
         return lord;
     }
 
