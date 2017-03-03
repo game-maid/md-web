@@ -361,7 +361,7 @@
 						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{activity.recruit.img.src}" >输入图片src</label>
 							<div class="col-sm-5">
-								<input type="text" id="src" name="src" class="form-control"  required="required" />
+								<input type="text" id="src" name="src" class="form-control"  />
 							</div>
 						</div>
 						<div class="form-group" id="imgDiv" >
@@ -423,7 +423,6 @@ $(function(){
 function redioChange(){
 	//是否单抽
 	$(".isOneRecruit").on('ifChecked',function(event){
-		console.log($("#discountDiv input:radio:checked").val())
 		var isOneRecruit =$(event.target).val();
 		if(isOneRecruit=="true" ){ 
 			if($("#discountDiv input:radio:checked").val()=="true"){
@@ -675,7 +674,11 @@ function initTable() {
 				text+='<td colspan=""><b>'+[[#{activity.recruit.probability}]]+'</b></td><td colspan="">'+row.probability+'</td>';
 				text+='<td colspan=""><b>'+[[#{activity.recruit.probabilityUp}]]+'</b></td><td colspan="">'+row.probabilityUp+'</td>';
 			}
-			text+='<td colspan="2"><b>'+[[#{activity.recruit.safetyTimes}]]+'</b></td><td colspan="2">'+row.safetyTimes+'</td>';
+			var safetyTimes =row.safetyTimes;
+			if(row.safetyTimes==0){
+				safetyTimes=[[#{sys.not}]];
+			}
+			text+='<td colspan="2"><b>'+[[#{activity.recruit.safetyTimes}]]+'</b></td><td colspan="2">'+safetyTimes+'</td>';
 			text+='</tr>';
 			
 			text+='<tr>';
@@ -794,9 +797,16 @@ function initTable() {
 			{
 				title : [[#{activity.recruit.safetyTimes}]],
 				field : "safetyTimes",
+				formatter:function(value){
+					if(value==0){
+						return [[#{sys.not}]];
+					}
+					return value;
+				},
+			
 			},
 			{
-				title : [[#{activity.shop.vip.limt}]],
+				title : [[#{sys.isenable}]],
 				field : "state",
 				formatter:function(value){
 					return value?'<b style="color:green">'+[[#{activity.recruit.state.open}]]+'</b>':'<b style="color:red">'+[[#{activity.recruit.state.close}]]+'</b>'
