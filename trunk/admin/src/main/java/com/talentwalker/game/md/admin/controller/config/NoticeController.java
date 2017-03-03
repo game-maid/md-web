@@ -9,11 +9,16 @@
 
 package com.talentwalker.game.md.admin.controller.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.talentwalker.game.md.admin.controller.BaseController;
+import com.talentwalker.game.md.core.domain.config.NoticeConfig;
+import com.talentwalker.game.md.core.service.gameworld.NoticeService;
+import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 
 /**
  * @ClassName: NoticeController
@@ -23,6 +28,10 @@ import com.talentwalker.game.md.admin.controller.BaseController;
 @Controller
 @RequestMapping(value = "notice", method = RequestMethod.GET)
 public class NoticeController extends BaseController {
+
+    @Autowired
+    private NoticeService noticeService;
+
     /**
      * @Description:页面跳转
      * @return
@@ -33,4 +42,46 @@ public class NoticeController extends BaseController {
         return "config/notice";
     }
 
+    /**
+     * @Description:
+     * @return
+     * @throws
+     */
+    @RequestMapping(value = "add", method = RequestMethod.POST)
+    @GameResponse
+    public Object add(NoticeConfig noticeConfig) {
+        noticeService.add(noticeConfig);
+        return null;
+    }
+
+    /**
+     * @Description:分页查询
+     * @return
+     * @throws
+     */
+    @RequestMapping(value = "findList", method = RequestMethod.POST)
+    @GameResponse
+    public Page<NoticeConfig> findList() {
+        return noticeService.findList();
+    }
+
+    /**
+     * @Description:根据id删除
+     * @param id
+     * @return
+     * @throws
+     */
+    @RequestMapping(value = "delete", method = RequestMethod.POST)
+    @GameResponse
+    public Object deleteById(String id) {
+        noticeService.deleteById(id);
+        return null;
+    }
+
+    @GameResponse
+    @RequestMapping(value = "update", method = RequestMethod.POST)
+    public Object update(String pk, String name, String value) {
+        noticeService.update(pk, name, value);
+        return null;
+    }
 }

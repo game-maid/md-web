@@ -3,30 +3,61 @@
  * @Copyright (C) 2017 太能沃可
  * @Description:
  * @Revision History:
- * @Revision 1.0 2017年3月2日  张福涛
+ * @Revision 1.0 2017年3月3日  张福涛
  */
 
-package com.talentwalker.game.md.admin.service.config;
+package com.talentwalker.game.md.core.service.gameworld;
+
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import com.talentwalker.game.md.admin.service.BaseService;
+import com.talentwalker.game.md.core.domain.GameUser;
 import com.talentwalker.game.md.core.domain.config.AdvertisementConfig;
 import com.talentwalker.game.md.core.repository.config.AdvertisementConfigRepository;
 import com.talentwalker.game.md.core.repository.support.SearchFilter;
+import com.talentwalker.game.md.core.response.ResponseKey;
+import com.talentwalker.game.md.core.util.GameSupport;
 
 /**
  * @ClassName: AdvertisementService
  * @Description: Description of this class
- * @author <a href="mailto:zhangfutao@talentwalker.com">张福涛</a> 于 2017年3月2日 下午6:05:38
+ * @author <a href="mailto:zhangfutao@talentwalker.com">张福涛</a> 于 2017年3月3日 下午7:00:00
  */
 @Service
-public class AdvertisementService extends BaseService {
+public class AdvertisementService extends GameSupport {
     @Autowired
     private AdvertisementConfigRepository advertisementConfigRepository;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    /**
+     * @Description:获取广告信息
+     * @return
+     * @throws
+     */
+    public void main() {
+        GameUser gameUser = getGameUser();
+        String zoneId = gameUser.getGameZone().getId();
+        Query query = new Query();
+        query.addCriteria(
+                new Criteria().orOperator(Criteria.where("allZone").is(true), Criteria.where("zoneList").in(zoneId)));
+        query.addCriteria(Criteria.where("startLong").lte(System.currentTimeMillis()));
+        query.addCriteria(Criteria.where("endLong").gt(System.currentTimeMillis()));
+        query.addCriteria(Criteria.where("state").is(true));
+        query.with(new Sort(Direction.ASC, "putrush"));
+        List<AdvertisementConfig> list = mongoTemplate.find(query, AdvertisementConfig.class);
+        this.gameModel.addObject(ResponseKey.ADVERTISEMENT, list);
+    }
 
     /**
      * @Description:添加修改广告
@@ -80,5 +111,4 @@ public class AdvertisementService extends BaseService {
         }
         advertisementConfigRepository.save(advertisementConfig);
     }
-
 }
