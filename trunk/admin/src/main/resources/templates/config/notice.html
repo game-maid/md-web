@@ -108,9 +108,10 @@
 						<div class="form-group contentClass" >
 						     <!-- 文本内容 -->
 						</div>
-						<div class="ibox form-group " style="padding-left:27%" >
+						<div class="form-group "   >
 						     <!-- 预览内容 -->
-							<div class="col-sm-7 ibox-content contentShow">
+						    <label class="col-sm-3 control-label"  th:text="#{notice.preview}">预览</label>
+							<div class="col-sm-7 contentShow" >
 							</div>
 						</div>
 
@@ -147,7 +148,7 @@
 			<div class="color-box" style="width: 30px; height: 30px;z-index:9999"></div>
 		</div>
 		<div class="col-sm-0">
-			<button type="button" class="btn btn-primary" id="" th:text="#{sys.delete}" onclick="removeItem(event)">删除</button>
+			<button type="button" class="btn btn-primary btn-danger" id="" th:text="#{sys.delete}" onclick="removeItem(event)">删除</button>
 		</div>
 	</div>
 </div>
@@ -227,6 +228,7 @@ function addOneItem(text,color){
 function removeItem(event){
 	//$(".contentClass div.oneItems:last").remove();
 	$(event.target).first().parents("div.parent").remove();
+	previewShow();
 } 
 
 $(function(){
@@ -257,25 +259,25 @@ function preview(parent){
 //预览
 function previewShow(){
 	var parentList =$(".contentClass").find(".parent");
-	var html="<div><p>";
+	var html="<div style='word-wrap:break-word; word-break:break-all;'><p>";
 	$.each(parentList,function(index,parentDiv){
 		html+="<span style='color:rgb("+$(parentDiv).find("input").val()+")'>"+$(parentDiv).find("textarea").val().replace(/[ ]/g,"&nbsp;")+"</span>";
 	});
 	html+="</p></div>";
-	transferString(html);
+	html = transferString(html);
 	$(".contentShow").empty();
 	$(".contentShow").append(html);
 }
 
 //替换空格 回车 换行
 function transferString(str){
-	console.log(str);
 	try{  
 		str=str.replace(/\r\n/g,"<BR>"); 
         str=str.replace(/\n/g,"<BR>");  
     }catch(e) {  
         alert(e.message);  
     }  
+	console.log(str);
     return str;
 }
  /*]]>*/
@@ -333,6 +335,9 @@ function add() {
 	$(".contentClass").find(".parent").remove();
 	//初始化一个文本
 	addOneItem();
+	//初始化预览
+	previewShow();
+	allZoneFalg="false";
 	$("#addModal").modal("show");
 }
 
@@ -367,7 +372,7 @@ function onSave(){
 	
 	var zonelist=$("#zonelist").getValues();
 	/*<![CDATA[*/
-	if(allZoneFalg=="fasle" && zonelist.length==0){
+	if(allZoneFalg=="false" && zonelist.length==0){
 		swal("", [[#{activity.zone.null}]], "warning");
 		return;
 	}
@@ -547,6 +552,7 @@ function edit(activityId){
 	$("#name").val(data.name);
 	$("#imgDiv").find(" img").attr("src",data.src);
 	$("#putrush").val(data.putrush);
+	previewShow();
 	$("#addModal").modal("show");
 }
 
