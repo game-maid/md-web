@@ -109,7 +109,11 @@
 						     <!-- 文本内容 -->
 						</div>
 						<div class="form-group contentShow" >
-						     <!-- 文本内容 -->
+						     <!-- 预览内容 -->
+						     <label class="col-sm-3 control-label"></label>
+							<div class="col-sm-7">
+								<textarea  class="form-control" sytle="height:200; "></textarea>
+							</div>
 						</div>
 
 						<div class="hr-line-dashed"></div>
@@ -166,7 +170,6 @@ function initColorBox(num,color){
 	}else{
 		color="rgb("+color+")";
 	}
-	console.log(color);
 	var colorBoxId = "#color-box-"+itemNum;
 	var contentText = "#content-id-"+itemNum;
 	$(colorBoxId).colpick({
@@ -216,6 +219,8 @@ function addOneItem(text,color){
 	cloneItem.find(".removeItem").show();
 	cloneItem.show();
 	$(".contentClass").append(cloneItem);
+	//预览事件
+	preview(cloneItem);
 	initColorBox(itemNum,color);
 	itemNum++;
 }
@@ -241,6 +246,25 @@ $(function(){
 		$("#imgDiv").find(" img").attr("src",$(this).val());
 	});
 });
+//预览事件 
+function preview(parent){
+	
+	parent.find(" textarea").keyup(function(){
+		var parentList =$(".contentClass").find(".parent");
+		
+		var textList="";
+		$.each(parentList,function(index,parentDiv){
+			/*<![CDATA[*/
+				textList+='<span style="color:rgb('+$(parentDiv).find("input").val()+')">';
+				textList+=$(parentDiv).find("textarea").val();
+				textList+='</span>';
+           /*]]>*/
+		});
+		$(".contentShow").find(" textarea").val('');
+		$(".contentShow").find(" textarea").val(textList);
+	});
+}
+
 /**
  * 单选框改变
  */
