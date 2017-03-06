@@ -144,4 +144,12 @@ public class ResponseKey {
      * 当前随机好感度剧情
      */
     public static final String ROMANCE_RANDOM_STORY = "romanceRandomStory";
+    /**
+     * 广告
+     */
+    public static final String ADVERTISEMENT = "advertisement";
+    /**
+     * 公告
+     */
+    public static final String NOTICE = "notice";
 }

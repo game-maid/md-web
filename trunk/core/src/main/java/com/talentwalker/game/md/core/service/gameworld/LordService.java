@@ -120,6 +120,10 @@ public class LordService extends GameSupport {
 
     @Autowired
     private HeroService heroService;
+    @Autowired
+    private AdvertisementService advertisementService;
+    @Autowired
+    private NoticeService noticeService;
 
     /**
      * 默认
@@ -271,7 +275,10 @@ public class LordService extends GameSupport {
         // heroService.setFormHoldFP(lord);
 
         recordLogin(lord);
-
+        // 广告
+        advertisementService.main();
+        // 公告
+        noticeService.main();
         return lord;
     }
 
@@ -354,7 +361,7 @@ public class LordService extends GameSupport {
         lord.setLevel(config.get("lv").getInteger("value"));
         lord.setExp(config.get("exp").getInteger("value"));
         lord.setGold(config.get("gold").getInteger("value"));
-        lord.setDiamond(config.get("diamond").getInteger("value"));
+        lord.setPersentDiamond(config.get("diamond").getInteger("value"));
         lord.setVipLevel(config.get("VIP").getInteger("value"));
         lord.setVipScore(config.get("score").getInteger("value"));
         lord.setHeroLimit(config.get("heroLimit").getInteger("value"));
