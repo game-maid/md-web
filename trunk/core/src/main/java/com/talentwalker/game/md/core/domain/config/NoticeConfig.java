@@ -68,6 +68,10 @@ public class NoticeConfig extends BaseDomain {
      * 图片路径
      */
     protected String src;
+    /**
+     * 跳转地址
+     */
+    protected String stage;
 
     /**
      * @return allZone
@@ -207,6 +211,20 @@ public class NoticeConfig extends BaseDomain {
      */
     public void setRgbList(List<String> rgbList) {
         this.rgbList = rgbList;
+    }
+
+    /**
+     * @return stage
+     */
+    public String getStage() {
+        return stage;
+    }
+
+    /**
+     * @param stage 要设置的 stage
+     */
+    public void setStage(String stage) {
+        this.stage = stage;
     }
 
 }

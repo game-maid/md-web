@@ -86,7 +86,17 @@
 				</div>
 			</div>
 			<div class="ibox-content" >
-				
+				<!-- 总人数 -->
+				<div class="form-horizontal">
+					<div class="form-group totalNum" >
+						<div class="col-sm-0" style="float: left;">
+							<label style="margin-top: 10px;margin-left:10px;" th:text="#{statistics.total}">总计</label>
+						</div>
+						<div class="col-sm-1" style="float: left;">
+							<input disabled="disabled" class="form-control" />
+						</div>
+					</div>
+				</div>
 				<!-- 曲线图 -->
 				<div id="graph-div" style="width:90%"></div>
 				<!-- 统计分页表格 -->
@@ -99,6 +109,9 @@
 </body>
 
 <script type="text/javascript" th:inline="javascript">
+//人数
+totalNum=0;
+
 $(function(){
 	//初始化复选框样式
 	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
@@ -106,12 +119,13 @@ $(function(){
 	zoneMap=loadZoneMap();
 	initZone();
 	//隐藏曲线图和数据表
-	$("#graph-div").hide();
+	$(".ibox-content").hide();
+	//$("#graph-div").hide();
 	//初始化时间
 	initDate();
 	//初始化分页表格
 	initPanelTable();
-	$("#panelTable").hide();
+//	$("#panelTable").hide();
 	graph={};
 	var level=[];
 	graph["level"]=level;
@@ -179,11 +193,11 @@ $("#select").click(function(){
 			graph["level"]=level;
 			var num=[];
 			graph["num"]=num;
+			totalNum=0;
 			gameBootstrapTable("/statistics/lord/level/findPage", params);
 		}
 	});
-	$("#panelTable").show();
-	
+	$(".ibox-content").show();
 });
 //检查参数是否为null,如果为null返回o
 function checkNull(val){
@@ -208,8 +222,11 @@ function divide(element,denominator){
 	return Math.round(divide*100)/100;
 }
 
-//初始化曲线图
+//初始化曲线图、显示总计
 $(document).ajaxComplete(function(){
+	//总计
+	$(".totalNum").find("input").val(totalNum);
+	//曲线图
 	if(graph==null ||graph.length==0){
 		$("#graph-div").hide();
 		return ;
@@ -253,7 +270,6 @@ $(document).ajaxComplete(function(){
         },
         series:  series
     });
-	$('#graph-div').show();
 })
 //分页统计（最下面的表格）
 function initPanelTable(zoneArr){
@@ -312,6 +328,7 @@ function initPanelTable(zoneArr){
 							var numArr = graph["num"];
 							numArr.push(value);
 							graph["num"]=numArr;
+							totalNum+=value;
 							return value;
 						},
 					},
