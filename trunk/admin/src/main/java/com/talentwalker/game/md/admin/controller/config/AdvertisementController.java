@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.talentwalker.game.md.admin.controller.BaseController;
-import com.talentwalker.game.md.admin.service.config.AdvertisementService;
 import com.talentwalker.game.md.core.domain.config.AdvertisementConfig;
+import com.talentwalker.game.md.core.service.gameworld.AdvertisementService;
 import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 
 /**
