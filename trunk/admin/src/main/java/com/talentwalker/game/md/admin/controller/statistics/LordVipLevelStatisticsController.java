@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.talentwalker.game.md.admin.controller.BaseController;
-import com.talentwalker.game.md.admin.service.statistics.LordLevelStatisticsService;
+import com.talentwalker.game.md.admin.service.statistics.LordVipLevelStatisticsService;
 import com.talentwalker.game.md.core.domain.statistics.LordLevel;
 import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 
@@ -27,11 +27,11 @@ import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
  * @Description: 玩家等级统计
  * @author <a href="mailto:zhangfutao@talentwalker.com">张福涛</a> 于 2017年2月22日 下午5:42:46
  */
-@Controller()
+@Controller
 @RequestMapping(value = "statistics/lord/vip/level", method = RequestMethod.GET)
 public class LordVipLevelStatisticsController extends BaseController {
     @Autowired
-    private LordLevelStatisticsService lordLevelStatisticsService;
+    private LordVipLevelStatisticsService lordVipLevelStatisticsService;
 
     /**
      * @Description:跳转玩家等级统计页面
@@ -40,7 +40,7 @@ public class LordVipLevelStatisticsController extends BaseController {
      */
     @RequestMapping(value = "list")
     public String list() {
-        return "statistics/lordLevel";
+        return "statistics/lordVipLevel";
     }
 
     /**
@@ -57,14 +57,14 @@ public class LordVipLevelStatisticsController extends BaseController {
     public Page<LordLevel> findPage(@RequestParam("userType") String userType,
             @RequestParam("startLong") Long startLong, @RequestParam("endLong") Long endLong,
             @RequestParam("zoneArr[]") String[] zoneArr) {
-        return lordLevelStatisticsService.findPage(userType, startLong, endLong, zoneArr);
+        return lordVipLevelStatisticsService.findPage(userType, startLong, endLong, zoneArr);
     }
 
     @GameResponse
     @RequestMapping(value = "export", method = RequestMethod.GET)
     public Object export(String userType, Long startLong, Long endLong, String[] zoneArr,
             HttpServletResponse response) {
-        lordLevelStatisticsService.export(userType, startLong, endLong, zoneArr, response);
+        lordVipLevelStatisticsService.export(userType, startLong, endLong, zoneArr, response);
         return null;
     }
 }

@@ -1,9 +1,9 @@
 /**
- * @Title: LordLevelStatisticsService.java
+ * @Title: LordVipLevelStatisticsService.java
  * @Copyright (C) 2017 太能沃可
  * @Description:
  * @Revision History:
- * @Revision 1.0 2017年2月22日  张福涛
+ * @Revision 1.0 2017年3月6日  张福涛
  */
 
 package com.talentwalker.game.md.admin.service.statistics;
@@ -19,8 +19,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -37,51 +40,46 @@ import com.mongodb.AggregationOutput;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
-import com.talentwalker.game.md.admin.controller.BaseController;
+import com.talentwalker.game.md.admin.service.BaseService;
 import com.talentwalker.game.md.core.domain.gameworld.Lord;
+import com.talentwalker.game.md.core.domain.gameworld.TopUpFirstRecord;
 import com.talentwalker.game.md.core.domain.statistics.Login;
 import com.talentwalker.game.md.core.domain.statistics.LordLevel;
 import com.talentwalker.game.md.core.domain.statistics.LordLevelExcel;
-import com.talentwalker.game.md.core.domain.statistics.Register;
-import com.talentwalker.game.md.core.repository.gameworld.LordRepository;
+import com.talentwalker.game.md.core.repository.gameworld.TopUpFirstRecordRepository;
 import com.talentwalker.game.md.core.repository.statistics.LoginRepository;
-import com.talentwalker.game.md.core.repository.statistics.RegisterRepository;
 import com.talentwalker.game.md.core.repository.support.SearchFilter;
 import com.talentwalker.game.md.core.util.ExportExcel;
 import com.talentwalker.game.md.core.util.ServletUtils;
 
 /**
- * @ClassName: LordLevelStatisticsService
- * @Description: 玩家等级统计
- * @author <a href="mailto:zhangfutao@talentwalker.com">张福涛</a> 于 2017年2月22日 下午6:13:22
+ * @ClassName: LordVipLevelStatisticsService
+ * @Description: Description of this class
+ * @author <a href="mailto:zhangfutao@talentwalker.com">张福涛</a> 于 2017年3月6日 下午7:40:31
  */
 @Service
-public class LordLevelStatisticsService extends BaseController {
-
+public class LordVipLevelStatisticsService extends BaseService {
     /**
-     * 全部用户
+     * 付费用户
      */
-    private static final String ALL_USER = "allUser";
+    public static final String PAYER = "payer";
     /**
-     * 活跃用户
+     * 付费全部用户（在查询截止时间前有过付费的玩家）
      */
-    private static final String ACTIVE_USER = "activeUser";
+    public static final String BEFORE_PAYER = "beforePayer";
     /**
-     * 新用户
+     * 付费活跃用户
      */
-    private static final String NEW_USER = "newUser";
-
+    public static final String ACTIVE_PAYER = "activePayer";
     @Autowired
-    private LoginRepository loginRepository;
-    @Autowired
-    private RegisterRepository registerRepository;
+    private TopUpFirstRecordRepository firstRecordRepository;
     @Autowired
     private MongoTemplate mongoTemplate;
     @Autowired
-    private LordRepository lordRepository;
+    private LoginRepository loginRepository;
 
     /**
-     * @Description:分页查询玩家等级
+     * @Description:
      * @param userType
      * @param startLong
      * @param endLong
@@ -90,32 +88,32 @@ public class LordLevelStatisticsService extends BaseController {
      * @throws
      */
     public Page<LordLevel> findPage(String userType, Long startLong, Long endLong, String[] zoneArr) {
+        // 查找符合条件的玩家id
+        List<String> lordIdList = findLordIds(userType, zoneArr, endLong, startLong);
+        String lordIds = JSON.serialize(lordIdList);
+
         List<LordLevel> content = new ArrayList<>();
-        String lordIds = queryLordIds(userType, startLong, endLong, zoneArr);
         // 计算总数
-        long total = findTotal(userType, lordIds);
+        long total = findTotal(lordIds);
         Pageable pageable = SearchFilter.newSearchFilter().getPageable();
         // 分页查询
-        findList(content, lordIds, pageable, userType, true);
+        findList(content, lordIds, pageable, true);
 
         return new PageImpl<>(content, pageable, total);
     }
 
     /**
-     * @Description:查询详细数据
+     * @Description:查找详细信息
      * @param content
      * @param lordIds
      * @param pageable
-     * @param userType
-     * @param isPage 是否分页
+     * @param b
      * @throws
      */
-    private void findList(List<LordLevel> content, String lordIds, Pageable pageable, String userType, Boolean isPage) {
+    private void findList(List<LordLevel> content, String lordIds, Pageable pageable, boolean isPage) {
         List<DBObject> pageList = new ArrayList<>();
-        if (!ALL_USER.equals(userType)) {
-            pageList.add((DBObject) JSON.parse("{$match:{_id:{$in:" + lordIds + "}}}"));
-        }
-        pageList.add((DBObject) JSON.parse("{$group:{_id:{level:'$level'},num:{$sum:1}}}"));
+        pageList.add((DBObject) JSON.parse("{$match:{_id:{$in:" + lordIds + "}}}"));
+        pageList.add((DBObject) JSON.parse("{$group:{_id:{level:'$vip_level'},num:{$sum:1}}}"));
         pageList.add((DBObject) JSON.parse("{$sort:{_id.level:1}}"));
         if (isPage) {
             pageList.add((DBObject) JSON.parse("{$skip:" + pageable.getOffset() + "}"));
@@ -126,7 +124,7 @@ public class LordLevelStatisticsService extends BaseController {
         int totalNum = 0;
         while (it.hasNext()) {
             BasicDBObject result = (BasicDBObject) it.next();
-            int level = ((BasicDBObject) result.get("_id")).getInt("level");// 等级
+            int level = ((BasicDBObject) result.get("_id")).getInt("level");// vip等级
             int num = result.getInt("num");// 人数
             LordLevel lordLevel = new LordLevel();
             lordLevel.setLevel(level);
@@ -134,34 +132,33 @@ public class LordLevelStatisticsService extends BaseController {
             totalNum += num;
             content.add(lordLevel);
         }
-        List<String> list = (List<String>) JSON.parse(lordIds);
+        List<String> lordIdList = (List<String>) JSON.parse(lordIds);
         for (int i = 0; i < content.size(); i++) {
             LordLevel lordLevel = content.get(i);
             lordLevel.setProportion((lordLevel.getNum() * 100) / totalNum / 100.0D);
             int level = lordLevel.getLevel();
             Query query = new Query();
-            query.addCriteria(Criteria.where("id").in(list));
-            query.addCriteria(Criteria.where("level").is(level));
+            query.addCriteria(Criteria.where("id").in(lordIdList));
+            query.addCriteria(Criteria.where("vipLevel").is(level));
             List<Lord> lordList = mongoTemplate.find(query, Lord.class);
             lordLevel.setLordList(lordList);
         }
     }
 
-    /**
-     * @Description:计算总数
+    /** 
+     * @Description:统计总条数
+     * @param lordIds
      * @return
-     * @throws
+     * @throws 
      */
-    private long findTotal(String userType, String lordIds) {
-        long total = 0L;
-        List<DBObject> totalNumList = new ArrayList<>();
-        if (!ALL_USER.equals(userType)) {
-            totalNumList.add((DBObject) JSON.parse("{$match:{_id:{$in:" + lordIds + "}}}"));
-        }
-        totalNumList.add((DBObject) JSON.parse("{$group:{_id:{lordId:'$id',level:'$level'}}}"));
-        totalNumList.add((DBObject) JSON.parse("{$group:{_id:{lordId:'$_id.lordId'},total:{$sum:1}}}"));
-        AggregationOutput outTotal = mongoTemplate.getCollection("game_lord").aggregate(totalNumList);
+    private long findTotal(String lordIds) {
+        List<DBObject> pipeline = new ArrayList<>();
+        pipeline.add((DBObject) JSON.parse("{$match:{_id:{$in:" + lordIds + "}}}"));
+        pipeline.add((DBObject) JSON.parse("{$group:{_id:{lordId:'$id',level:'$vip_level'}}}"));
+        pipeline.add((DBObject) JSON.parse("{$group:{_id:{lordId:'$_id.lordId'},total:{$sum:1}}}"));
+        AggregationOutput outTotal = mongoTemplate.getCollection("game_lord").aggregate(pipeline);
         Iterator<DBObject> it = outTotal.results().iterator();
+        long total = 0L;
         while (it.hasNext()) {
             BasicDBObject result = (BasicDBObject) it.next();
             total = result.getInt("total");
@@ -170,52 +167,46 @@ public class LordLevelStatisticsService extends BaseController {
     }
 
     /**
-     * @Description:根据查询条件，查询符合条件的玩家id
+     * @Description:查找符合添加的玩家id
      * @param userType
-     * @param startLong
-     * @param endLong
-     * @param zoneArr
-     * @return
      * @throws
      */
-    private String queryLordIds(String userType, Long startLong, Long endLong, String[] zoneArr) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        if (ACTIVE_USER.equals(userType)) {// 活跃用户
-            List<Login> loginList = loginRepository.findByDistinctLoginTimeAndZoneId(startLong, endLong, zoneArr);
-            Iterator<Login> it = loginList.iterator();
-            while (it.hasNext()) {
-                sb.append("'").append(it.next().getLordId()).append("'");
-                if (it.hasNext()) {
-                    sb.append(",");
-                }
+    private List<String> findLordIds(String userType, String[] zoneArr, long endLong, long startLong) {
+        List<String> zoneList = Arrays.asList(zoneArr);
+        List<String> lordIdList = new ArrayList<>();
+        List<TopUpFirstRecord> topUpFirstRecordList = new ArrayList<>();
+        if (PAYER.equals(userType)) {
+            topUpFirstRecordList = firstRecordRepository.findList(zoneList);
+        } else if (BEFORE_PAYER.equals(userType)) {
+            topUpFirstRecordList = firstRecordRepository.findList(zoneList, endLong);
+        } else if (ACTIVE_PAYER.equals(userType)) {
+            Set<String> tempSet = new HashSet<>();
+            List<Login> LoginList = loginRepository.findByDistinctLoginTimeAndZoneId(startLong, endLong, zoneArr);
+            for (Login login : LoginList) {
+                tempSet.add(login.getLordId());
             }
-        } else if (NEW_USER.equals(userType)) {// 新注册用户
-            List<Register> registerList = registerRepository.findByRegisterTimeAndZoneArr(startLong, endLong, zoneArr);
-            Iterator<Register> it = registerList.iterator();
-            while (it.hasNext()) {
-                sb.append("'").append(it.next().getId()).append("'");
-                if (it.hasNext()) {
-                    sb.append(",");
-                }
-            }
+            topUpFirstRecordList = firstRecordRepository.findList(endLong, tempSet);
         }
-        sb.append("]");
-        return sb.toString();
+        for (TopUpFirstRecord topUpFirstRecord : topUpFirstRecordList) {
+            lordIdList.add(topUpFirstRecord.getId());
+        }
+        return lordIdList;
     }
 
     /**
-     * @Description: 导出excel文件
+     * @Description:
      * @param userType
      * @param startLong
      * @param endLong
      * @param zoneArr
+     * @param response
      * @throws
      */
     public void export(String userType, Long startLong, Long endLong, String[] zoneArr, HttpServletResponse response) {
         List<LordLevel> content = new ArrayList<>();
-        String lordIds = queryLordIds(userType, startLong, endLong, zoneArr);
-        findList(content, lordIds, null, userType, false);
+        List<String> lordIdList = findLordIds(userType, zoneArr, endLong, startLong);
+        String lordIds = JSON.serialize(lordIdList);
+        findList(content, lordIds, null, false);
         // 生成excel文件
         // excel 内容
         List<LordLevelExcel> excelList = new ArrayList<>();
@@ -233,13 +224,13 @@ public class LordLevelStatisticsService extends BaseController {
             }
         }
         // excel 头
-        String[] header = {getMessage("sys.sequence"), getMessage("statistics.lord.level.user.level"),
+        String[] header = {getMessage("sys.sequence"), getMessage("statistics.vip.level"),
                 getMessage("statistics.lord.level.num"), getMessage("statistics.lord.level.user.level.proportion"),
                 getMessage("gamelog.player"), getMessage("gmtool.lord.name") };
         ExportExcel<LordLevelExcel> excel = new ExportExcel<>();
         String path = ServletUtils.getRequest().getServletContext().getRealPath("/");
         SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
-        String fileName = "lordLevel" + sdf1.format(System.currentTimeMillis()) + ".xls";
+        String fileName = "lordVipLevel" + sdf1.format(System.currentTimeMillis()) + ".xls";
         // 在服务器生成excel文件
         FileOutputStream out = null;
         try {
@@ -305,5 +296,4 @@ public class LordLevelStatisticsService extends BaseController {
             }
         }
     }
-
 }
