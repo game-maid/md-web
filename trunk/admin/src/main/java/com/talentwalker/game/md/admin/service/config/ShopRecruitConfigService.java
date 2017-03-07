@@ -52,8 +52,8 @@ public class ShopRecruitConfigService extends BaseService {
         }
         shopRecruit.setZoneList(recruit.getZoneList());
         shopRecruit.setName(recruit.getName());
-        shopRecruit.setDescribe(recruit.getDescribe());
-
+        shopRecruit.setDescList(recruit.getDescList());
+        shopRecruit.setRgbList(recruit.getRgbList());
         if ("item".equals(recruit.getCost())) {
             shopRecruit.setCost(recruit.getItemId());
         } else {

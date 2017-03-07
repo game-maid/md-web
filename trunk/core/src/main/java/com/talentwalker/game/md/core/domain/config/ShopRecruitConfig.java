@@ -32,7 +32,11 @@ public class ShopRecruitConfig extends BaseDomain {
     /**
      * 描述
      */
-    protected String describe;
+    protected List<String> descList;
+    /**
+     * 描述对应的颜色
+     */
+    protected List<String> rgbList;
     /**
      * 出售货币类型
      */
@@ -206,17 +210,31 @@ public class ShopRecruitConfig extends BaseDomain {
     }
 
     /**
-     * @return describe
+     * @return descList
      */
-    public String getDescribe() {
-        return describe;
+    public List<String> getDescList() {
+        return descList;
     }
 
     /**
-     * @param describe 要设置的 describe
+     * @param descList 要设置的 descList
      */
-    public void setDescribe(String describe) {
-        this.describe = describe;
+    public void setDescList(List<String> descList) {
+        this.descList = descList;
+    }
+
+    /**
+     * @return rgbList
+     */
+    public List<String> getRgbList() {
+        return rgbList;
+    }
+
+    /**
+     * @param rgbList 要设置的 rgbList
+     */
+    public void setRgbList(List<String> rgbList) {
+        this.rgbList = rgbList;
     }
 
     /**

@@ -59,6 +59,10 @@ public class AdvertisementConfig extends BaseDomain {
      * 图片路径
      */
     protected String src;
+    /**
+     * 跳转地址
+     */
+    protected String stage;
 
     /**
      * @return allZone
@@ -170,6 +174,20 @@ public class AdvertisementConfig extends BaseDomain {
      */
     public void setSrc(String src) {
         this.src = src;
+    }
+
+    /**
+     * @return stage
+     */
+    public String getStage() {
+        return stage;
+    }
+
+    /**
+     * @param stage 要设置的 stage
+     */
+    public void setStage(String stage) {
+        this.stage = stage;
     }
 
 }

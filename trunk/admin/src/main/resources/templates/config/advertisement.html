@@ -100,6 +100,12 @@
 
 						<div class="hr-line-dashed"></div>
 						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{notice.jump.path}" >跳转路径</label>
+							<div class="col-sm-5">
+								<input type="text" id="stage" name="stage" class="form-control"  />
+							</div>
+						</div>
+						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{activity.recruit.img.src}" >输入图片src</label>
 							<div class="col-sm-5">
 								<input type="text" id="src" name="src" class="form-control"  />
@@ -281,6 +287,7 @@ function initTable() {
 				});
 				text+='<tr><td><b>'+[[#{sys.zone.select}]]+'</b></td><td>'+zone+'</td></tr>';
 			}
+			text+='<tr><td><b>'+[[#{notice.jump.path}]]+'</b></td><td>'+row.stage+'</td></tr>';
 			//图片
 			text+='<tr><td><b>'+[[#{advertisement.img}]]+'</b></td><td><img src="'+row.src+'"/></td></tr>';
 			text+='</table>';
@@ -390,6 +397,7 @@ function edit(activityId){
 	}else{
 		$("#stateFalse").iCheck("check");
 	}
+	$("#stage").val(data.stage);
 	$("#name").val(data.name);
 	$("#imgDiv").find(" img").attr("src",data.src);
 	$("#putrush").val(data.putrush);

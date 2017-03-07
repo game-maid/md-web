@@ -106,9 +106,24 @@
 							</div>
 						</div>
 						<div class="form-group contentClass" >
+							<div class="" style="display: none;" >
+								<div class="form-group">
+									<label class="col-sm-3 control-label"></label>
+									<div class="col-sm-7">
+										<textarea name="textList" class="form-control" style="resize: vertical;"></textarea>
+									</div>
+									<div class="col-sm-1 ColorTipDiv">
+										<input name="rgbList"  type="hidden" value="0,0,0" />
+										<div class="color-box" style="width: 30px; height: 30px;z-index:9999"></div>
+									</div>
+									<div class="col-sm-0">
+										<button type="button" class="btn btn-primary btn-danger" id="" th:text="#{sys.delete}" onclick="removeItem(event)">删除</button>
+									</div>
+								</div>
+							</div>
 						     <!-- 文本内容 -->
 						</div>
-						<div class="form-group "   >
+						<div class="form-group ">
 						     <!-- 预览内容 -->
 						    <label class="col-sm-3 control-label"  th:text="#{notice.preview}">预览</label>
 							<div class="col-sm-7 contentShow" >
@@ -116,6 +131,12 @@
 						</div>
 
 						<div class="hr-line-dashed"></div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label" th:text="#{notice.jump.path}" >跳转路径</label>
+							<div class="col-sm-5">
+								<input type="text" id="stage" name="stage" class="form-control"  />
+							</div>
+						</div>
 						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{activity.recruit.img.src}" >输入图片src</label>
 							<div class="col-sm-5">
@@ -144,7 +165,7 @@
 			<textarea name="textList" class="form-control" style="resize: vertical;"></textarea>
 		</div>
 		<div class="col-sm-1 ColorTipDiv">
-			<input name="rgbList" type="hidden" value="232,193,138" />
+			<input name="rgbList"  type="hidden" value="232,193,138" />
 			<div class="color-box" style="width: 30px; height: 30px;z-index:9999"></div>
 		</div>
 		<div class="col-sm-0">
@@ -171,6 +192,7 @@ function initColorBox(num,color){
 	}
 	var colorBoxId = "#color-box-"+itemNum;
 	var contentText = "#content-id-"+itemNum;
+	$(contentText).css('color',color);
 	$(colorBoxId).colpick({
 
 		colorScheme:'dark',
@@ -277,7 +299,6 @@ function transferString(str){
     }catch(e) {  
         alert(e.message);  
     }  
-	console.log(str);
     return str;
 }
  /*]]>*/
@@ -384,7 +405,6 @@ function onSave(){
 		swal('',[[#{config.shop.recruit.time.error}]],'warning');
 		return ;
 	}
-	
 	 /*<![CDATA[*/
 		var data=$("#addForm").serialize()+"&startLong="+startLong+"&endLong="+endLong;
 	 	if(allZoneFalg=="false"){
@@ -434,6 +454,7 @@ function initTable() {
 				text+='<tr><td><b>'+[[#{sys.zone.select}]]+'</b></td><td>'+zone+'</td></tr>';
 			}
 			//图片
+			text+='<tr><td><b>'+[[#{notice.jump.path}]]+'</b></td><td>'+row.stage+'</td></tr>';
 			text+='<tr><td><b>'+[[#{advertisement.img}]]+'</b></td><td><img src="'+row.src+'"/></td></tr>';
 			text+='</table>';
 			return text;
@@ -546,10 +567,13 @@ function edit(activityId){
 	$(".contentClass").find(".parent").remove();
 	//生成文本
 	$.each(data.textList,function(index,text){
-		addOneItem(text,data.rgbList[index]);
+		if(index!=0){
+			addOneItem(text,data.rgbList[index]);
+		}
 	});
-	
+	$("#stage").val(data.stage);
 	$("#name").val(data.name);
+	$("#src").val(data.src);
 	$("#imgDiv").find(" img").attr("src",data.src);
 	$("#putrush").val(data.putrush);
 	previewShow();
