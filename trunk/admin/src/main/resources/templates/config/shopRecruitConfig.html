@@ -647,6 +647,14 @@ function add() {
 	}).resetForm();
 	$("#activityId").val("");
 	//初始化icheck选项
+	$("#stateTrue").iCheck('check');
+	$("#stateTrue").parent("div").addClass("checked"); //改变选中颜色
+	$("#stateFalse").parent("div").removeClass("checked"); //改变选中颜色
+	
+	$("#oneRecruitTrue").iCheck('check');
+	$("#oneRecruitTrue").parent("div").addClass("checked"); //改变选中颜色
+	$("#oneRecruitFalse").parent("div").removeClass("checked"); //改变选中颜色
+	
 	$("#continuous1").iCheck('check');
 	$("#continuous1").parent("div").addClass("checked"); //改变选中颜色
 	$("#continuous2").parent("div").removeClass("checked"); //改变选中颜色
@@ -1109,6 +1117,7 @@ function edit(activityId){
 		}
 	});
 	previewShow();
+	$("#src").val(data.src);
 	$("#imgDiv").find(" img").attr("src",data.src);
 	if(data.isOneRecruit){
 		$("#oneRecruitTrue").iCheck('check');
