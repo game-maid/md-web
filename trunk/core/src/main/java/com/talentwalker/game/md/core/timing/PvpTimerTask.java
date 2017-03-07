@@ -8,6 +8,7 @@
 
 package com.talentwalker.game.md.core.timing;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.TimerTask;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.log4j.Logger;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
@@ -44,6 +46,7 @@ public class PvpTimerTask extends TimerTask {
     private final static String RANK_KEY = "game_duel_rank_";
     private String ServerId;
     private String dateValue;
+    private static final Logger logger = Logger.getLogger(PvpTimerTask.class);
 
     /**
      * 创建一个新的实例 PvpTimerTask.
@@ -64,16 +67,23 @@ public class PvpTimerTask extends TimerTask {
      */
     @Override
     public void run() {
+        logger.info("----------数据区服" + ServerId + "_" + dateValue + " 定时任务开始-------------");
+        if (dateValue == null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            dateValue = sdf.format(System.currentTimeMillis());
+        }
         List<Mail> mails = new ArrayList<Mail>();
         DataConfig config = dataConfigManager.getTest().get("duel_rankScore");
         String rankKey = RANK_KEY + ServerId;
         String rankKeyDate = rankKey + "_" + dateValue;
         if (!mongoTemplate.collectionExists(rankKey)) {
+            logger.info("----------数据区服" + ServerId + " 定时任务结束-------------");
             return;
         }
         Map<String, List<String>> map = new HashMap<String, List<String>>();
         List<DuelRank> duelList = new ArrayList<>();
         if (mongoTemplate.collectionExists(rankKeyDate)) {
+            logger.info("----------数据区服" + ServerId + " 定时任务结束-------------");
             return;
             // Query query = new Query();
             // query.with(new Sort(new Order(Direction.ASC, "rank")));
@@ -111,6 +121,7 @@ public class PvpTimerTask extends TimerTask {
             this.sendMails(map.get(mailKey), mailKey, null, null, mails);
         }
         mailRepository.save(mails);
+        logger.info("----------数据区服" + ServerId + " 定时任务结束-------------");
     }
 
     /**

@@ -20,31 +20,44 @@
 </head>
 <body class="gray-bg">
 	<div class="wrapper wrapper-content animated fadeInRight">
-		<div class="ibox float-e-margins">
-			<div class="ibox-title">
-				<button type="button" class="btn btn-sm btn-info"
-					onclick="showModel()">
-					<i class="glyphicon glyphicon-plus" aria-hidden="true"></i>&nbsp;<span
-						th:text="#{gmtool.mail.title}">发送邮件</span>
-				</button>
-			</div>
-			<div class="ibox-content">
-				<form class="form-horizontal" id="addForm">
-					<div class="form-group contentClass">
-					</div>
-					<div class="form-group">
-						<label class="col-sm-3 control-label"></label>
-						<div class="col-sm-7">
-							<button type="button" class="btn btn-primary" id="" onclick="addOneItem()">添加</button>
-							<button type="button" class="btn btn-primary" id="" onclick="removeItem()">删除</button>
+		<div class="row">
+			<div class="ibox float-e-margins">
+				<div class="ibox-title">
+					<button type="button" class="btn btn-sm btn-info"
+						onclick="showModel()">
+						<i class="glyphicon glyphicon-plus" aria-hidden="true"></i>&nbsp;<span
+							th:text="#{gmtool.mail.title}">发送邮件</span>
+					</button>
+				</div>
+				<div class="ibox-content">
+					<form class="form-horizontal" id="addForm">
+						<div class="form-group contentClass"></div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label"></label>
+							<div class="col-sm-7">
+								<button type="button" class="btn btn-primary" id=""
+									onclick="addOneItem()">添加</button>
+								<button type="button" class="btn btn-primary" id=""
+									onclick="removeItem()">删除</button>
+							</div>
 						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-primary" id="preview">预览</button>
+							<button type="submit" class="btn btn-primary"
+								th:text="#{sys.save}" id="submit">保存</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="ibox float-e-margins">
+					<div class="ibox-content" id="preview-div">
+
+
 					</div>
-					<div class="modal-footer">
-					<button type="button" class="btn btn-primary" id="preview">预览</button>
-						<button type="submit" class="btn btn-primary"
-							th:text="#{sys.save}" id="submit">保存</button>
-					</div>
-				</form>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -115,16 +128,32 @@ function removeItem(){
 //预览 ps先不做
 /*<![CDATA[*/
 $("#preview").click(function(){
-	
-	var html = "<div>";
+	var html = "<div><p>";
 	for(var i=1;i<itemNum;i++){
 		var colorBoxId = "#color-box-"+i;
 		var contentText = "#content-id-"+i;
-		html += "<p style='color:"+$(contentText).css("color")+" '>"+$(contentText).val()+"</p>"
+		var content = $(contentText).val().replace(/[ ]/g,"&nbsp"); 
+		html += "<font style='color:"+$(contentText).css("color")+"'>"+content+"</font>";
 	}
-	html += "</div>";
-	$("#preview-div").append();
+	html += "</p></div>";
+	html = TransferString(html);
+	$("#preview-div").empty();
+	$("#preview-div").append(html);
+	console.log(html);
 });
+
+//替换所有的回车、换行  
+function TransferString(content)  
+{  
+    var string = content;  
+    try{  
+        string=string.replace(/\r\n/g,"<BR>")  
+        string=string.replace(/\n/g,"<BR>");  
+    }catch(e) {  
+        alert(e.message);  
+    }  
+    return string;  
+}  
 /*]]>*/
 </script>
 </html>

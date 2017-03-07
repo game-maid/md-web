@@ -16,6 +16,7 @@ import java.util.Timer;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -27,7 +28,6 @@ import com.talentwalker.game.md.core.repository.DataZoneRepository;
 import com.talentwalker.game.md.core.repository.gameworld.MailRepository;
 import com.talentwalker.game.md.core.service.statistics.ActiveAndPersistenceService;
 import com.talentwalker.game.md.core.timing.PvpTimerTask;
-import com.talentwalker.game.md.core.timing.StatisticsActiveAndPersistenceTimerTask;
 
 /**
  * @ClassName: TimingCommandLineRunner
@@ -49,6 +49,8 @@ public class TimingCommandLineRunner implements CommandLineRunner {
     @Resource
     private ActiveAndPersistenceService activeAndPesistenceService;
 
+    private static final Logger logger = Logger.getLogger(TimingCommandLineRunner.class);
+
     /**.
      * <p>Title: run</p>
      * <p>Description: </p>
@@ -68,15 +70,16 @@ public class TimingCommandLineRunner implements CommandLineRunner {
                         * DateUtils.MILLIS_PER_HOUR;
         for (DataZone data : list) {
             Timer timer = new Timer(TIMER_NAME + data.getId());
+            logger.info("启动timer定时器----------" + data.getId() + "/间隔时间：" + DateUtils.MILLIS_PER_DAY);
             timer.scheduleAtFixedRate(
-                    new PvpTimerTask(mongoTemplate, mailRepository, dataConfigManager, data.getId(), dateValue),
+                    new PvpTimerTask(mongoTemplate, mailRepository, dataConfigManager, data.getId(), null),
                     new Date(time), DateUtils.MILLIS_PER_DAY);
         }
         // 启动活跃与存留定时统计任务
-        Date activeAndPersistenceStartTime = DateUtils.parseDate(dateValue + " 23:55:00", "yyyy-MM-dd HH:mm:ss");
-        Timer timer = new Timer("activeAndPersistenceStartTime:" + dateValue + " 23:55:00");
-        timer.scheduleAtFixedRate(new StatisticsActiveAndPersistenceTimerTask(activeAndPesistenceService),
-                activeAndPersistenceStartTime, DateUtils.MILLIS_PER_DAY);
+        // Date activeAndPersistenceStartTime = DateUtils.parseDate(dateValue + " 23:55:00", "yyyy-MM-dd HH:mm:ss");
+        // Timer timer = new Timer("activeAndPersistenceStartTime:" + dateValue + " 23:55:00");
+        // timer.scheduleAtFixedRate(new StatisticsActiveAndPersistenceTimerTask(activeAndPesistenceService),
+        // activeAndPersistenceStartTime, DateUtils.MILLIS_PER_DAY);
     }
 
 }
