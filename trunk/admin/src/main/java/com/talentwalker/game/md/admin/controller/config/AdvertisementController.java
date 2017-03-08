@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.talentwalker.game.md.admin.controller.BaseController;
 import com.talentwalker.game.md.core.domain.config.AdvertisementConfig;
@@ -83,5 +84,11 @@ public class AdvertisementController extends BaseController {
     public Object update(String pk, String name, String value) {
         advertisementService.update(pk, name, value);
         return null;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "stage", method = RequestMethod.POST)
+    public Object stageConfig() {
+        return advertisementService.stageConfig();
     }
 }
