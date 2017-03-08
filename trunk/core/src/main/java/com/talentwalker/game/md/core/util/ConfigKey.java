@@ -317,5 +317,15 @@ public class ConfigKey {
      * 收取体力数量
      */
     public static final String RECEIVE_ENERGY = "receiveEnergy";
+    /*******************后台广告、公告跳转路径配置********************/
+    public static final String ADVERTISEMENT_JUMPOUT = "advertisementJumpout";
+    /**
+     * name（名称）
+     */
+    public static final String ADVERTISEMENT_JUMPOUT_NAME = "name";
+    /**
+     * vlue(跳转路径)
+     */
+    public static final String ADVERTISEMENT_JUMPOUT_TYPE = "type";
 
 }
