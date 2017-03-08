@@ -9,7 +9,9 @@
 	<link th:href="@{/static/css/plugins/pickList/pickList.css}" rel="stylesheet"/>
 	<link th:href="@{/static/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
 	<link th:href="@{/static/css/plugins/bootstrap-table/extensions/editable/bootstrap-editable.css}" rel="stylesheet"/>
+	<link th:href="@{/static/css/plugins/colpick/colpick.css}" rel="stylesheet"/>
 	
+	<script th:src="@{/static/js/plugins/colpick/colpick.js}"></script>	
     <script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.js}"></script>
 	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
 	<script th:src="@{/static/js/plugins/autocompleter/jquery.autocompleter.min.js}"></script>
@@ -67,12 +69,6 @@
 							<label class="col-sm-3 control-label" th:text="#{activity.name}">名称：</label>
 							<div class="col-sm-7">
 								<input type="text" name="name" id="name" class="form-control" required="required" />
-							</div>
-						</div>
-						<div class="form-group">
-							<label class="col-sm-3 control-label" th:text="#{activity.describe}">描述：</label>
-							<div class="col-sm-7">
-								<textarea rows="2" cols="" class="form-control" id="describe" name="describe" required="required" ></textarea>
 							</div>
 						</div>
 						<div class="form-group">
@@ -357,6 +353,37 @@
 						</div>
 						
 						<div class="hr-line-dashed"></div>
+						<div class="form-group " style="padding-left:10%">
+							<div class="col-sm-3">
+								<button type="button" class="btn btn-primary" id="" th:text="#{activity.recruit.add.desc}" onclick="addOneItem()">添加</button>
+							</div>
+						</div>
+						<div class="form-group contentClass" >
+							<div class="" style="display: none;" >
+									<div class="form-group">
+									<label class="col-sm-3 control-label"></label>
+									<div class="col-sm-7">
+										<textarea name="descList" class="form-control" style="resize: vertical;"></textarea>
+									</div>
+									<div class="col-sm-1 ColorTipDiv">
+										<input name="rgbList"  type="hidden" value="0,0,0" />
+										<div class="color-box" style="width: 30px; height: 30px;z-index:9999"></div>
+									</div>
+									<div class="col-sm-0">
+										<button type="button" class="btn btn-primary btn-danger" id="" th:text="#{sys.delete}" onclick="removeItem(event)">删除</button>
+									</div>
+								</div>
+							</div>
+						     <!-- 文本内容 -->
+						</div>
+						<div class="form-group "   >
+						     <!-- 预览内容 -->
+						    <label class="col-sm-3 control-label"  th:text="#{notice.preview}">预览</label>
+							<div class="col-sm-7 contentShow" >
+							</div>
+						</div>
+						
+						<div class="hr-line-dashed"></div>
 						
 						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{activity.recruit.img.src}" >输入图片src</label>
@@ -365,8 +392,8 @@
 							</div>
 						</div>
 						<div class="form-group" id="imgDiv" >
-							<div  class="col-sm-3 control-label" style="padding-left:20%" >
-								<img  />
+							<div  class="col-sm-10 control-label" style="padding-left:20%;" >
+								<img style="width:100%;height:100% " />
 							</div>
 						</div>
 							
@@ -379,6 +406,22 @@
 			</div>
 		</div>
 	</div>
+<!-- 取色模板 -->
+<div class="parent" id="itemTample" style="display: none;">
+	<div class="form-group">
+		<label class="col-sm-3 control-label"></label>
+		<div class="col-sm-7">
+			<textarea name="descList" class="form-control" style="resize: vertical;"></textarea>
+		</div>
+		<div class="col-sm-1 ColorTipDiv">
+			<input name="rgbList" type="hidden" value="232,193,138" />
+			<div class="color-box" style="width: 30px; height: 30px;z-index:9999"></div>
+		</div>
+		<div class="col-sm-0">
+			<button type="button" class="btn btn-primary btn-danger" id="" th:text="#{sys.delete}" onclick="removeItem(event)">删除</button>
+		</div>
+	</div>
+</div>
 </body>
 <script type="text/javascript" th:inline="javascript">
 $(".modal-dialog").css({
@@ -389,6 +432,112 @@ $(window).resize(function(){
 		width:$(document.body).width()/2>600?$(document.body).width()/2:$(document.body).width()-100
 	});
 });
+//文本输入框数量初始化
+itemNum = 1;
+
+//初始化一个文本
+function initColorBox(num,color){
+	if(color==null){
+		color='#000000';
+	}else{
+		color="rgb("+color+")";
+	}
+	var colorBoxId = "#color-box-"+itemNum;
+	var contentText = "#content-id-"+itemNum;
+	$(contentText).css('color',color);
+	$(colorBoxId).colpick({
+
+		colorScheme:'dark',
+
+		layout:'rgbhex',
+		color:color,
+		onShow: function (colpkr) {
+			colpkr.style.cssText=colpkr.style.cssText+";z-index:9999";
+			$(colpkr).fadeIn(500);
+			return false;
+
+		},
+		onHide: function (colpkr) {
+			$(colpkr).fadeOut(500);
+			return false;
+		},
+		onSubmit:function(hsb,hex,rgb,el) {
+			$(contentText).css('color','#'+hex);
+			$(el).css('background-color', '#'+hex);
+
+			$(el).colpickHide();
+			var rgb=rgb.r+","+rgb.g+","+rgb.b;
+			$(el).parent(".ColorTipDiv").children("input").val(rgb);
+			previewShow();
+		}
+	}).css('background-color',color ); //默认颜色
+}
+//添加一个文本
+function addOneItem(text,color){
+	if(color==null){
+		color="0,0,0";
+	}
+	if(text==null){
+		text="";
+	}
+	var colorBoxId = "color-box-"+itemNum;
+	var contentText = "content-id-"+itemNum;
+	var cloneItem = $("#itemTample").clone();
+	cloneItem.removeAttr("id");
+	cloneItem.addClass("oneItems");
+	cloneItem.find("textarea").first().addClass("hpf");
+	cloneItem.find("textarea").attr("id",contentText);
+	cloneItem.find("textarea").val(text);
+	cloneItem.find("input").val(color);
+	cloneItem.find(".color-box").attr("id",colorBoxId);
+	cloneItem.find(".removeItem").show();
+	cloneItem.show();
+	$(".contentClass").append(cloneItem);
+	//预览事件
+	preview(cloneItem);
+	initColorBox(itemNum,color);
+	itemNum++;
+}
+//移除一个文本
+function removeItem(event){
+	//$(".contentClass div.oneItems:last").remove();
+	$(event.target).first().parents("div.parent").remove();
+	previewShow();
+} 
+//预览事件 
+/*<![CDATA[*/
+function preview(parent){
+	
+	parent.find(" textarea").keyup(function(){
+		previewShow();
+		
+	});
+}
+//预览
+function previewShow(){
+	var parentList =$(".contentClass").find(".parent");
+	var html="<div style='word-wrap:break-word; word-break:break-all;'><p>";
+	$.each(parentList,function(index,parentDiv){
+		html+="<span style='color:rgb("+$(parentDiv).find("input").val()+")'>"+$(parentDiv).find("textarea").val().replace(/[ ]/g,"&nbsp;")+"</span>";
+	});
+	html+="</p></div>";
+	html = transferString(html);
+	$(".contentShow").empty();
+	$(".contentShow").append(html);
+}
+
+//替换空格 回车 换行
+function transferString(str){
+	try{  
+		str=str.replace(/\r\n/g,"<BR>"); 
+        str=str.replace(/\n/g,"<BR>");  
+    }catch(e) {  
+        alert(e.message);  
+    }  
+    return str;
+}
+ /*]]>*/
+
 $(function(){
 	table=$("#panelTable");
 	initTable();
@@ -498,14 +647,27 @@ function add() {
 	}).resetForm();
 	$("#activityId").val("");
 	//初始化icheck选项
+	$("#stateTrue").iCheck('check');
+	$("#stateTrue").parent("div").addClass("checked"); //改变选中颜色
+	$("#stateFalse").parent("div").removeClass("checked"); //改变选中颜色
+	
+	$("#oneRecruitTrue").iCheck('check');
+	$("#oneRecruitTrue").parent("div").addClass("checked"); //改变选中颜色
+	$("#oneRecruitFalse").parent("div").removeClass("checked"); //改变选中颜色
+	
 	$("#continuous1").iCheck('check');
-	//$("#continuous2").parent("div").addClass("checked"); //改变选中颜色
-	//$("#continuous1").parent("div").removeClass("checked"); //改变选中颜色
+	$("#continuous1").parent("div").addClass("checked"); //改变选中颜色
+	$("#continuous2").parent("div").removeClass("checked"); //改变选中颜色
 	
 	$("#discount1").iCheck('check');
-	//$("#discount2").parent("div").addClass("checked"); //改变选中颜色
-	//$("#discount1").parent("div").removeClass("checked"); //改变选中颜色
-	
+	$("#discount1").parent("div").addClass("checked"); //改变选中颜色
+	$("#discount2").parent("div").removeClass("checked"); //改变选中颜色
+	//清除多余文本
+	$(".contentClass").find(".parent").remove();
+	//初始化一个文本
+	addOneItem();
+	//初始化预览
+	previewShow();
 	//初始化区服
 	initZone();
 	initDataTimePicker();
@@ -664,7 +826,6 @@ function initTable() {
 				zone+=zoneId+"-"+zoneMap[zoneId]+"&nbsp;,&nbsp;";
 			});
 			text+='<tr><td><b>'+[[#{sys.zone.select}]]+'</b></td><td colspan="11">'+zone+'</td></tr>';
-			text+='<tr><td><b>'+[[#{activity.describe}]]+'</b></td><td colspan="11">'+row.describe+'</td></tr>';
 			text+='<tr>';
 			if(row.proType==1){
 				text+='<td colspan="2"><b>'+[[#{activity.recruit.rare.probability}]]+'</b></td><td colspan="2">'+[[#{activity.recruit.average.type}]]+'</td>';
@@ -902,11 +1063,14 @@ function edit(activityId){
 	editDataTimePicker(data);
 	if(data.state){
 		$("#stateTrue").iCheck('check');
+		$("#stateTrue").parent("div").addClass("checked"); //改变选中颜色
+		$("#stateFalse").parent("div").removeClass("checked"); //改变选中颜色
 	}else{
 		$("#stateFalse").iCheck('check');
+		$("#stateFalse").parent("div").addClass("checked"); //改变选中颜色
+		$("#stateTrue").parent("div").removeClass("checked"); //改变选中颜色
 	}
 	$("#name").val(data.name);
-	$("#describe").val(data.describe);
 	/*<![CDATA[*/
 	if(data.cost!="diamond"&&data.cost!="gold"){
 		$("#cost").val("item");
@@ -944,17 +1108,27 @@ function edit(activityId){
 	$("#everyTimesA").val(data.everyTimesA);
 	$("#addA").val(data.addA);
 	$("#addB").val(data.addB);
+	//清除多余文本
+	$(".contentClass").find(".parent").remove();
+	//生成文本
+	$.each(data.descList,function(index,text){
+		if(index!=0){
+			addOneItem(text,data.rgbList[index]);
+		}
+	});
+	previewShow();
+	$("#src").val(data.src);
 	$("#imgDiv").find(" img").attr("src",data.src);
 	if(data.isOneRecruit){
 		$("#oneRecruitTrue").iCheck('check');
 		//改变选中颜色
-		//$("#oneRecruitTrue").parent("div").addClass("checked");
-		//$("#oneRecruitFalse").parent("div").removeClass("checked");  
+		$("#oneRecruitTrue").parent("div").addClass("checked");
+		$("#oneRecruitFalse").parent("div").removeClass("checked");  
 	}else{
 		$("#oneRecruitFalse").iCheck('check');
 		//改变选中颜色
-		//$("#oneRecruitFalse").parent("div").addClass("checked");
-		//$("#oneRecruitFalse").parent("div").removeClass("checked");
+		$("#oneRecruitFalse").parent("div").addClass("checked");
+		$("#oneRecruitTrue").parent("div").removeClass("checked");
 	}
 	if(data.continuous){
 		$("#continuous1").iCheck('check');
@@ -1049,5 +1223,6 @@ function deleteData(itemId){
 		}
 	})
 }
+
 </script>
 </html>
