@@ -71,8 +71,7 @@ public class TimingCommandLineRunner implements CommandLineRunner {
         for (DataZone data : list) {
             Timer timer = new Timer(TIMER_NAME + data.getId());
             logger.info("启动timer定时器----------" + data.getId() + "/间隔时间：" + DateUtils.MILLIS_PER_DAY);
-            timer.scheduleAtFixedRate(
-                    new PvpTimerTask(mongoTemplate, mailRepository, dataConfigManager, data.getId(), null),
+            timer.scheduleAtFixedRate(new PvpTimerTask(mongoTemplate, mailRepository, dataConfigManager, data.getId()),
                     new Date(time), DateUtils.MILLIS_PER_DAY);
         }
         // 启动活跃与存留定时统计任务

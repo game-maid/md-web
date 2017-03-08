@@ -45,19 +45,17 @@ public class PvpTimerTask extends TimerTask {
     private IDataConfigManager dataConfigManager;
     private final static String RANK_KEY = "game_duel_rank_";
     private String ServerId;
-    private String dateValue;
     private static final Logger logger = Logger.getLogger(PvpTimerTask.class);
 
     /**
      * 创建一个新的实例 PvpTimerTask.
      */
     public PvpTimerTask(MongoTemplate mongoTemplate, MailRepository mailRepository,
-            IDataConfigManager dataConfigManager, String ServerId, String dateValue) {
+            IDataConfigManager dataConfigManager, String ServerId) {
         this.mongoTemplate = mongoTemplate;
         this.mailRepository = mailRepository;
         this.dataConfigManager = dataConfigManager;
         this.ServerId = ServerId;
-        this.dateValue = dateValue;
     }
 
     /**.
@@ -67,11 +65,9 @@ public class PvpTimerTask extends TimerTask {
      */
     @Override
     public void run() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String dateValue = sdf.format(System.currentTimeMillis());
         logger.info("----------数据区服" + ServerId + "_" + dateValue + " 定时任务开始-------------");
-        if (dateValue == null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            dateValue = sdf.format(System.currentTimeMillis());
-        }
         List<Mail> mails = new ArrayList<Mail>();
         DataConfig config = dataConfigManager.getTest().get("duel_rankScore");
         String rankKey = RANK_KEY + ServerId;
@@ -121,7 +117,7 @@ public class PvpTimerTask extends TimerTask {
             this.sendMails(map.get(mailKey), mailKey, null, null, mails);
         }
         mailRepository.save(mails);
-        logger.info("----------数据区服" + ServerId + " 定时任务结束-------------");
+        logger.info("----------数据区服" + ServerId + "_" + dateValue + " 定时任务结束-------------");
     }
 
     /**
