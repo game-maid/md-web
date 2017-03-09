@@ -244,14 +244,6 @@ function initTable(){
 				}
 			},
 			{
-				title : [[#{statistics.gold.item.num}]],
-				field : "itemNum",
-				align : "center",
-				formatter : function(value){
-					return value==null?0:value;
-				}
-			},
-			{
 				title : [[#{statistics.gold.expend.times}]],
 				field : "expendTimes",
 				align : "center",
@@ -262,6 +254,22 @@ function initTable(){
 			{
 				title : [[#{statistics.gold.peyer.num}]],
 				field : "payerNum",
+				align : "center",
+				formatter : function(value){
+					return value==null?0:value;
+				}
+			},
+			{
+				title : [[#{statistics.diamond.pay.num}]],
+				field : "payNum",
+				align : "center",
+				formatter : function(value){
+					return value==null?0:value;
+				}
+			},
+			{
+				title : [[#{statistics.diamond.free.num}]],
+				field : "freeNum",
 				align : "center",
 				formatter : function(value){
 					return value==null?0:value;

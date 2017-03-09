@@ -11,6 +11,7 @@ package com.talentwalker.game.md.admin.service.statistics;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +30,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.talentwalker.game.md.admin.service.BaseService;
+import com.talentwalker.game.md.core.constant.ItemID;
+import com.talentwalker.game.md.core.repository.support.SearchFilter;
 
 /**
  * @ClassName: DiamondExpendService
@@ -35,6 +40,19 @@ import com.talentwalker.game.md.admin.service.BaseService;
  */
 @Service
 public class DiamondExpendService extends BaseService {
+    /**
+     * 钻石类型（全部钻石）
+     */
+    public static final String DIAMOND_TYPE_ALL = "allDiamond";
+    /**
+     * 钻石类型（付费钻石）
+     */
+    public static final String DIAMOND_TYPE_PAY = "payDiamond";
+    /**
+     * 钻石类型（免费钻石）
+     */
+    public static final String DIAMOND_TYPE_FREE = "freeDiamond";
+
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -70,8 +88,163 @@ public class DiamondExpendService extends BaseService {
         // 计算总数
         long total = countTotal(startDate, endDate, zoneId, diamondType, userType, lordId, payType, registerCondition,
                 function, lordIds);
+        // 查询列表
+        ArrayList<Map<String, Object>> content = new ArrayList<>();
+        Pageable pageable = SearchFilter.newSearchFilter().getPageable();
+        findContent(startDate, endDate, zoneId, diamondType, userType, lordId, payType, registerCondition, function,
+                pageable, content, lordIds);
 
-        return null;
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    /**
+     * @Description:查询列表
+     * @param startDate
+     * @param endDate
+     * @param zoneId
+     * @param diamondType
+     * @param userType
+     * @param lordId
+     * @param payType
+     * @param registerCondition
+     * @param function
+     * @param pageable
+     * @param content
+     * @param lordIds
+     * @throws
+     */
+    private void findContent(long startDate, long endDate, String zoneId, String diamondType, Integer userType,
+            String lordId, Integer payType, Integer registerCondition, String function, Pageable pageable,
+            ArrayList<Map<String, Object>> content, String lordIds) {
+        String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
+        String matchTime = "{$match:{$and:[{request_time:{$gte:" + startDate + "}},{request_time:{$lt:" + endDate
+                + "}}]}}";
+        String matchItemType = "";
+        if (DIAMOND_TYPE_ALL.equals(diamondType)) {
+            matchItemType = "{$match:{$or:[{expend_items:{$in:['" + ItemID.DIAMOND + "']}},{expend_items:{$in:['"
+                    + ItemID.PERSENT_DIAMOND + "']}}]}}";
+        } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
+        } else {
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND + "']}}}]}}";
+        }
+        String limitStr = "";
+        String offsetStr = "";
+        if (pageable != null) {
+            offsetStr = "{$skip:" + pageable.getOffset() + "}";
+            limitStr = "{$limit:" + pageable.getPageSize() + "}";
+        }
+        AggregationOutput selectOutPut = null;
+        AggregationOutput payOutPut = null;
+        if (userType == 0) {// 单个用户 根据用户id查询
+            String matchLordId = "{$match:{player_id:'" + lordId + "'}}";
+            // 道具数量 、消费次数
+            List<DBObject> selectList = new ArrayList<>();
+            String groupItemNum = "{$group:{_id:{uri:'$uri'},expendTimes:{$sum:1},freeNum:{$sum:'$result.pay.lord."
+                    + ItemID.PERSENT_DIAMOND + "'},payNum:{$sum:'$result.pay.lord." + ItemID.DIAMOND + "'}}}";
+            String sortByUri = "{$sort:{_id.uri:-1}}";
+            selectList.add((DBObject) JSON.parse(matchZoneId));
+            selectList.add((DBObject) JSON.parse(matchTime));
+            selectList.add((DBObject) JSON.parse(matchLordId));
+            selectList.add((DBObject) JSON.parse(matchItemType));
+            selectList.add((DBObject) JSON.parse(groupItemNum));
+            selectList.add((DBObject) JSON.parse(sortByUri));
+            if (pageable != null) {
+                selectList.add((DBObject) JSON.parse(offsetStr));
+                selectList.add((DBObject) JSON.parse(limitStr));
+            }
+            selectOutPut = mongoTemplate.getCollection("game_log").aggregate(selectList);
+
+            // 消费人数
+            List<DBObject> payList = new ArrayList<>();
+            String discountLordId = "{$group:{_id:{player_id:'$player_id',uri:'$uri'}}}";
+            String groupPayNum = "{$group:{_id:{uri:'$_id.uri'},count:{$sum:1}}}";
+            payList.add((DBObject) JSON.parse(matchZoneId));
+            payList.add((DBObject) JSON.parse(matchLordId));
+            payList.add((DBObject) JSON.parse(matchTime));
+            payList.add((DBObject) JSON.parse(matchItemType));
+            payList.add((DBObject) JSON.parse(discountLordId));
+            payList.add((DBObject) JSON.parse(groupPayNum));
+            payList.add((DBObject) JSON.parse(sortByUri));
+            if (pageable != null) {
+                payList.add((DBObject) JSON.parse(offsetStr));
+                payList.add((DBObject) JSON.parse(limitStr));
+            }
+            payOutPut = mongoTemplate.getCollection("game_log").aggregate(payList);
+
+        } else {// 整体用户 根据条件查询
+            String matchLordIds = "";
+            matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
+            String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
+            // 道具数量 、消费次数
+            List<DBObject> selectList = new ArrayList<>();
+            String groupItemNum = "{$group:{_id:{uri:'$uri'},expendTimes:{$sum:1},freeNum:{$sum:'$result.pay.lord."
+                    + ItemID.PERSENT_DIAMOND + "'},payNum:{$sum:'$result.pay.lord." + ItemID.DIAMOND + "'}}}";
+            String sortByUri = "{$sort:{_id.uri:-1}}";
+            selectList.add((DBObject) JSON.parse(matchZoneId));
+            selectList.add((DBObject) JSON.parse(matchTime));
+            selectList.add((DBObject) JSON.parse(matchItemType));
+            selectList.add((DBObject) JSON.parse(matchLordIds));
+            if (!StringUtils.isEmpty(function)) {
+                selectList.add((DBObject) JSON.parse(matchUri));
+            }
+            selectList.add((DBObject) JSON.parse(groupItemNum));
+            selectList.add((DBObject) JSON.parse(sortByUri));
+            if (pageable != null) {
+                selectList.add((DBObject) JSON.parse(offsetStr));
+                selectList.add((DBObject) JSON.parse(limitStr));
+            }
+            selectOutPut = mongoTemplate.getCollection("game_log").aggregate(selectList);
+
+            // 消费人数
+            List<DBObject> payList = new ArrayList<>();
+            String discountLordId = "{$group:{_id:{player_id:'$player_id',uri:'$uri'}}}";
+            String groupPayNum = "{$group:{_id:{uri:'$_id.uri'},count:{$sum:1}}}";
+            payList.add((DBObject) JSON.parse(matchZoneId));
+            payList.add((DBObject) JSON.parse(matchTime));
+            payList.add((DBObject) JSON.parse(matchItemType));
+            payList.add((DBObject) JSON.parse(matchLordIds));
+            if (!StringUtils.isEmpty(function)) {
+                payList.add((DBObject) JSON.parse(matchUri));
+            }
+            payList.add((DBObject) JSON.parse(discountLordId));
+            payList.add((DBObject) JSON.parse(groupPayNum));
+            payList.add((DBObject) JSON.parse(sortByUri));
+            if (pageable != null) {
+                payList.add((DBObject) JSON.parse(offsetStr));
+                payList.add((DBObject) JSON.parse(limitStr));
+            }
+            payOutPut = mongoTemplate.getCollection("game_log").aggregate(payList);
+        }
+
+        // 道具数量 、消费次数 处理查询结果
+        Iterator<DBObject> selectIt = selectOutPut.results().iterator();
+        while (selectIt.hasNext()) {
+            HashMap<String, Object> map = new HashMap<>();
+            content.add(map);
+            BasicDBObject next = (BasicDBObject) selectIt.next();
+            String uri = ((BasicDBObject) next.get("_id")).getString("uri");
+            int payNum = next.getInt("payNum");
+            int freeNum = next.getInt("freeNum");
+            int expendTimes = next.getInt("expendTimes");
+            map.put("functionName", uri);
+            map.put("payNum", payNum);
+            map.put("freeNum", freeNum);
+            map.put("expendTimes", expendTimes);
+        }
+        // 消费人数 处理查询结果
+        Iterator<DBObject> payIt = payOutPut.results().iterator();
+        while (payIt.hasNext()) {
+            BasicDBObject next = (BasicDBObject) payIt.next();
+            String uri = ((BasicDBObject) next.get("_id")).getString("uri");
+            int payerNum = next.getInt("count");
+            for (Map<String, Object> map : content) {
+                if (map.get("functionName").equals(uri)) {
+                    map.put("payerNum", payerNum);
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -95,10 +268,15 @@ public class DiamondExpendService extends BaseService {
         String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
         String matchTime = "{$match:{$and:[{request_time:{$gte:" + startDate + "}},{request_time:{$lt:" + endDate
                 + "}}]}}";
-        /**
-         * 未完成
-         */
-        String matchItemType = "{$match:{expend_items:{$in:['" + "-------" + "']}}}";
+        String matchItemType = "";
+        if (DIAMOND_TYPE_ALL.equals(diamondType)) {
+            matchItemType = "{$match:{$or:[{expend_items:{$in:['" + ItemID.DIAMOND + "']}},{expend_items:{$in:['"
+                    + ItemID.PERSENT_DIAMOND + "']}}]}}";
+        } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
+        } else {
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND + "']}}}]}}";
+        }
         String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
         if (userType == 0) {// 单个用户 根据用户id查询
             // 分组 统计总数 count
@@ -260,6 +438,95 @@ public class DiamondExpendService extends BaseService {
                 lordIdList.add(lordId);
             }
         }
+    }
+
+    /**
+     * @Description:消耗钻石、剩余钻石
+     * @param startStr
+     * @param endStr
+     * @param zoneId
+     * @param diamondType
+     * @param userType
+     * @param lordId
+     * @param payType
+     * @param registerCondition
+     * @param function
+     * @return
+     * @throws
+     */
+    public Object distribution(String startStr, String endStr, String zoneId, String diamondType, Integer userType,
+            String lordId, Integer payType, Integer registerCondition, String function) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        long startDate = 0L;
+        long endDate = 0L;
+        try {
+            startDate = sdf.parse(startStr).getTime();
+            endDate = sdf.parse(endStr).getTime() + DateUtils.MILLIS_PER_DAY;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        String lordIds = null;
+        if (userType != 0) {
+            lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition);// 符合要求的玩家id
+        }
+
+        String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
+        String matchTime = "{$match:{$and:[{request_time:{$gte:" + startDate + "}},{request_time:{$lt:" + endDate
+                + "}}]}}";
+        String matchItemType = "";
+        if (DIAMOND_TYPE_ALL.equals(diamondType)) {
+            matchItemType = "{$match:{$or:[{expend_items:{$in:['" + ItemID.DIAMOND + "']}},{expend_items:{$in:['"
+                    + ItemID.PERSENT_DIAMOND + "']}}]}}";
+        } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
+        } else {
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND + "']}}}]}}";
+        }
+        AggregationOutput selectOutPut = null;
+        AggregationOutput payOutPut = null;
+        if (userType == 0) {// 单个用户 根据用户id查询
+            String matchLordId = "{$match:{player_id:'" + lordId + "'}}";
+            // 道具数量 、消费次数
+            List<DBObject> selectList = new ArrayList<>();
+            String groupItemNum = "{$group:{_id:{temp:'$temp'},freeNum:{$sum:'$result.pay.lord."
+                    + ItemID.PERSENT_DIAMOND + "'},payNum:{$sum:'$result.pay.lord." + ItemID.DIAMOND + "'}}}";
+            String sortByUri = "{$sort:{_id.uri:-1}}";
+            selectList.add((DBObject) JSON.parse(matchZoneId));
+            selectList.add((DBObject) JSON.parse(matchTime));
+            selectList.add((DBObject) JSON.parse(matchLordId));
+            selectList.add((DBObject) JSON.parse(matchItemType));
+            selectList.add((DBObject) JSON.parse(groupItemNum));
+            selectOutPut = mongoTemplate.getCollection("game_log").aggregate(selectList);
+
+        } else {// 整体用户 根据条件查询
+            String matchLordIds = "";
+            matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
+            String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
+            // 道具数量 、消费次数
+            List<DBObject> selectList = new ArrayList<>();
+            String groupItemNum = "{$group:{_id:{uri:'$temp'},freeNum:{$sum:'$result.pay.lord." + ItemID.PERSENT_DIAMOND
+                    + "'},payNum:{$sum:'$result.pay.lord." + ItemID.DIAMOND + "'}}}";
+            String sortByUri = "{$sort:{_id.uri:-1}}";
+            selectList.add((DBObject) JSON.parse(matchZoneId));
+            selectList.add((DBObject) JSON.parse(matchTime));
+            selectList.add((DBObject) JSON.parse(matchItemType));
+            selectList.add((DBObject) JSON.parse(matchLordIds));
+            if (!StringUtils.isEmpty(function)) {
+                selectList.add((DBObject) JSON.parse(matchUri));
+            }
+            selectList.add((DBObject) JSON.parse(groupItemNum));
+            selectList.add((DBObject) JSON.parse(sortByUri));
+            selectOutPut = mongoTemplate.getCollection("game_log").aggregate(selectList);
+
+        }
+        Iterator<DBObject> iterator = selectOutPut.results().iterator();
+        while (iterator.hasNext()) {
+            BasicDBObject next = (BasicDBObject) iterator.next();
+            long freeNum = next.getLong("freeNum");
+            long payNum = next.getLong("payNum");
+            System.out.println(freeNum + "----" + payNum);
+        }
+        return null;
     }
 
 }

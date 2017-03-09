@@ -56,6 +56,16 @@ public class DiamondExpendController extends BaseController {
             Integer userType, String lordId, Integer payType, Integer registerCondition, String function) {
         Page<Map<String, Object>> findList = diamondExpendService.findList(startStr, endStr, zoneId, diamondType,
                 userType, lordId, payType, registerCondition, function);
+        diamondExpendService.distribution(startStr, endStr, zoneId, diamondType, userType, lordId, payType,
+                registerCondition, function);
         return findList;
+    }
+
+    @GameResponse
+    @RequestMapping(value = "distribution", method = RequestMethod.POST)
+    public Object distribution(String startStr, String endStr, String zoneId, String diamondType, Integer userType,
+            String lordId, Integer payType, Integer registerCondition, String function) {
+        return diamondExpendService.distribution(startStr, endStr, zoneId, diamondType, userType, lordId, payType,
+                registerCondition, function);
     }
 }
