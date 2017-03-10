@@ -138,10 +138,11 @@ $(function(){
 	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
 	table=$("#panelTable");
 	initTable();
-	itemtable=$("#itemtable");
-	itemNames();
+	
+
+	initDataTimePicker();
+	
 	initKanBanInput($(".itemList"));
-	itemName=window.itemAll;
 	zoneMap=loadZoneMap();
 	//iCheckChange
 	redioChange();
@@ -192,12 +193,19 @@ function add() {
         }
 	}).resetForm();
 	$("#activityId").val("");
-	itemtable.bootstrapTable("load", []);
 	//初始化区服
 	initZone();
-	initDataTimePicker();
 	$("#allZoneFalse").iCheck("check");
+	$("#allZoneFalse").parent("div").addClass("checked"); //改变选中颜色
+	$("#allZoneTrue").parent("div").removeClass("checked"); //改变选中颜色
+	$("#zonelistDiv").show();
+	
 	$("#stateTrue").iCheck("check");
+	$("#stateTrue").parent("div").addClass("checked"); //改变选中颜色
+	$("#stateFalse").parent("div").removeClass("checked"); //改变选中颜色
+	$(".putrush").show();
+
+	$("#imgDiv").find(" img").attr("src","");
 	$("#addModal").modal("show");
 }
 
@@ -249,10 +257,7 @@ function onSave(){
 	
 	 /*<![CDATA[*/
 		var data=$("#addForm").serialize()+"&startLong="+startLong+"&endLong="+endLong;
-	 	if(allZoneFalg=="false"){
-	 		console.log($("#zonelist").getValues());
-	 		data+="&zoneList="+$("#zonelist").getValues();
-	 	}
+ 		data+="&zoneList="+$("#zonelist").getValues();
 		if(id!=null&&id!=""&&id!=undefined){
 			data+="&id="+id;
 		}
@@ -398,13 +403,25 @@ function edit(activityId){
 	editDataTimePicker(data);
 	if(data.allZone){
 		$("#allZoneTrue").iCheck("check");
+		$("#allZoneTrue").parent("div").addClass("checked"); //改变选中颜色
+		$("#allZoneFalse").parent("div").removeClass("checked"); //改变选中颜色
+		$("#zonelistDiv").hide();
 	}else{
 		$("#allZoneFalse").iCheck("check");
+		$("#allZoneFalse").parent("div").addClass("checked"); //改变选中颜色
+		$("#allZoneTrue").parent("div").removeClass("checked"); //改变选中颜色
+		$("#zonelistDiv").show();
 	}
 	if(data.state){
 		$("#stateTrue").iCheck("check");
+		$("#stateTrue").parent("div").addClass("checked"); //改变选中颜色
+		$("#stateFalse").parent("div").removeClass("checked"); //改变选中颜色
+		$(".putrush").show();
 	}else{
 		$("#stateFalse").iCheck("check");
+		$("#stateFalse").parent("div").addClass("checked"); //改变选中颜色
+		$("#stateTrue").parent("div").removeClass("checked"); //改变选中颜色
+		$(".putrush").hide();
 	}
 	$("#stage").val(data.stage);
 	$("#name").val(data.name);

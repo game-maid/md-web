@@ -364,10 +364,11 @@ function add() {
 	//清除多余文本
 	$(".contentClass").find(".parent").remove();
 	//初始化一个文本
-	addOneItem();
+	addOneItem();	
 	//初始化预览
 	previewShow();
 	allZoneFalg="false";
+	$("#imgDiv").find(" img").attr("src","");
 	$("#addModal").modal("show");
 }
 

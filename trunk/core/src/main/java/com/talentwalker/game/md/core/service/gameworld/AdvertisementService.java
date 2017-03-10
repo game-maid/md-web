@@ -74,7 +74,6 @@ public class AdvertisementService extends GameSupport {
      * @throws
      */
     public void add(AdvertisementConfig advertisementConfig) {
-        System.out.println(advertisementConfig.getId());
         if (StringUtils.isEmpty(advertisementConfig.getId())) {
             String id = "AD_" + System.currentTimeMillis()
                     + com.talentwalker.game.md.core.util.StringUtils.getRandomLowerStr(4);
