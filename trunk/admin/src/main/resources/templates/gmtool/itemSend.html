@@ -174,9 +174,10 @@ function addItem(){
 			if(id=="diamond"){
 				if(amount>10000){
 					diamondLimit=true;
+				}else{
+					tableData[index]["amount"]=amount;
 				}
-			}
-			tableData[index]["amount"]=amount;
+			}			
 			isAdd=false;
 		}
 	});
