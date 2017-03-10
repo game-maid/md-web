@@ -56,8 +56,6 @@ public class DiamondExpendController extends BaseController {
             Integer userType, String lordId, Integer payType, Integer registerCondition, String function) {
         Page<Map<String, Object>> findList = diamondExpendService.findList(startStr, endStr, zoneId, diamondType,
                 userType, lordId, payType, registerCondition, function);
-        diamondExpendService.distribution(startStr, endStr, zoneId, diamondType, userType, lordId, payType,
-                registerCondition, function);
         return findList;
     }
 
