@@ -134,7 +134,8 @@
 						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{notice.jump.path}" >跳转路径</label>
 							<div class="col-sm-5">
-								<input type="text" id="stage" name="stage" class="form-control"  />
+								<select class="form-control" id="stage" name="stage">
+								</select>
 							</div>
 						</div>
 						<div class="form-group">
@@ -268,6 +269,14 @@ $(function(){
 	$("#src").keyup(function(){
 		$("#imgDiv").find(" img").attr("src",$(this).val());
 	});
+	//加载跳转路径
+	simpleGameAjax({url:"/advertisement/stage",callback:function(data){
+		var html = '';
+		$.each(data,function(name,stage){
+			html+='<option value="'+stage+'">'+name+'</option>';			
+		});	
+		$("#stage").html(html);
+	}});
 });
 //预览事件 
 /*<![CDATA[*/
@@ -323,7 +332,7 @@ function transferString(str){
 			$("#putrush").val("");
 			$(".putrush").show();
 		}else{
-			$("#putrush").val("N/A");
+			$("#putrush").val('');
 			$(".putrush").hide();
 		}
 	});
@@ -355,10 +364,11 @@ function add() {
 	//清除多余文本
 	$(".contentClass").find(".parent").remove();
 	//初始化一个文本
-	addOneItem();
+	addOneItem();	
 	//初始化预览
 	previewShow();
 	allZoneFalg="false";
+	$("#imgDiv").find(" img").attr("src","");
 	$("#addModal").modal("show");
 }
 

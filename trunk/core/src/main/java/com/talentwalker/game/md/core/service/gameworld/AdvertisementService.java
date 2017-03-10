@@ -8,7 +8,10 @@
 
 package com.talentwalker.game.md.core.service.gameworld;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +23,14 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import com.talentwalker.game.md.core.dataconfig.DataConfig;
+import com.talentwalker.game.md.core.dataconfig.IDataConfigManager;
 import com.talentwalker.game.md.core.domain.GameUser;
 import com.talentwalker.game.md.core.domain.config.AdvertisementConfig;
 import com.talentwalker.game.md.core.repository.config.AdvertisementConfigRepository;
 import com.talentwalker.game.md.core.repository.support.SearchFilter;
 import com.talentwalker.game.md.core.response.ResponseKey;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameSupport;
 
 /**
@@ -39,6 +45,9 @@ public class AdvertisementService extends GameSupport {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private IDataConfigManager configManager;
 
     /**
      * @Description:获取广告信息
@@ -65,7 +74,6 @@ public class AdvertisementService extends GameSupport {
      * @throws
      */
     public void add(AdvertisementConfig advertisementConfig) {
-        System.out.println(advertisementConfig.getId());
         if (StringUtils.isEmpty(advertisementConfig.getId())) {
             String id = "AD_" + System.currentTimeMillis()
                     + com.talentwalker.game.md.core.util.StringUtils.getRandomLowerStr(4);
@@ -104,11 +112,29 @@ public class AdvertisementService extends GameSupport {
      * @param value
      * @throws
      */
-    public void update(String id, String name, String value) {
+    public void update(String id, String name, int value) {
         AdvertisementConfig advertisementConfig = advertisementConfigRepository.findOne(id);
         if ("putrush".equals(name)) {
             advertisementConfig.setPutrush(value);
         }
         advertisementConfigRepository.save(advertisementConfig);
+    }
+
+    /**
+     * @Description:读取跳转路径配置
+     * @return
+     * @throws
+     */
+    public Object stageConfig() {
+        DataConfig dataConfig = configManager.getTest().get(ConfigKey.ADVERTISEMENT_JUMPOUT);
+        Set<String> keySet = dataConfig.getJsonObject().keySet();
+        Map<String, String> resultMap = new HashMap<>();
+        for (String key : keySet) {
+            DataConfig keyConfig = dataConfig.get(key);
+            String name = keyConfig.getString(ConfigKey.ADVERTISEMENT_JUMPOUT_NAME);
+            String value = keyConfig.getString(ConfigKey.ADVERTISEMENT_JUMPOUT_TYPE);
+            resultMap.put(name, value);
+        }
+        return resultMap;
     }
 }

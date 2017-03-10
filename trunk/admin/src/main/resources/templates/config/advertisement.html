@@ -102,7 +102,8 @@
 						<div class="form-group">
 							<label class="col-sm-3 control-label" th:text="#{notice.jump.path}" >跳转路径</label>
 							<div class="col-sm-5">
-								<input type="text" id="stage" name="stage" class="form-control"  />
+								<select class="form-control" id="stage" name="stage">
+								</select>
 							</div>
 						</div>
 						<div class="form-group">
@@ -137,10 +138,11 @@ $(function(){
 	$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})
 	table=$("#panelTable");
 	initTable();
-	itemtable=$("#itemtable");
-	itemNames();
+	
+
+	initDataTimePicker();
+	
 	initKanBanInput($(".itemList"));
-	itemName=window.itemAll;
 	zoneMap=loadZoneMap();
 	//iCheckChange
 	redioChange();
@@ -148,6 +150,14 @@ $(function(){
 	$("#src").keyup(function(){
 		$("#imgDiv").find(" img").attr("src",$(this).val());
 	});
+	//加载跳转路径
+	simpleGameAjax({url:"/advertisement/stage",callback:function(data){
+		var html = '';
+		$.each(data,function(name,stage){
+			html+='<option value="'+stage+'">'+name+'</option>';			
+		});	
+		$("#stage").html(html);
+	}});
 });
 /**
  * 单选框改变
@@ -163,16 +173,6 @@ $(function(){
 			$("#zonelistDiv").show();
 		}
 	});
-	$("[name='state']").on('ifChecked',function(event){
-		var value =$(event.target).val();
-		if(value=='true'){
-			$("#putrush").val("");
-			$(".putrush").show();
-		}else{
-			$("#putrush").val("N/A");
-			$(".putrush").hide();
-		}
-	});
 }
 
 function add() {
@@ -183,12 +183,17 @@ function add() {
         }
 	}).resetForm();
 	$("#activityId").val("");
-	itemtable.bootstrapTable("load", []);
 	//初始化区服
 	initZone();
-	initDataTimePicker();
 	$("#allZoneFalse").iCheck("check");
+	$("#allZoneFalse").parent("div").addClass("checked"); //改变选中颜色
+	$("#allZoneTrue").parent("div").removeClass("checked"); //改变选中颜色
+	$("#zonelistDiv").show();
+	
 	$("#stateTrue").iCheck("check");
+	$("#stateTrue").parent("div").addClass("checked"); //改变选中颜色
+	$("#stateFalse").parent("div").removeClass("checked"); //改变选中颜色
+	$("#imgDiv").find(" img").attr("src","");
 	$("#addModal").modal("show");
 }
 
@@ -240,10 +245,7 @@ function onSave(){
 	
 	 /*<![CDATA[*/
 		var data=$("#addForm").serialize()+"&startLong="+startLong+"&endLong="+endLong;
-	 	if(allZoneFalg=="false"){
-	 		console.log($("#zonelist").getValues());
-	 		data+="&zoneList="+$("#zonelist").getValues();
-	 	}
+ 		data+="&zoneList="+$("#zonelist").getValues();
 		if(id!=null&&id!=""&&id!=undefined){
 			data+="&id="+id;
 		}
@@ -389,13 +391,23 @@ function edit(activityId){
 	editDataTimePicker(data);
 	if(data.allZone){
 		$("#allZoneTrue").iCheck("check");
+		$("#allZoneTrue").parent("div").addClass("checked"); //改变选中颜色
+		$("#allZoneFalse").parent("div").removeClass("checked"); //改变选中颜色
+		$("#zonelistDiv").hide();
 	}else{
 		$("#allZoneFalse").iCheck("check");
+		$("#allZoneFalse").parent("div").addClass("checked"); //改变选中颜色
+		$("#allZoneTrue").parent("div").removeClass("checked"); //改变选中颜色
+		$("#zonelistDiv").show();
 	}
 	if(data.state){
 		$("#stateTrue").iCheck("check");
+		$("#stateTrue").parent("div").addClass("checked"); //改变选中颜色
+		$("#stateFalse").parent("div").removeClass("checked"); //改变选中颜色
 	}else{
 		$("#stateFalse").iCheck("check");
+		$("#stateFalse").parent("div").addClass("checked"); //改变选中颜色
+		$("#stateTrue").parent("div").removeClass("checked"); //改变选中颜色
 	}
 	$("#stage").val(data.stage);
 	$("#name").val(data.name);
