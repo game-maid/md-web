@@ -54,7 +54,7 @@ public class AdvertisementConfig extends BaseDomain {
     /**
      * 商店序位
      */
-    protected String putrush;
+    protected int putrush;
     /**
      * 图片路径
      */
@@ -151,14 +151,14 @@ public class AdvertisementConfig extends BaseDomain {
     /**
      * @return putrush
      */
-    public String getPutrush() {
+    public int getPutrush() {
         return putrush;
     }
 
     /**
      * @param putrush 要设置的 putrush
      */
-    public void setPutrush(String putrush) {
+    public void setPutrush(int putrush) {
         this.putrush = putrush;
     }
 
