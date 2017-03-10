@@ -83,7 +83,7 @@ public class NoticeService extends GameSupport {
      * @param value
      * @throws
      */
-    public void update(String id, String name, String value) {
+    public void update(String id, String name, int value) {
         NoticeConfig noticeConfig = noticeConfigRepository.findOne(id);
         if ("putrush".equals(name)) {
             noticeConfig.setPutrush(value);

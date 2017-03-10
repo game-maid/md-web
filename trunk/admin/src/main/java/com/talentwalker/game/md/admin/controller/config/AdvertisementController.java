@@ -81,7 +81,7 @@ public class AdvertisementController extends BaseController {
 
     @GameResponse
     @RequestMapping(value = "update", method = RequestMethod.POST)
-    public Object update(String pk, String name, String value) {
+    public Object update(String pk, String name, int value) {
         advertisementService.update(pk, name, value);
         return null;
     }
