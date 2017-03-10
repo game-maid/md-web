@@ -80,7 +80,7 @@ public class NoticeController extends BaseController {
 
     @GameResponse
     @RequestMapping(value = "update", method = RequestMethod.POST)
-    public Object update(String pk, String name, String value) {
+    public Object update(String pk, String name, int value) {
         noticeService.update(pk, name, value);
         return null;
     }

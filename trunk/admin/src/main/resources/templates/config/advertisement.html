@@ -173,16 +173,6 @@ $(function(){
 			$("#zonelistDiv").show();
 		}
 	});
-	$("[name='state']").on('ifChecked',function(event){
-		var value =$(event.target).val();
-		if(value=='true'){
-			$("#putrush").val("");
-			$(".putrush").show();
-		}else{
-			$("#putrush").val("N/A");
-			$(".putrush").hide();
-		}
-	});
 }
 
 function add() {
@@ -203,8 +193,6 @@ function add() {
 	$("#stateTrue").iCheck("check");
 	$("#stateTrue").parent("div").addClass("checked"); //改变选中颜色
 	$("#stateFalse").parent("div").removeClass("checked"); //改变选中颜色
-	$(".putrush").show();
-
 	$("#imgDiv").find(" img").attr("src","");
 	$("#addModal").modal("show");
 }
@@ -416,12 +404,10 @@ function edit(activityId){
 		$("#stateTrue").iCheck("check");
 		$("#stateTrue").parent("div").addClass("checked"); //改变选中颜色
 		$("#stateFalse").parent("div").removeClass("checked"); //改变选中颜色
-		$(".putrush").show();
 	}else{
 		$("#stateFalse").iCheck("check");
 		$("#stateFalse").parent("div").addClass("checked"); //改变选中颜色
 		$("#stateTrue").parent("div").removeClass("checked"); //改变选中颜色
-		$(".putrush").hide();
 	}
 	$("#stage").val(data.stage);
 	$("#name").val(data.name);
