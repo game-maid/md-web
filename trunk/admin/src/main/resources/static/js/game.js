@@ -312,5 +312,18 @@ var queryFunctionName=function(){
 		}
 	});
 };
-
+//获取道具表中的道具
+var queryItems = function (){
+	gameAjax({
+		url : "/statistics/items",
+		async : false,
+		type : "get",
+		callback : function(data) {
+			itemsMap={};
+			$.each(data,function(index,val){
+				itemsMap[val.value]=val.name;
+			});
+		}
+	});
+}
 

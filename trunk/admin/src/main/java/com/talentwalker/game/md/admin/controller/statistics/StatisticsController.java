@@ -46,4 +46,14 @@ public class StatisticsController extends BaseController {
         Locale locale = LocaleContextHolder.getLocale();
         return statisticsService.queryFunctionName(locale.getLanguage());
     }
+
+    /**
+     * @Description:从道具表中查询道具
+     * @return
+     * @throws
+     */
+    public List<Map<String, Object>> queryItems() {
+        return statisticsService.queryItems();
+    }
+
 }

@@ -139,9 +139,9 @@ public class DiamondExpendService extends BaseService {
             matchItemType = "{$match:{$or:[{expend_items:{$in:['" + ItemID.DIAMOND + "']}},{expend_items:{$in:['"
                     + ItemID.PERSENT_DIAMOND + "']}}]}}";
         } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
-            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
-        } else {
             matchItemType = "{$match:{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND + "']}}}]}}";
+        } else {
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
         }
         String limitStr = "";
         String offsetStr = "";
@@ -189,7 +189,6 @@ public class DiamondExpendService extends BaseService {
 
         } else {// 整体用户 根据条件查询
             String matchLordIds = "";
-            System.out.println(lordIds);
             matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
             String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
             // 道具数量 、消费次数
@@ -398,12 +397,12 @@ public class DiamondExpendService extends BaseService {
                 + "}}]}}";
         String matchDiamondExpend = "";
         if (DIAMOND_TYPE_ALL.equals(diamondType)) {
-            matchDiamondExpend = "{$match:{$or:[{expend_items:{$in:['" + ItemID.DIAMOND + "']}},{expend_items:{$in:['"
-                    + ItemID.PERSENT_DIAMOND + "']}}]}}";
+            matchDiamondExpend = "{$match:{$or:[{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND
+                    + "']}},{expend_items:{$in:['" + ItemID.DIAMOND + "']}}]}}";
         } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
-            matchDiamondExpend = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
-        } else {
             matchDiamondExpend = "{$match:{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND + "']}}}]}}";
+        } else {
+            matchDiamondExpend = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
         }
         String distinct = "{$group:{_id:{player_id:'$player_id'}}}";
         String group = "{$group:{_id:'$_id.player_id'}}";
@@ -528,6 +527,7 @@ public class DiamondExpendService extends BaseService {
         if (userType != 0) {
             lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition, diamondType);// 符合要求的玩家id
         }
+        System.out.println("扇形图玩家id--" + lordIds);
         List<Map<String, Object>> result = new ArrayList<>();
         /**
          * 消费之前钻石统计
@@ -542,15 +542,15 @@ public class DiamondExpendService extends BaseService {
         if (DIAMOND_TYPE_ALL.equals(diamondType)) {
             matchItemType = "{$match:{$or:[{expend_items:{$in:['" + ItemID.DIAMOND + "']}},{expend_items:{$in:['"
                     + ItemID.PERSENT_DIAMOND + "']}}]}}";
-            distinct = "{$group:{_id:{player_id:'$player_id'},payDiamond:{$first:'$post_diamond'},freeDiamond:{$first:'$post_persent_diamond'}}}";
+            distinct = "{$group:{_id:{player_id:'$player_id'},freeDiamond:{$first:'$post_diamond'},payDiamond:{$first:'$post_persent_diamond'}}}";
             groupDiamond = "{$group:{_id:{temp:'$temp'},payNum:{$sum:'$payDiamond'},freeNum:{$sum:'$freeDiamond'}}}";
-        } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
-            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
-            distinct = "{$group:{_id:{player_id:'$player_id'},payDiamond:{$first:'$post_diamond'}}}";
+        } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {// 付费钻石
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND + "']}}}]}}";
+            distinct = "{$group:{_id:{player_id:'$player_id'},payDiamond:{$first:'$post_persent_diamond'}}}";
             groupDiamond = "{$group:{_id:{temp:'$temp'},payNum:{$sum:'$payDiamond'}}}";
         } else {
-            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND + "']}}}]}}";
-            distinct = "{$group:{_id:{player_id:'$player_id'},freeDiamond:{$first:'$post_persent_diamond'}}}";
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
+            distinct = "{$group:{_id:{player_id:'$player_id'},freeDiamond:{$first:'$post_diamond'}}}";
             groupDiamond = "{$group:{_id:{temp:'$temp'},freeNum:{$sum:'$freeDiamond'}}}";
         }
         if (userType == 0) {// 单个用户 根据用户id查询
@@ -592,14 +592,14 @@ public class DiamondExpendService extends BaseService {
             if (DIAMOND_TYPE_ALL.equals(diamondType)) {
                 long payNum = next.getLong("payNum");
                 long freeNum = next.getLong("freeNum");
-                tempMap.put(getMessage("statistics.diamond.start.pay"), freeNum);
-                tempMap.put(getMessage("statistics.diamond.start.free"), payNum);
+                tempMap.put(getMessage("statistics.diamond.end.free"), freeNum);
+                tempMap.put(getMessage("statistics.diamond.end.pay"), payNum);
             } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
                 long payNum = next.getLong("payNum");
-                tempMap.put(getMessage("statistics.diamond.start.free"), payNum);
+                tempMap.put(getMessage("statistics.diamond.start.pay"), payNum);
             } else {
                 long freeNum = next.getLong("freeNum");
-                tempMap.put(getMessage("statistics.diamond.start.pay"), freeNum);
+                tempMap.put(getMessage("statistics.diamond.start.free"), freeNum);
             }
         }
 
@@ -611,15 +611,15 @@ public class DiamondExpendService extends BaseService {
         if (DIAMOND_TYPE_ALL.equals(diamondType)) {
             // matchItemType = "{$match:{$or:[{expend_items:{$in:['" + ItemID.DIAMOND + "']}},{expend_items:{$in:['"
             // + ItemID.PERSENT_DIAMOND + "']}}]}}";
-            groupItemNum = "{$group:{_id:{temp:'$temp'},freeNum:{$sum:'$result.pay.lord." + ItemID.PERSENT_DIAMOND
-                    + "'},payNum:{$sum:'$result.pay.lord." + ItemID.DIAMOND + "'}}}";
+            groupItemNum = "{$group:{_id:{temp:'$temp'},freeNum:{$sum:'$result.pay.lord." + ItemID.DIAMOND
+                    + "'},payNum:{$sum:'$result.pay.lord." + ItemID.PERSENT_DIAMOND + "'}}}";
         } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
             // matchItemType = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
-            groupItemNum = "{$group:{_id:{temp:'$temp'},payNum:{$sum:'$result.pay.lord." + ItemID.DIAMOND + "'}}}";
+            groupItemNum = "{$group:{_id:{temp:'$temp'},payNum:{$sum:'$result.pay.lord." + ItemID.PERSENT_DIAMOND
+                    + "'}}}";
         } else {
             // matchItemType = "{$match:{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND + "']}}}]}}";
-            groupItemNum = "{$group:{_id:{temp:'$temp'},freeNum:{$sum:'$result.pay.lord." + ItemID.PERSENT_DIAMOND
-                    + "'}}}";
+            groupItemNum = "{$group:{_id:{temp:'$temp'},freeNum:{$sum:'$result.pay.lord." + ItemID.DIAMOND + "'}}}";
         }
 
         if (userType == 0) {// 单个用户 根据用户id查询
@@ -656,27 +656,27 @@ public class DiamondExpendService extends BaseService {
             if (DIAMOND_TYPE_ALL.equals(diamondType)) {
                 long payNum = next.getLong("payNum");
                 long freeNum = next.getLong("freeNum");
-                tempMap.put(getMessage("statistics.diamond.expend.pay"), freeNum);
-                tempMap.put(getMessage("statistics.diamond.expend.free"), payNum);
+                tempMap.put(getMessage("statistics.diamond.end.free"), freeNum);
+                tempMap.put(getMessage("statistics.diamond.end.pay"), payNum);
             } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
                 long payNum = next.getLong("payNum");
-                tempMap.put(getMessage("statistics.diamond.expend.free"), payNum);
+                tempMap.put(getMessage("statistics.diamond.expend.pay"), payNum);
             } else {
                 long freeNum = next.getLong("freeNum");
-                tempMap.put(getMessage("statistics.diamond.expend.pay"), freeNum);
+                tempMap.put(getMessage("statistics.diamond.expend.free"), freeNum);
             }
         }
         /**
          *  剩余的钻石统计
          */
         if (DIAMOND_TYPE_ALL.equals(diamondType)) {
-            distinct = "{$group:{_id:{player_id:'$player_id'},payDiamond:{$first:'$post_diamond'},freeDiamond:{$first:'$post_persent_diamond'}}}";
+            distinct = "{$group:{_id:{player_id:'$player_id'},freeDiamond:{$first:'$post_diamond'},payDiamond:{$first:'$post_persent_diamond'}}}";
             groupDiamond = "{$group:{_id:{temp:'$temp'},payNum:{$sum:'$payDiamond'},freeNum:{$sum:'$freeDiamond'}}}";
         } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
-            distinct = "{$group:{_id:{player_id:'$player_id'},payDiamond:{$first:'$post_diamond'}}}";
+            distinct = "{$group:{_id:{player_id:'$player_id'},payDiamond:{$first:'$post_persent_diamond'}}}";
             groupDiamond = "{$group:{_id:{temp:'$temp'},payNum:{$sum:'$payDiamond'}}}";
         } else {
-            distinct = "{$group:{_id:{player_id:'$player_id'},freeDiamond:{$first:'$post_persent_diamond'}}}";
+            distinct = "{$group:{_id:{player_id:'$player_id'},freeDiamond:{$first:'$post_diamond'}}}";
             groupDiamond = "{$group:{_id:{temp:'$temp'},freeNum:{$sum:'$freeDiamond'}}}";
         }
         if (userType == 0) {// 单个用户 根据用户id查询
@@ -717,14 +717,14 @@ public class DiamondExpendService extends BaseService {
             if (DIAMOND_TYPE_ALL.equals(diamondType)) {
                 long payNum = next.getLong("payNum");
                 long freeNum = next.getLong("freeNum");
-                tempMap.put(getMessage("statistics.diamond.end.pay"), freeNum);
-                tempMap.put(getMessage("statistics.diamond.end.free"), payNum);
+                tempMap.put(getMessage("statistics.diamond.end.free"), freeNum);
+                tempMap.put(getMessage("statistics.diamond.end.pay"), payNum);
             } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
                 long payNum = next.getLong("payNum");
-                tempMap.put(getMessage("statistics.diamond.end.free"), payNum);
+                tempMap.put(getMessage("statistics.diamond.end.pay"), payNum);
             } else {
                 long freeNum = next.getLong("freeNum");
-                tempMap.put(getMessage("statistics.diamond.end.pay"), freeNum);
+                tempMap.put(getMessage("statistics.diamond.end.free"), freeNum);
             }
         }
         return result;
