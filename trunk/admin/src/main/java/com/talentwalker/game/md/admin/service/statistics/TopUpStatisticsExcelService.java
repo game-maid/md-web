@@ -91,16 +91,18 @@ public class TopUpStatisticsExcelService extends BaseService {
         if (!StringUtils.isEmpty(packageId)) {
             query.addCriteria(Criteria.where("package_id").is(packageId));
         }
-        if (!StringUtils.isEmpty(orderState)) {
-            query.addCriteria(Criteria.where("state").is(orderState));
+        if ("0".equals(orderState)) {// 已支付
+            query.addCriteria(Criteria.where("state").is(0));
+        } else if ("1".equals(orderState)) {// 未支付
+            query.addCriteria(Criteria.where("state").is(1));
         }
+
         if ("1".equals(itemType)) {
             query.addCriteria(Criteria.where("product_type").is(itemType));
         } else if ("2".equals(itemType)) {
             query.addCriteria(Criteria.where("product_type").ne(1));
         }
         List<Order> list = mongoTemplate.find(query, Order.class);
-
         // 查询区服/包
         List<GameZone> zoneList = gameZoneService.findAll();
         Map<String, String> zoneMap = new HashMap<>();
@@ -127,7 +129,6 @@ public class TopUpStatisticsExcelService extends BaseService {
             excel.setNum(order.getQuantity());
             excel.setLordId(order.getLordId());
             excel.setPlatformId(order.getPlatformId());
-            ;
             excel.setZoneName(zoneMap.get(order.getZoneId()));
             excel.setPackageName(packageMap.get(order.getPackageId()));
             excel.setPrice(order.getPrice());

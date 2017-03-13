@@ -53,4 +53,14 @@ public class StatisitcsService {
         return result;
     }
 
+    /**
+     * @Description:从道具表中查询道具
+     * @return
+     * @throws
+     */
+    public List<Map<String, Object>> queryItems() {
+
+        return null;
+    }
+
 }
