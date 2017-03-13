@@ -319,150 +319,164 @@ function search(){
 //扇形图
 function chart(data){
 	var startMap = data[0];
+	if(startMap==null ||startMap.length==0){
+		$("#start-graph-div").hide();
+	}else{
+		var startSeries=[];
+		var startTotal =0;
+		$.each(startMap,function(name,value){
+			startTotal +=value;
+		});
+		$.each(startMap,function(name,value){
+			var tempMap={};
+			tempMap["name"]=name;
+			tempMap["y"]=dividePercentage(value,startTotal);
+			startSeries.push(tempMap);
+		});
+		//初始钻石
+		$("#start-graph-div").highcharts({
+			credits:{
+				href:"",
+				text:"TalentWalker",
+			},
+	        chart: {
+	            plotBackgroundColor: null,
+	            plotBorderWidth: null,
+	            plotShadow: false
+	        },
+	        title: {
+	            text: [[#{statistics.diamond.start}]]
+	        },
+	        tooltip: {
+	            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+	        },
+	        plotOptions: {
+	            pie: {
+	                allowPointSelect: true,
+	                cursor: 'pointer',
+	                dataLabels: {
+	                    enabled: true,
+	                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
+	                }
+	            }
+	        },
+	        series: [{
+	            type: 'pie',
+	            name: 'Browser share',
+	            data: startSeries
+	        }]
+	    });
+		$.each(startMap,function(name,value){
+			$("#start-graph-div").append('<b>'+name+":"+value+'&nbsp;</b>');
+		});
+		$("#start-graph-div").show();
+	}
 	var expendMap = data[1];
+	if(expendMap==null ||expendMap.length==0){
+		$("#expend-graph-div").hide();
+	}else{
+		//消耗钻石
+		var expendSeries=[];
+		var expendTotal =0;
+		$.each(expendMap,function(name,value){
+			expendTotal +=value;
+		});
+		$.each(expendMap,function(name,value){
+			var tempMap={};
+			tempMap["name"]=name;
+			tempMap["y"]=dividePercentage(value,expendTotal);
+			expendSeries.push(tempMap);
+		});
+		$("#expend-graph-div").highcharts({
+			credits:{
+				href:"",
+				text:"TalentWalker",
+			},
+	        chart: {
+	            plotBackgroundColor: null,
+	            plotBorderWidth: null,
+	            plotShadow: false
+	        },
+	        title: {
+	            text: [[#{statistics.diamond.expend}]]
+	        },
+	        tooltip: {
+	            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+	        },
+	        plotOptions: {
+	            pie: {
+	                allowPointSelect: true,
+	                cursor: 'pointer',
+	                dataLabels: {
+	                    enabled: true,
+	                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
+	                }
+	            }
+	        },
+	        series: [{
+	            type: 'pie',
+	            name: 'Browser share',
+	            data: expendSeries
+	        }]
+	    });
+		$.each(expendMap,function(name,value){
+			$("#expend-graph-div").append('<b>'+name+":"+value+'&nbsp;</b>');
+		});
+		$("#expend-graph-div").show();
+	}
 	var endMap = data[2];
-	var startSeries=[];
-	var startTotal =0;
-	$.each(startMap,function(name,value){
-		startTotal +=value;
-	});
-	$.each(startMap,function(name,value){
-		var tempMap={};
-		tempMap["name"]=name;
-		tempMap["y"]=dividePercentage(value,startTotal);
-		startSeries.push(tempMap);
-	});
-	//初始钻石
-	$("#start-graph-div").highcharts({
-		credits:{
-			href:"",
-			text:"TalentWalker",
-		},
-        chart: {
-            plotBackgroundColor: null,
-            plotBorderWidth: null,
-            plotShadow: false
-        },
-        title: {
-            text: [[#{statistics.diamond.start}]]
-        },
-        tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
-        },
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
-                }
-            }
-        },
-        series: [{
-            type: 'pie',
-            name: 'Browser share',
-            data: startSeries
-        }]
-    });
-	$.each(startMap,function(name,value){
-		$("#start-graph-div").append('<b>'+name+":"+value+'&nbsp;</b>');
-	});
-	$("#start-graph-div").show();
-	//消耗钻石
-	var expendSeries=[];
-	var expendTotal =0;
-	$.each(expendMap,function(name,value){
-		expendTotal +=value;
-	});
-	$.each(expendMap,function(name,value){
-		var tempMap={};
-		tempMap["name"]=name;
-		tempMap["y"]=dividePercentage(value,expendTotal);
-		expendSeries.push(tempMap);
-	});
-	$("#expend-graph-div").highcharts({
-		credits:{
-			href:"",
-			text:"TalentWalker",
-		},
-        chart: {
-            plotBackgroundColor: null,
-            plotBorderWidth: null,
-            plotShadow: false
-        },
-        title: {
-            text: [[#{statistics.diamond.expend}]]
-        },
-        tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
-        },
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
-                }
-            }
-        },
-        series: [{
-            type: 'pie',
-            name: 'Browser share',
-            data: expendSeries
-        }]
-    });
-	$.each(expendMap,function(name,value){
-		$("#expend-graph-div").append('<b>'+name+":"+value+'&nbsp;</b>');
-	});
-	//剩余钻石
-	var endSeries=[];
-	var endTotal =0;
-	$.each(endMap,function(name,value){
-		endTotal +=value;
-	});
-	$.each(endMap,function(name,value){
-		var tempMap={};
-		tempMap["name"]=name;
-		tempMap["y"]=dividePercentage(value,endTotal);
-		endSeries.push(tempMap);
-	});
-	$("#end-graph-div").highcharts({
-		credits:{
-			href:"",
-			text:"TalentWalker",
-		},
-        chart: {
-            plotBackgroundColor: null,
-            plotBorderWidth: null,
-            plotShadow: false
-        },
-        title: {
-            text: [[#{statistics.diamond.end}]]
-        },
-        tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
-        },
-        plotOptions: {
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
-                }
-            }
-        },
-        series: [{
-            type: 'pie',
-            name: 'Browser share',
-            data: endSeries
-        }]
-    });
-	$.each(endMap,function(name,value){
-		$("#end-graph-div").append('<b>'+name+":"+value+'&nbsp;</b>');
-	});
+	if(endMap==null ||endMap.length==0){
+		$("#end-graph-div").hide();
+	}else{
+		//剩余钻石
+		var endSeries=[];
+		var endTotal =0;
+		$.each(endMap,function(name,value){
+			endTotal +=value;
+		});
+		$.each(endMap,function(name,value){
+			var tempMap={};
+			tempMap["name"]=name;
+			tempMap["y"]=dividePercentage(value,endTotal);
+			endSeries.push(tempMap);
+		});
+		$("#end-graph-div").highcharts({
+			credits:{
+				href:"",
+				text:"TalentWalker",
+			},
+	        chart: {
+	            plotBackgroundColor: null,
+	            plotBorderWidth: null,
+	            plotShadow: false
+	        },
+	        title: {
+	            text: [[#{statistics.diamond.end}]]
+	        },
+	        tooltip: {
+	            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+	        },
+	        plotOptions: {
+	            pie: {
+	                allowPointSelect: true,
+	                cursor: 'pointer',
+	                dataLabels: {
+	                    enabled: true,
+	                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
+	                }
+	            }
+	        },
+	        series: [{
+	            type: 'pie',
+	            name: 'Browser share',
+	            data: endSeries
+	        }]
+	    });
+		$.each(endMap,function(name,value){
+			$("#end-graph-div").append('<b>'+name+":"+value+'&nbsp;</b>');
+		});
+		$("#end-graph-div").show();
+	}
 }
 //两数相除 两位小数(百分比)
 function dividePercentage(element,denominator){
