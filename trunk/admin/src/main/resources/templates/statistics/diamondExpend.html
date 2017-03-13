@@ -142,6 +142,19 @@
 		
 		
 			<div class="ibox-content" >
+				<div class="form-horizontal" id="graph-top-div">
+					<div class="form-group">
+					<!-- ARPU占比 -->
+						<div id="start-graph-div" class="col-sm-4" style="float: left;">
+						</div>
+						<!-- 渠道充值人员占比 -->
+						<div id="expend-graph-div" class="col-sm-4" style="float: left;">
+						</div>
+						<!-- 渠道充值总额占比 -->
+						<div id="end-graph-div" class="col-sm-4" style="float: left;">
+						</div>
+					</div>
+				</div>
 				<!-- 统计分页表格 -->
 				<div>
 					<table id="panelTable" class="table-striped" data-mobile-responsive="true"></table>
@@ -204,12 +217,6 @@ $("#user-type-select").change(function(){
 function initTable(){
 	$("#panelTable").bootstrapTable({
 		queryParams : function(params) {
-			var functionName="";
-			if($("#diamond-type-select").val()=="diamond"){
-				functionName=$("#diamond-function-select").val();
-			}else{
-				functionName=$("#gold-function-select").val();
-			}
 			var query = {
 				limit : params.limit,
 				offset : params.offset,
@@ -221,7 +228,7 @@ function initTable(){
 				lordId:$("#lord_id").val(),
 				payType:$("#pay-type-select").val(),
 				registerCondition:$("#order-state-select").val(),
-				function:functionName,
+				function:$("#diamond-function-select").val(),
 			};
 			return query;
 		},
@@ -293,20 +300,187 @@ function search(){
 			gameBootstrapTable("/statistics/diamondExpend/findList", params);
 		}
 	});
+	//加载扇形图
+	/*<![CDATA[*/
+	var data="startStr="+$("#startDatetimepicker").val()+"&endStr="+$("#endDatetimepicker").val()+
+			"&zoneId="+$("#zone-select").val()+"&diamondType="+$("#diamond-type-select").val()+"&userType="+$("#user-type-select").val()+
+			"&lordId="+$("#lord_id").val()+"&payType="+$("#pay-type-select").val()+"&registerCondition="+$("#order-state-select").val()+
+			"&function="+$("#diamond-function-select").val();
+    /*]]>*/
+	gameAjax({
+		url:"/statistics/diamondExpend/distribution",
+		data:data,
+		callback:function(value){
+			chart(value);
+		}
+		});
 }
+
+//扇形图
+function chart(data){
+	var startMap = data[0];
+	var expendMap = data[1];
+	var endMap = data[2];
+	var startSeries=[];
+	var startTotal =0;
+	$.each(startMap,function(name,value){
+		startTotal +=value;
+	});
+	$.each(startMap,function(name,value){
+		var tempMap={};
+		tempMap["name"]=name;
+		tempMap["y"]=dividePercentage(value,startTotal);
+		startSeries.push(tempMap);
+	});
+	//初始钻石
+	$("#start-graph-div").highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: [[#{statistics.diamond.start}]]
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Browser share',
+            data: startSeries
+        }]
+    });
+	$.each(startMap,function(name,value){
+		$("#start-graph-div").append('<b>'+name+":"+value+'&nbsp;</b>');
+	});
+	$("#start-graph-div").show();
+	//消耗钻石
+	var expendSeries=[];
+	var expendTotal =0;
+	$.each(expendMap,function(name,value){
+		expendTotal +=value;
+	});
+	$.each(expendMap,function(name,value){
+		var tempMap={};
+		tempMap["name"]=name;
+		tempMap["y"]=dividePercentage(value,expendTotal);
+		expendSeries.push(tempMap);
+	});
+	$("#expend-graph-div").highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: [[#{statistics.diamond.expend}]]
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Browser share',
+            data: expendSeries
+        }]
+    });
+	$.each(expendMap,function(name,value){
+		$("#expend-graph-div").append('<b>'+name+":"+value+'&nbsp;</b>');
+	});
+	//剩余钻石
+	var endSeries=[];
+	var endTotal =0;
+	$.each(endMap,function(name,value){
+		endTotal +=value;
+	});
+	$.each(endMap,function(name,value){
+		var tempMap={};
+		tempMap["name"]=name;
+		tempMap["y"]=dividePercentage(value,endTotal);
+		endSeries.push(tempMap);
+	});
+	$("#end-graph-div").highcharts({
+		credits:{
+			href:"",
+			text:"TalentWalker",
+		},
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: [[#{statistics.diamond.end}]]
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.2f} %',
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Browser share',
+            data: endSeries
+        }]
+    });
+	$.each(endMap,function(name,value){
+		$("#end-graph-div").append('<b>'+name+":"+value+'&nbsp;</b>');
+	});
+}
+//两数相除 两位小数(百分比)
+function dividePercentage(element,denominator){
+	if(element==null || element==0 || denominator==null ||denominator==0){
+		return 0;
+	}
+	var divide = element/denominator;
+	return Math.round(divide*10000)/100;
+}
+
 //导出
 function exportExcel(){
-	var functionName="";
-	if($("#diamond-type-select").val()=="diamond"){
-		functionName=$("#diamond-function-select").val();
-	}else{
-		functionName=$("#gold-function-select").val();
-	}
 	/*<![CDATA[*/
-		var url ="/statistics/goldDiamondExpend/export?startStr="+$("#startDatetimepicker").val()+"&endStr="+$("#endDatetimepicker").val()+
+		var url ="/statistics/diamondExpend/export?startStr="+$("#startDatetimepicker").val()+"&endStr="+$("#endDatetimepicker").val()+
 				"&zoneId="+$("#zone-select").val()+"&diamondType="+$("#diamond-type-select").val()+"&userType="+$("#user-type-select").val()+
 				"&lordId="+$("#lord_id").val()+"&payType="+$("#pay-type-select").val()+"&registerCondition="+$("#order-state-select").val()+
-				"&function="+functionName;
+				"&function="+$("#diamond-function-select").val();
+	
     /*]]>*/
     window.location.href=url;
 }

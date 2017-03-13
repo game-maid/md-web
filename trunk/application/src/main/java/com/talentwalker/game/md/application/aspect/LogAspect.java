@@ -113,7 +113,7 @@ public class LogAspect extends GameSupport {
         log.setSessionId(getGameUser().getGamesessionId());
         if (!isThrough()) {
             log.setPreDiamond(getLord().getDiamond());
-            log.setPostPersentDiamond(getLord().getPersentDiamond());
+            log.setPrePersentDiamond(getLord().getPersentDiamond());
             log.setPreGold(getLord().getGold());
             log.setPreLevel(getLord().getLevel());
             log.setPreVipscore(getLord().getVipScore());
