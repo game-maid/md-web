@@ -9,7 +9,6 @@
 package com.talentwalker.game.md.core.domain.gameworld;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,11 +50,11 @@ public class Lord extends BaseDomain {
      */
     protected int exp;
     /**
-     * 充钱买的钻石
+     *赠送的钻石 
      */
     protected int diamond;
     /**
-     * 赠送的钻石
+     * 充钱买的钻石
      */
     protected int persentDiamond;
     /**
@@ -911,22 +910,22 @@ public class Lord extends BaseDomain {
         this.givesStrengthTimes = givesStrengthTimes;
     }
 
-//    /**
-//     * @return givesStrengthTime
-//     */
-//    public Date getGivesStrengthTime() {
-//        if (givesStrengthTime == null) {
-//            givesStrengthTime = new Date();
-//        }
-//        return givesStrengthTime;
-//    }
-//
-//    /**
-//     * @param givesStrengthTime 要设置的 givesStrengthTime
-//     */
-//    public void setGivesStrengthTime(Date givesStrengthTime) {
-//        this.givesStrengthTime = givesStrengthTime;
-//    }
+    // /**
+    // * @return givesStrengthTime
+    // */
+    // public Date getGivesStrengthTime() {
+    // if (givesStrengthTime == null) {
+    // givesStrengthTime = new Date();
+    // }
+    // return givesStrengthTime;
+    // }
+    //
+    // /**
+    // * @param givesStrengthTime 要设置的 givesStrengthTime
+    // */
+    // public void setGivesStrengthTime(Date givesStrengthTime) {
+    // this.givesStrengthTime = givesStrengthTime;
+    // }
 
     public Long getDailyFirstFreeStrenthStartTime() {
         return dailyFirstFreeStrenthStartTime;

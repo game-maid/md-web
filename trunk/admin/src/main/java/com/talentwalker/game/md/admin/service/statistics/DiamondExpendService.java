@@ -189,6 +189,7 @@ public class DiamondExpendService extends BaseService {
 
         } else {// 整体用户 根据条件查询
             String matchLordIds = "";
+            System.out.println(lordIds);
             matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
             String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
             // 道具数量 、消费次数
