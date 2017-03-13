@@ -194,7 +194,7 @@ public class EquipService extends GameSupport {
 
     private List<Integer> getStrengthenWeight(Equip equip, int vipLv) {
         double lvLimit = this.getDataConfig().get("equip").get(equip.getEquipId()).getDouble("updateLvLimit");
-        if (lvLimit == 3.0) {
+        if (lvLimit != 3.0) {
             return new ArrayList<Integer>();
         }
         JSONArray config = this.getDataConfig().get("VIP").get(vipLv + "").get("equipUpdateComboRate").getJsonArray();
