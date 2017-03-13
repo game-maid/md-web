@@ -476,10 +476,11 @@ function dividePercentage(element,denominator){
 //导出
 function exportExcel(){
 	/*<![CDATA[*/
-		var url ="/statistics/goldDiamondExpend/export?startStr="+$("#startDatetimepicker").val()+"&endStr="+$("#endDatetimepicker").val()+
+		var url ="/statistics/diamondExpend/export?startStr="+$("#startDatetimepicker").val()+"&endStr="+$("#endDatetimepicker").val()+
 				"&zoneId="+$("#zone-select").val()+"&diamondType="+$("#diamond-type-select").val()+"&userType="+$("#user-type-select").val()+
 				"&lordId="+$("#lord_id").val()+"&payType="+$("#pay-type-select").val()+"&registerCondition="+$("#order-state-select").val()+
-				"&function="+("#diamond-function-select").val();
+				"&function="+$("#diamond-function-select").val();
+	
     /*]]>*/
     window.location.href=url;
 }

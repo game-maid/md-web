@@ -10,6 +10,9 @@ package com.talentwalker.game.md.admin.controller.statistics;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -59,11 +62,49 @@ public class DiamondExpendController extends BaseController {
         return findList;
     }
 
+    /**
+     * @Description:扇形图查询
+     * @param startStr
+     * @param endStr
+     * @param zoneId
+     * @param diamondType
+     * @param userType
+     * @param lordId
+     * @param payType
+     * @param registerCondition
+     * @param function
+     * @return
+     * @throws
+     */
     @GameResponse
     @RequestMapping(value = "distribution", method = RequestMethod.POST)
     public Object distribution(String startStr, String endStr, String zoneId, String diamondType, Integer userType,
             String lordId, Integer payType, Integer registerCondition, String function) {
         return diamondExpendService.distribution(startStr, endStr, zoneId, diamondType, userType, lordId, payType,
                 registerCondition, function);
+    }
+
+    /**
+     * @Description:文件导出
+     * @param startStr
+     * @param endStr
+     * @param zoneId
+     * @param diamondType
+     * @param userType
+     * @param lordId
+     * @param payType
+     * @param registerCondition
+     * @param function
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping(value = "export", method = RequestMethod.POST)
+    public Object export(String startStr, String endStr, String zoneId, String diamondType, Integer userType,
+            String lordId, Integer payType, Integer registerCondition, String function, HttpServletRequest request,
+            HttpServletResponse response) {
+        diamondExpendService.export(startStr, endStr, zoneId, diamondType, userType, lordId, payType, registerCondition,
+                function, request, response);
+        return null;
     }
 }
