@@ -116,11 +116,11 @@ public class TopUpCardService extends GameSupport {
                 lord.getMonthCard().put(productId, monthCard);
             }
         }
-        if (baseAmount > 0) {
-            gainPayService.gain(lord, ItemID.DIAMOND, baseAmount);
-        }
         if (persentAmount > 0) {
-            gainPayService.gain(lord, ItemID.PERSENT_DIAMOND, persentAmount);
+            gainPayService.gain(lord, ItemID.DIAMOND, persentAmount);
+        }
+        if (baseAmount > 0) {
+            gainPayService.gain(lord, ItemID.PERSENT_DIAMOND, baseAmount);
         }
         if (vipScore > 0) {
             gainPayService.gain(lord, ItemID.VIPSCORE, vipScore);
