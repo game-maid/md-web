@@ -74,30 +74,28 @@ public class GainPayService extends GameSupport {
     private void gainPay(Object obj, String itemId, int number) {
         if (obj instanceof Lord) {
             Lord lord = (Lord) obj;
-            if (ItemID.DIAMOND.equals(itemId)) { // 钻石
-                int diamond = lord.getDiamond();
-                int persentDiamond = lord.getPersentDiamond();
+            if (ItemID.DIAMOND.equals(itemId)) { // 赠送的钻石
+                int diamond = lord.getDiamond();// 赠送的钻石
+                int persentDiamond = lord.getPersentDiamond();// 购买的钻石
                 if (number < 0) {// 消耗钻石
-                    // this.check(diamond, number);
+                    this.check(diamond + persentDiamond, number);
                     // 优先消耗充值钻石
-                    if (diamond + number >= 0) {// 消耗充值钻石
-                        lord.setDiamond(diamond + number);
-                        this.lordResponse(itemId, number, lord.getDiamond());
+                    if (persentDiamond + number >= 0) {// 消耗充值钻石
+                        lord.setPersentDiamond(persentDiamond + number);
+                        this.lordResponse(ItemID.PERSENT_DIAMOND, number, lord.getPersentDiamond());
                     } else if (diamond + persentDiamond + number >= 0) {// 消耗充值钻石和赠送钻石
-                        if (diamond != 0) {
-                            lord.setDiamond(0);
-                            this.lordResponse(itemId, -diamond, lord.getDiamond());
+                        if (persentDiamond > 0) {
+                            lord.setPersentDiamond(0);
+                            this.lordResponse(ItemID.PERSENT_DIAMOND, -persentDiamond, lord.getPersentDiamond());
                         }
-                        lord.setPersentDiamond(diamond + persentDiamond + number);
-                        this.lordResponse(ItemID.PERSENT_DIAMOND, number + diamond, lord.getPersentDiamond());
-                    } else {
-                        GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_21019, "钻石不足");
+                        lord.setDiamond(diamond + persentDiamond + number);
+                        this.lordResponse(ItemID.DIAMOND, number + persentDiamond, lord.getDiamond());
                     }
-                } else {// 获得充值钻石
+                } else {// 获得赠送钻石
                     lord.setDiamond(diamond + number);
                     this.lordResponse(itemId, number, lord.getDiamond());
                 }
-            } else if (ItemID.PERSENT_DIAMOND.equals(itemId)) {// 增加赠送的钻石
+            } else if (ItemID.PERSENT_DIAMOND.equals(itemId)) {// 增加购买的钻石
                 lord.setPersentDiamond(number + lord.getPersentDiamond());
                 this.lordResponse(itemId, number, lord.getPersentDiamond());
             } else if (ItemID.GOLD.equals(itemId)) { // 金币
