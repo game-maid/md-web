@@ -8,11 +8,13 @@
 
 package com.talentwalker.game.md.admin.controller.statistics;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.talentwalker.game.md.admin.controller.BaseController;
+import com.talentwalker.game.md.admin.service.statistics.ItemExpendService;
 import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 
 /**
@@ -23,6 +25,10 @@ import com.talentwalker.game.md.core.web.bind.annotation.GameResponse;
 @Controller
 @RequestMapping(value = "statistics/itemExpend", method = RequestMethod.GET)
 public class ItemExpendController extends BaseController {
+
+    @Autowired
+    private ItemExpendService itemExpendService;
+
     /**
      * @Description:页面跳转
      * @return
@@ -34,4 +40,11 @@ public class ItemExpendController extends BaseController {
         return "statistics/itemExpend";
     }
 
+    @GameResponse
+    @RequestMapping(value = "findList", method = RequestMethod.POST)
+    public Object list(String startStr, String endStr, String zoneId, String itemId, Integer userType, String lordId,
+            Integer payType, Integer registerCondition, String function) {
+        return itemExpendService.findList(startStr, endStr, zoneId, itemId, userType, lordId, payType,
+                registerCondition, function);
+    }
 }
