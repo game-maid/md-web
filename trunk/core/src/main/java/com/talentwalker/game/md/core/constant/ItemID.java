@@ -17,6 +17,9 @@ public class ItemID {
 
     public final static String DIAMOND = "diamond";
 
+    /**
+     * 充值钻石
+     */
     public final static String PERSENT_DIAMOND = "persentDiamond";
 
     public final static String GOLD = "gold";
