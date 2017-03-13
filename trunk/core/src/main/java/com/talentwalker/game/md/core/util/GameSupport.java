@@ -258,18 +258,19 @@ public class GameSupport extends BaseGameSupport {
      */
     public boolean isLevelOpen(String functionName, Lord lord, boolean isError) {
         DataConfig config = this.getDataConfig().get(ConfigKey.FUNCTION_LEVEL_OPEN);
+        boolean isOpen = true;
         if (config.get(functionName).getInteger("control") == 1) {
             if (config.get(functionName).getJsonObject().containsKey("openlevel")
                     && lord.getLevel() < config.get(functionName).getInteger("openlevel")) {
-                if (isError) {
-                    GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_39001);
-                }
-                return false;
+                isOpen = false;
             }
         } else {
-            return false;
+            isOpen = false;
         }
-        return true;
+        if (isError && !isOpen) {
+            GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_39001);
+        }
+        return isOpen;
     }
 
     /**
