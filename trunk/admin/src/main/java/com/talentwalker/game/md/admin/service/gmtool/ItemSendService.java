@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -84,6 +85,12 @@ public class ItemSendService extends BaseService {
         while (it.hasNext()) {
             Map<String, String> m = Maps.newHashMap();
             String id = (String) it.next();
+            // 去除特技发送
+            if (StringUtils.startsWith(id, ItemID.SKILL)) {
+                if (StringUtils.indexOf(id, "_n") > 0 || StringUtils.indexOf(id, "_u") > 0) {
+                    continue;
+                }
+            }
             String name = "";
             if (JSONObject.fromObject(config.get(id)).containsKey("name")) {
                 name = JSONObject.fromObject(config.get(id)).getString("name");

@@ -132,7 +132,7 @@ public class DuelService extends GameSupport {
      * @throws
      */
     public Duel getMain(Lord lord) {
-        if (this.isLevelOpen(ConfigKey.DUEL, lord, false)) {
+        if (!this.isLevelOpen(ConfigKey.DUEL, lord, false)) {
             return null;
         }
         Duel duel = getDuel(lord);
