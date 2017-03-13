@@ -10,6 +10,8 @@ package com.talentwalker.game.md.application.aspect;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -25,6 +27,8 @@ import com.talentwalker.game.md.core.exception.GameErrorCode;
 import com.talentwalker.game.md.core.exception.GameException;
 import com.talentwalker.game.md.core.repository.GameLogRepository;
 import com.talentwalker.game.md.core.response.GameModel;
+import com.talentwalker.game.md.core.response.ResponseKey;
+import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameSupport;
 import com.talentwalker.game.md.core.util.ServletUtils;
 
@@ -138,6 +142,19 @@ public class LogAspect extends GameSupport {
             }
             if (log.getPreGold() > log.getPostGold()) {// 消耗金币
                 expendItems.add(ItemID.GOLD);
+            }
+            JSONObject itemJSON = getDataConfig().get(ConfigKey.ITEM).getJsonObject();
+            Object payModel = this.gameModel.getModel(ResponseKey.PAY);
+            if (payModel != null) {
+                Map<String, Object> payMap = (Map<String, Object>) payModel;
+                Object itemsModel = payMap.get(ResponseKey.ITEMS);
+                if (itemsModel != null) {
+                    Map<String, Object> itemsMap = (Map<String, Object>) itemsModel;
+                    Set<String> keySet = itemsMap.keySet();
+                    for (String itemId : keySet) {
+                        expendItems.add(itemId);
+                    }
+                }
             }
         }
 

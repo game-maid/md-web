@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -65,9 +66,78 @@ public class ItemExpendService extends BaseService {
         if (userType != 0) {
             lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition, itemId);// 符合要求的玩家id
         }
-
         System.out.println(lordIds);
+        // 查询总条数
+        long total = countTotal(startDate, endDate, zoneId, itemId, userType, lordId, payType, registerCondition,
+                function, lordIds);
+        // 查询列表
+
         return null;
+    }
+
+    /**
+     * @Description:查询总条数
+     * @param startDate
+     * @param endDate
+     * @param zoneId
+     * @param itemId
+     * @param userType
+     * @param lordId
+     * @param payType
+     * @param registerCondition
+     * @param function
+     * @param lordIds
+     * @return
+     * @throws
+     */
+    private long countTotal(long startDate, long endDate, String zoneId, String itemId, Integer userType, String lordId,
+            Integer payType, Integer registerCondition, String function, String lordIds) {
+        AggregationOutput totalOutPut = null;
+        String matchZoneId = "{$match:{zone_id:'" + zoneId + "'}}";
+        String matchTime = "{$match:{$and:[{request_time:{$gte:" + startDate + "}},{request_time:{$lt:" + endDate
+                + "}}]}}";
+        String matchItemType = "{$match:{expend_items:{$in:['" + itemId + "']}}}]}}";
+        String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
+        if (userType == 0) {// 单个用户 根据用户id查询
+            // 分组 统计总数 count
+            List<DBObject> countList = new ArrayList<>();
+            String matchLordId = "{$match:{player_id:'" + lordId + "'}}";
+            String discountUri = "{$group:{_id:'$uri'}}";
+            String groupNum = "{$group:{_id:'$count',count:{$sum:1}}}";
+            countList.add((DBObject) JSON.parse(matchZoneId));
+            countList.add((DBObject) JSON.parse(matchLordId));
+            countList.add((DBObject) JSON.parse(matchTime));
+            countList.add((DBObject) JSON.parse(matchItemType));
+            countList.add((DBObject) JSON.parse(discountUri));
+            countList.add((DBObject) JSON.parse(groupNum));
+            totalOutPut = mongoTemplate.getCollection("game_log").aggregate(countList);
+        } else {// 整体用户 根据条件查询
+            String matchLordIds = "";
+            matchLordIds = "{$match:{player_id:{$in:[" + lordIds + "]}}}";
+            // 分组 统计总数 count
+            List<DBObject> countList = new ArrayList<>();
+            String discountUri = "{$group:{_id:'$uri'}}";
+            String groupNum = "{$group:{_id:'$count',count:{$sum:1}}}";
+            countList.add((DBObject) JSON.parse(matchZoneId));
+            countList.add((DBObject) JSON.parse(matchTime));
+            countList.add((DBObject) JSON.parse(matchItemType));
+            countList.add((DBObject) JSON.parse(matchLordIds));
+            if (!StringUtils.isEmpty(function)) {
+                countList.add((DBObject) JSON.parse(matchUri));
+            }
+            countList.add((DBObject) JSON.parse(discountUri));
+            countList.add((DBObject) JSON.parse(groupNum));
+            totalOutPut = mongoTemplate.getCollection("game_log").aggregate(countList);
+        }
+        long total = 0L;
+        // 分组 统计总数 count 处理查询结果
+        Iterator<DBObject> totalIt = totalOutPut.results().iterator();
+        while (totalIt.hasNext()) {
+            BasicDBObject next = (BasicDBObject) totalIt.next();
+            total = next.getLong("count");
+        }
+        System.out.println("total:" + total);
+        return total;
     }
 
     /**
@@ -127,7 +197,6 @@ public class ItemExpendService extends BaseService {
             lordIdList = registerLordIdList;
         }
         String lordIds = listToString(lordIdList);
-
         return lordIds;
     }
 
