@@ -61,6 +61,10 @@ public class ConfigKey {
      * rank 道具品质
      */
     public static final String ITEM_RANK = "rank";
+    /**
+     * 道具名称
+     */
+    public static final String ITEM_NAME = "name";
 
     /********************guide_other*****************************/
     /**
