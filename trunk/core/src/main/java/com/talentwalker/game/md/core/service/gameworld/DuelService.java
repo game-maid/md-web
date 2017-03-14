@@ -1422,7 +1422,7 @@ public class DuelService extends GameSupport {
         if (duel.getAward() == null) {
             GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_26008, "没有缓存奖励");
         }
-        if (!duel.getAward().contains(index)) {
+        if (duel.getAward().get(index) == null) {
             GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_26008, "没有缓存奖励");
         }
         Map<String, Integer> award = duel.getAward().get(index);

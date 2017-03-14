@@ -139,9 +139,9 @@ public class DiamondExpendService extends BaseService {
             matchItemType = "{$match:{$or:[{expend_items:{$in:['" + ItemID.DIAMOND + "']}},{expend_items:{$in:['"
                     + ItemID.PERSENT_DIAMOND + "']}}]}}";
         } else if (DIAMOND_TYPE_PAY.equals(diamondType)) {
-            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND + "']}}}]}}";
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.PERSENT_DIAMOND + "']}}}";
         } else {
-            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}]}}";
+            matchItemType = "{$match:{expend_items:{$in:['" + ItemID.DIAMOND + "']}}}";
         }
         String limitStr = "";
         String offsetStr = "";
