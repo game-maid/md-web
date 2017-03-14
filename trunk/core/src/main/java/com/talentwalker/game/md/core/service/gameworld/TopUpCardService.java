@@ -74,15 +74,16 @@ public class TopUpCardService extends GameSupport {
             // 首充翻倍
             persentAmount = baseAmount * (topupConfig.getInteger(CONFIG_CASH_SHOP_MULTIPLE) - 1);
             if (topupConfig.getInteger("type") != CONFIG_SHOP_TYPE_ITEM) {
-                vipScore += topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
+                persentAmount += topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
             }
             topUpFirstRecord.getRecord().put(productId, 1);
         } else {
-            if (topupConfig.getInteger("type") != CONFIG_SHOP_TYPE_ITEM) {
-                vipScore += topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
-            } else {
-                persentAmount = topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
-            }
+            // if (topupConfig.getInteger("type") != CONFIG_SHOP_TYPE_ITEM) {
+            // vipScore += topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
+            // } else {
+            // persentAmount = topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
+            // }
+            persentAmount = topupConfig.getInteger(CONFIG_CASH_SHOP_SEND_AMOUNT);
             topUpFirstRecord.getRecord().put(productId, topUpFirstRecord.getRecord().get(productId) + 1);
         }
         if (topupConfig.getInteger("type") != CONFIG_SHOP_TYPE_ITEM) {
