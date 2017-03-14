@@ -727,5 +727,8 @@ public class GameErrorCode extends ErrorCode {
      * 未达到开启等级
      */
     public static final Integer GAME_ERROR_39001 = 39001;
-
+    /**
+     * 武将获取次数达到上限
+     */
+    public static final Integer GAME_ERROR_39002 = 39002;
 }

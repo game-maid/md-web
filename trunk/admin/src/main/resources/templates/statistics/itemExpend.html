@@ -11,7 +11,7 @@
 	<link th:href="@{/static/css/plugins/jsTree/style.min.css}" rel="stylesheet"/>
     <link th:href="@{/static/css/plugins/webuploader/webuploader.css}" rel="stylesheet"/>
     <link th:href="@{/static/css/plugins/iCheck/custom.css}" rel="stylesheet"/>
-	
+   	<link th:href="@{/static/css/plugins/autocompleter/jquery.autocompleter.css}" rel="stylesheet"/>
 	
     <script th:src="@{/static/js/plugins/bootstrap-table/bootstrap-table.js}"></script>
 	<script th:src="@{'/static/js/plugins/bootstrap-table/locale/bootstrap-table-'+${#ctx.locale.language}+'.min.js'}"></script>
@@ -27,6 +27,7 @@
 	<script th:src="@{/static/js/plugins/iCheck/icheck.min.js}"></script>
 	<script th:src="@{/static/js/plugins/bootstrap-waitingfor/bootstrap-waitingfor.min.js}"></script>
 	<script th:src="@{/static/js/plugins/highcharts/highcharts.js}"></script>
+		<script th:src="@{/static/js/plugins/autocompleter/jquery.autocompleter.min.js}"></script>
 </head>
 <body class="gray-bg">
 	<div class="wrapper wrapper-content animated fadeInRight">
@@ -54,10 +55,7 @@
 	                        <label style="margin-top:10px;margin-left:10px;" th:text="#{sys.item}">道具</label>
 	                    </div>
 	                    <div class="col-sm-1" style="float:left;">
-	                        <select class="form-control" id="item-type-select">
-	                       		<option value="diamond" th:text="#{sys.item.diamond}">钻石</option>
-	                       		<option value="gold" th:text="#{sys.item.gold}">金币</option>
-							</select>
+	                        <input placeholder="选择道具" class="form-control" value="" id="itemId" name="itemId" th:placeholder="#{sys.item.select}"/> 
 	                    </div>
 	                    <div class="col-sm-1" style="float:left;">
 	                       	<select class="form-control" id="user-type-select">
@@ -149,6 +147,8 @@ $(function(){
 	$("#gold-function-div").hide();
 	//获取功能名称
 	queryFunctionName();
+	//获取道具名称
+	queryItems($("#itemId"));
 });
 
 //初始化时间(日/周/月)
@@ -195,7 +195,7 @@ function initTable(){
 				startStr:$("#startDatetimepicker").val(),
 				endStr:$("#endDatetimepicker").val(),
 				zoneId: $("#zone-select").val(),
-				itemType:$("#item-type-select").val(),
+				itemId:$("#itemId").val(),
 				userType:$("#user-type-select").val(),
 				lordId:$("#lord_id").val(),
 				payType:$("#pay-type-select").val(),
@@ -256,19 +256,25 @@ function search(){
 	if($("#user-type-select").val()==0){//单个用户
 		if($("#lord_id").val()==null||$("#lord_id").val().length==0){
 			swal("",[[#{statistics.gold.input.lord.id}]],"warning");
+			return ;
 		}
+	}
+	
+	if(!itemsMap.hasOwnProperty($("#itemId").val())){
+		swal("",[[#{statistics.item.expend.items.null}]],"warning");
+		return ;
 	}
 	$("#panelTable").bootstrapTable("refreshOptions", {
 		ajax : function(params) {
-			gameBootstrapTable("/statistics/goldDiamondExpend/findList", params);
+			gameBootstrapTable("/statistics/itemExpend/findList", params);
 		}
 	});
 }
 //导出
 function exportExcel(){
 	/*<![CDATA[*/
-		var url ="/statistics/goldDiamondExpend/export?startStr="+$("#startDatetimepicker").val()+"&endStr="+$("#endDatetimepicker").val()+
-				"&zoneId="+$("#zone-select").val()+"&itemType="+$("#item-type-select").val()+"&userType="+$("#user-type-select").val()+
+		var url ="/statistics/itemExpend/export?startStr="+$("#startDatetimepicker").val()+"&endStr="+$("#endDatetimepicker").val()+
+				"&zoneId="+$("#zone-select").val()+"&itemId="+$("#itemId").val()+"&userType="+$("#user-type-select").val()+
 				"&lordId="+$("#lord_id").val()+"&payType="+$("#pay-type-select").val()+"&registerCondition="+$("#order-state-select").val()+
 				"&function="+$("#function-select").val();
     /*]]>*/

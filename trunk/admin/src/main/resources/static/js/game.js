@@ -313,17 +313,26 @@ var queryFunctionName=function(){
 	});
 };
 //获取道具表中的道具
-var queryItems = function (){
+var queryItems = function (input){
 	gameAjax({
 		url : "/statistics/items",
-		async : false,
 		type : "get",
 		callback : function(data) {
 			itemsMap={};
 			$.each(data,function(index,val){
 				itemsMap[val.value]=val.name;
 			});
+			input.autocompleter({
+		    	source: data,
+		        limit: 10,
+		        highlightMatches: true,
+		        callback: function (value, index, selected) {
+		        	if (selected) {
+		        		$('#dialogcontent').find('.auto_affix').val(selected.name);
+		        		} 
+		        }
+		    });
 		}
-	});
+	})
 }
 

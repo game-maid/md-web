@@ -42,7 +42,7 @@ public class ShopRecruitController extends GameSupport {
     @GameResponse
     @RequestMapping(value = "textTriggering/{recruitKey}")
     public Object textTriggering(@PathVariable String recruitKey) {
-        shopRecruitService.textTriggeringRecruit(recruitKey);
+        shopRecruitService.triggeringRecruit(recruitKey);
         return this.gameModel;
     }
 

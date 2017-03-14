@@ -187,7 +187,7 @@
 							<label class="col-sm-3 control-label" th:text="#{activity.recruit.is.one}">是否单抽：</label>
 							<div class="col-sm-7 btn-group" id="isOneRecruitDiv">
 								<label class="radio-inline i-checks isOneRecruit"> 
-									<input type="radio"  checked="checked"  value="true" id="oneRecruitTrue" name="isOneRecruit" th:text="#{sys.true}" />
+									<input type="radio"  value="true" id="oneRecruitTrue" name="isOneRecruit" th:text="#{sys.true}" />
 								</label> 
 								<label class="radio-inline i-checks isOneRecruit"> 
 									<input type="radio" value="false" id="oneRecruitFalse" name="isOneRecruit" th:text="#{sys.false}" />
@@ -1032,6 +1032,7 @@ function onSave(){
 		 temp["getWeight"]=parseInt(val.getWeight);
 		 bData.push(temp);
 	 });
+	 //return ; 
 /*<![CDATA[*/
 	var data=$("#addForm").serialize()+"&zoneList="+$("#zonelist").getValues()+"&data1="+JSON.stringify(aData)+"&data2="+JSON.stringify(bData);
 	if(id!=null){

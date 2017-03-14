@@ -61,6 +61,10 @@ public class ConfigKey {
      * rank 道具品质
      */
     public static final String ITEM_RANK = "rank";
+    /**
+     * 道具名称
+     */
+    public static final String ITEM_NAME = "name";
 
     /********************guide_other*****************************/
     /**
@@ -176,6 +180,10 @@ public class ConfigKey {
      * 武将被抽取到的权重
      */
     public static final String SHOP_HERO_RECRUIT_GETWEIGHT = "getWeight";
+    /**
+     * 最大抽取次数
+     */
+    public static final String SHOP_HERO_RECRUIT_GETTIMES = "gettimes";
     /**********************突破计算*****************************/
     public static final String RANK_UP = "rankUp";
 

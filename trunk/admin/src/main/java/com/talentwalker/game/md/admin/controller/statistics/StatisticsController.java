@@ -52,6 +52,8 @@ public class StatisticsController extends BaseController {
      * @return
      * @throws
      */
+    @GameResponse
+    @RequestMapping(value = "items")
     public List<Map<String, Object>> queryItems() {
         return statisticsService.queryItems();
     }

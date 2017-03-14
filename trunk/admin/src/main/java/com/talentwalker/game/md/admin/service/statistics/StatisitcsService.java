@@ -59,8 +59,18 @@ public class StatisitcsService {
      * @throws
      */
     public List<Map<String, Object>> queryItems() {
-
-        return null;
+        List<Map<String, Object>> result = new ArrayList<>();
+        DataConfig itemConfig = dataConfigManager.getTest().get(ConfigKey.ITEM);
+        JSONObject itemJSON = itemConfig.getJsonObject();
+        Set<String> keySet = itemJSON.keySet();
+        for (String key : keySet) {
+            Map<String, Object> tempMap = new HashMap<>();
+            tempMap.put("value", key);
+            tempMap.put("name", itemConfig.get(key).getString(ConfigKey.ITEM_NAME));
+            tempMap.put("label", key + "-" + itemConfig.get(key).getString(ConfigKey.ITEM_NAME));
+            result.add(tempMap);
+        }
+        return result;
     }
 
 }
