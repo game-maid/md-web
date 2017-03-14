@@ -71,7 +71,6 @@ public class ItemExpendService extends BaseService {
         if (userType != 0) {
             lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition, itemId);// 符合要求的玩家id
         }
-        System.out.println("lordIds:" + lordIds);
         // 查询总条数
         long total = countTotal(startDate, endDate, zoneId, itemId, userType, lordId, payType, registerCondition,
                 function, lordIds);
@@ -282,7 +281,6 @@ public class ItemExpendService extends BaseService {
             BasicDBObject next = (BasicDBObject) totalIt.next();
             total = next.getLong("count");
         }
-        System.out.println("total:" + total);
         return total;
     }
 
