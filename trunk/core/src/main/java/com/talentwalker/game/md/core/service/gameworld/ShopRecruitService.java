@@ -96,35 +96,34 @@ public class ShopRecruitService extends GameSupport {
      */
     private List<Recruit> getShopRecruit(ShopRecruit shopRecruit, Lord lord) {
         Set<Recruit> activityRecruit = new HashSet<>();
+        List<Recruit> recruitList = new ArrayList<>();
         DataConfig config = this.getDataConfig().get(ConfigKey.SHOP_HERO_RECRUIT);
         int guidanceRcruit = lord.getGuidanceRcruit();
         Map<String, Recruit> recruitMap = null;
         if (guidanceRcruit == 0 && shopRecruit == null) {
             shopRecruit = new ShopRecruit();
+            recruitMap = new HashMap<>();
             shopRecruit.setId(lord.getId());
             Recruit recruit = initRecruit();
             recruit.setId(ConfigKey.SHOP_HERO_RECRUIT_FIRST);
-            recruit.setType(4);
+            recruit.setType(1);
             recruitMap.put(ConfigKey.SHOP_HERO_RECRUIT_FIRST, recruit);
             shopRecruit.setRecruit(recruitMap);
+            recruitList.add(recruit);
         } else if (guidanceRcruit >= 1) {
             recruitMap = shopRecruit.getRecruit();
             commonRecruit(config, recruitMap, lord, shopRecruit, activityRecruit);
+            // 当前存在的活动招募
+            getActivityRecruit(lord, shopRecruit, activityRecruit);
+            for (String recruitId : recruitMap.keySet()) {
+                activityRecruit.add(recruitMap.get(recruitId));
+            }
+            this.setRecruit(shopRecruit, activityRecruit);
+            shopRecruitRepository.save(shopRecruit);
+            // 常驻招募和触发招募
+            recruitList = getResidentRecruit(shopRecruit);
         }
-        // 当前存在的活动招募
-        getActivityRecruit(lord, shopRecruit, activityRecruit);
-
-        for (String recruitId : recruitMap.keySet()) {
-            activityRecruit.add(recruitMap.get(recruitId));
-        }
-        this.setRecruit(shopRecruit, activityRecruit);
-        shopRecruitRepository.save(shopRecruit);
-        // 常驻招募和触发招募
-        List<Recruit> recruit = getResidentRecruit(shopRecruit);
-
-        List<Recruit> result = new ArrayList<>();
-        result.addAll(recruit);
-        return result;
+        return recruitList;
     }
 
     /**

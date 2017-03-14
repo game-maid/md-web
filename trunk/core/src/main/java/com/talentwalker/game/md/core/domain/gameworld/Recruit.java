@@ -38,10 +38,6 @@ public class Recruit extends BaseDomain {
      */
     public static final int TYPE_ACTIVITY = 3;
     /**
-     * 新手招募（配置）
-     */
-    public static final int TYPE_NEW = 4;
-    /**
      * 招募总次数
      */
     protected int times;
