@@ -114,6 +114,8 @@ public class ShopRecruitService extends GameSupport {
         }
         // 常驻招募和触发招募
         List<Recruit> recruit = getResidentRecruit(shopRecruit);
+        // 当前存在的活动招募
+        getActivityRecruit(lord, shopRecruit, activityRecruit);
 
         activityRecruit.addAll(recruit);
         this.setRecruit(shopRecruit, activityRecruit);
@@ -164,13 +166,42 @@ public class ShopRecruitService extends GameSupport {
         getActivityRecruit(lord, shopRecruit, activityRecruit);
     }
 
-    public void textTriggeringRecruit(String recruitId) {
+    public void triggeringRecruit(Lord lord, String condition) {
+        DataConfig config = this.getDataConfig().get("shop_heroRecruit");
+        ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
+        Iterator<String> it = config.getJsonObject().keys();
+        while (it.hasNext()) {
+            String recruitId = it.next();
+            if (shopRecruit != null && shopRecruit.getRecruit().containsKey(recruitId)) {
+                continue;
+            }
+            Integer type = config.get(recruitId).getInteger(ConfigKey.SHOP_HERO_RECRUIT_TYPE);
+            if (type == 2) {// 触发招募
+                if (config.get(recruitId).get("typeby").equals(condition)) {
+                    // 初始化触发招募
+                    Recruit triggeringRecruit = initRecruit();
+                    triggeringRecruit.setId(recruitId);
+                    triggeringRecruit.setType(2);
+                    shopRecruit.getRecruit().put(recruitId, triggeringRecruit);
+                    // 获取当前招募列表
+                    List<Recruit> recruit = this.getShopRecruit(shopRecruit, lord);
+                    Map<String, List<Recruit>> map = new HashMap<String, List<Recruit>>();
+                    map.put("recruit", recruit);
+                    shopRecruitRepository.save(shopRecruit);
+                    this.gameModel.addObject(ResponseKey.SHOP, map);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void triggeringRecruit(String recruitId) {
+        Lord lord = this.getLord();
         // 检验触发招募是否存在
         DataConfig config = this.getDataConfig().get("shop_heroRecruit");
         if (!config.getJsonObject().containsKey(recruitId)) {
             GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_28002);
         }
-        Lord lord = this.getLord();
         ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
         // 初始化触发招募
         Recruit triggeringRecruit = initRecruit();
@@ -215,7 +246,12 @@ public class ShopRecruitService extends GameSupport {
             if (time < System.currentTimeMillis()) {
                 return true;
             }
+            int times = config.getJsonObject().containsKey("gettimes") ? config.getInteger("gettimes") : 0;
+            if (recruit.getTimes() >= times) {
+                return true;
+            }
         }
+
         return false;
 
     }
