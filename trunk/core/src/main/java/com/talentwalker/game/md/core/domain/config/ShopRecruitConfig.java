@@ -639,7 +639,7 @@ public class ShopRecruitConfig extends BaseDomain {
     /**
      * @param isOneRecruit 要设置的 isOneRecruit
      */
-    public void setOneRecruit(boolean isOneRecruit) {
+    public void setIsOneRecruit(boolean isOneRecruit) {
         this.isOneRecruit = isOneRecruit;
     }
 
