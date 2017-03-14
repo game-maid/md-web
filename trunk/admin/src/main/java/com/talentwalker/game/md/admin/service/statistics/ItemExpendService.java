@@ -19,6 +19,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.talentwalker.game.md.admin.service.BaseService;
-import com.talentwalker.game.md.core.constant.ItemID;
 import com.talentwalker.game.md.core.repository.support.SearchFilter;
 
 /**
@@ -81,7 +81,7 @@ public class ItemExpendService extends BaseService {
         findContent(startDate, endDate, zoneId, itemId, userType, lordId, payType, registerCondition, function,
                 pageable, content, lordIds);
 
-        return null;
+        return new PageImpl<>(content, pageable, total);
     }
 
     /**
@@ -113,15 +113,15 @@ public class ItemExpendService extends BaseService {
             offsetStr = "{$skip:" + pageable.getOffset() + "}";
             limitStr = "{$limit:" + pageable.getPageSize() + "}";
         }
+        String groupItemNum = "{$group:{_id:{uri:'$uri'},expendTimes:{$sum:1},itemNum:{$sum:'$result.pay.items."
+                + itemId + "'}}}";
+        String sortByUri = "{$sort:{_id.uri:-1}}";
         AggregationOutput selectOutPut = null;
         AggregationOutput payOutPut = null;
         if (userType == 0) {// 单个用户 根据用户id查询
             String matchLordId = "{$match:{player_id:'" + lordId + "'}}";
             // 道具数量 、消费次数
             List<DBObject> selectList = new ArrayList<>();
-            String groupItemNum = "{$group:{_id:{uri:'$uri'},expendTimes:{$sum:1},num:{$sum:'$result.pay.items."
-                    + itemId + "'}}}";
-            String sortByUri = "{$sort:{_id.uri:-1}}";
             selectList.add((DBObject) JSON.parse(matchZoneId));
             selectList.add((DBObject) JSON.parse(matchTime));
             selectList.add((DBObject) JSON.parse(matchLordId));
@@ -157,9 +157,6 @@ public class ItemExpendService extends BaseService {
             String matchUri = "{$match:{uri:{$regex:'/" + function + "/'}}}";
             // 道具数量 、消费次数
             List<DBObject> selectList = new ArrayList<>();
-            String groupItemNum = "{$group:{_id:{uri:'$uri'},expendTimes:{$sum:1},payNum:{$sum:'$result.pay.lord."
-                    + ItemID.PERSENT_DIAMOND + "'},freeNum:{$sum:'$result.pay.lord." + ItemID.DIAMOND + "'}}}";
-            String sortByUri = "{$sort:{_id.uri:-1}}";
             selectList.add((DBObject) JSON.parse(matchZoneId));
             selectList.add((DBObject) JSON.parse(matchTime));
             selectList.add((DBObject) JSON.parse(matchItemType));
@@ -203,12 +200,10 @@ public class ItemExpendService extends BaseService {
             content.add(map);
             BasicDBObject next = (BasicDBObject) selectIt.next();
             String uri = ((BasicDBObject) next.get("_id")).getString("uri");
-            int payNum = next.getInt("payNum");
-            int freeNum = next.getInt("freeNum");
+            int itemNum = next.getInt("itemNum");
             int expendTimes = next.getInt("expendTimes");
             map.put("functionName", uri);
-            map.put("payNum", payNum);
-            map.put("freeNum", freeNum);
+            map.put("ItemNum", itemNum);
             map.put("expendTimes", expendTimes);
         }
         // 消费人数 处理查询结果
