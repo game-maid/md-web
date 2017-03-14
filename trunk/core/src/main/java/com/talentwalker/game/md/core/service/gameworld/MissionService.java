@@ -439,6 +439,7 @@ public class MissionService extends GameSupport {
             mission.getActiveStatus().clear();
             // 刷新任务
             initDailyMission(lord, mission);
+            dailyRepository.save(mission);
         }
 
         return mission;
