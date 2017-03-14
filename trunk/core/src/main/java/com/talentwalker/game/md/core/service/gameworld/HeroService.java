@@ -809,6 +809,10 @@ public class HeroService extends GameSupport {
             Romance newRomance = new Romance();
             romance.put(heroId, newRomance);
             HashMap<Object, Object> updateMap = new HashMap<>();
+            Object model = this.gameModel.getModel(ResponseKey.ROMANCE);
+            if (model != null) {
+                updateMap = (HashMap<Object, Object>) model;
+            }
             updateMap.put(heroId, newRomance);
             this.gameModel.addObject(ResponseKey.ROMANCE, updateMap);
         }

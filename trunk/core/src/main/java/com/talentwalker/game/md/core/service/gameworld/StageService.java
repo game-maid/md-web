@@ -61,6 +61,9 @@ public class StageService extends GameSupport {
     @Autowired
     private MissionService missionService;
 
+    @Autowired
+    private ShopRecruitService recruitService;
+
     private final static String SWEEP_ITEM = "item_1101";
     /**
      * 新手引导关卡 
@@ -115,6 +118,8 @@ public class StageService extends GameSupport {
                 stage.setStar(star);
             }
             romanceRandomStroy(lord, RandomStoryType.PVE_WIN);
+            // 触发招募
+            recruitService.triggeringRecruit(lord, stageId);
         } else { // 战斗失败，添加部分英雄经验
             double mul = this.getDataConfig().get("stage_other").get("loseexp").getDouble("value");
             heroExp = (int) Math.floor(mul * heroExp);
