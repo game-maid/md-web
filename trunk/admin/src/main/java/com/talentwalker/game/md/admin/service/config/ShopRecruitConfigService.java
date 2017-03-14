@@ -88,7 +88,7 @@ public class ShopRecruitConfigService extends BaseService {
         shopRecruit.setAddB(recruit.getAddB());
         shopRecruit.setLimitTimesType(recruit.getLimitTimesType());
         shopRecruit.setLimitTimes(recruit.getLimitTimes());
-        shopRecruit.setOneRecruit(recruit.getIsOneRecruit());
+        shopRecruit.setIsOneRecruit(recruit.getIsOneRecruit());
         shopRecruit.setSafetyTimes(recruit.getSafetyTimes());
         shopRecruit.setContinuous(recruit.getContinuous());
         shopRecruit.setDiscount(recruit.getDiscount());
