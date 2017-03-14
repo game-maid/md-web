@@ -98,28 +98,30 @@ public class ShopRecruitService extends GameSupport {
         List<Recruit> activityRecruit = new ArrayList<>();
         DataConfig config = this.getDataConfig().get(ConfigKey.SHOP_HERO_RECRUIT);
         int guidanceRcruit = lord.getGuidanceRcruit();
+        Map<String, Recruit> recruitMap = null;
         if (guidanceRcruit == 0 && shopRecruit == null) {
             shopRecruit = new ShopRecruit();
             shopRecruit.setId(lord.getId());
-            Map<String, Recruit> mapRecruit = new HashMap<String, Recruit>();
             Recruit recruit = initRecruit();
             recruit.setId(ConfigKey.SHOP_HERO_RECRUIT_FIRST);
             recruit.setType(4);
-            mapRecruit.put(ConfigKey.SHOP_HERO_RECRUIT_FIRST, recruit);
-            shopRecruit.setRecruit(mapRecruit);
+            recruitMap.put(ConfigKey.SHOP_HERO_RECRUIT_FIRST, recruit);
+            shopRecruit.setRecruit(recruitMap);
         } else if (guidanceRcruit >= 1) {
-            Map<String, Recruit> recruitMap = shopRecruit.getRecruit();
+            recruitMap = shopRecruit.getRecruit();
             recruitMap.remove(ConfigKey.SHOP_HERO_RECRUIT_FIRST);
             commonRecruit(config, recruitMap, lord, shopRecruit, activityRecruit);
         }
-        // 常驻招募和触发招募
-        List<Recruit> recruit = getResidentRecruit(shopRecruit);
         // 当前存在的活动招募
         getActivityRecruit(lord, shopRecruit, activityRecruit);
 
-        activityRecruit.addAll(recruit);
+        for (String recruitId : recruitMap.keySet()) {
+            activityRecruit.add(recruitMap.get(recruitId));
+        }
         this.setRecruit(shopRecruit, activityRecruit);
         shopRecruitRepository.save(shopRecruit);
+        // 常驻招募和触发招募
+        List<Recruit> recruit = getResidentRecruit(shopRecruit);
         return activityRecruit;
     }
 
@@ -166,6 +168,12 @@ public class ShopRecruitService extends GameSupport {
         getActivityRecruit(lord, shopRecruit, activityRecruit);
     }
 
+    /**
+     * @Description:触发招募
+     * @param lord
+     * @param condition
+     * @throws
+     */
     public void triggeringRecruit(Lord lord, String condition) {
         DataConfig config = this.getDataConfig().get("shop_heroRecruit");
         ShopRecruit shopRecruit = shopRecruitRepository.findOne(lord.getId());
@@ -177,7 +185,7 @@ public class ShopRecruitService extends GameSupport {
             }
             Integer type = config.get(recruitId).getInteger(ConfigKey.SHOP_HERO_RECRUIT_TYPE);
             if (type == 2) {// 触发招募
-                if (config.get(recruitId).get("typeby").equals(condition)) {
+                if (config.get(recruitId).getString("typeby").equals(condition)) {
                     // 初始化触发招募
                     Recruit triggeringRecruit = initRecruit();
                     triggeringRecruit.setId(recruitId);
@@ -354,6 +362,11 @@ public class ShopRecruitService extends GameSupport {
      */
     private String randomHero(Recruit recruit, DataConfig config) {
         int times = recruit.getTimes();
+        // 校验抽卡次数
+        Integer maxTimes = config.getInteger(ConfigKey.SHOP_HERO_RECRUIT_GETTIMES);
+        if (maxTimes != null　＆＆　maxTimes＜＝ｔｉｍｅｓ) {
+
+        }
         // 刷新卡池（C、D）
         refreshPoll(times, recruit, config);
         times++;
