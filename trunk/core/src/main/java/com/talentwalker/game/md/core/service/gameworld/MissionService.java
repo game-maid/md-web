@@ -436,6 +436,7 @@ public class MissionService extends GameSupport {
         if (!DateUtils.isSameDay(new Date(mission.getLastTime()), new Date())) {
             mission.setMissions(new HashMap<>());
             mission.setActive(0);
+            mission.setLastTime(System.currentTimeMillis());
             mission.getActiveStatus().clear();
             // 刷新任务
             initDailyMission(lord, mission);
