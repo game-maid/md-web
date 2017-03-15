@@ -438,7 +438,6 @@ public class MissionService extends GameSupport {
             mission.setActive(0);
             mission.setLastTime(System.currentTimeMillis());
             mission.getActiveStatus().clear();
-            mission.setLastTime(System.currentTimeMillis());
             // 刷新任务
             initDailyMission(lord, mission);
             dailyRepository.save(mission);
