@@ -193,11 +193,11 @@ public class ShopRecruitService extends GameSupport {
                     triggeringRecruit.setType(2);
                     shopRecruit.getRecruit().put(recruitId, triggeringRecruit);
                     // 获取当前招募列表
-                    List<Recruit> recruit = this.getShopRecruit(shopRecruit, lord);
-                    Map<String, List<Recruit>> map = new HashMap<String, List<Recruit>>();
-                    map.put("recruit", recruit);
+                    // List<Recruit> recruit = this.getShopRecruit(shopRecruit, lord);
+                    // Map<String, List<Recruit>> map = new HashMap<String, List<Recruit>>();
+                    // map.put("recruit", recruit);
                     shopRecruitRepository.save(shopRecruit);
-                    this.gameModel.addObject(ResponseKey.SHOP, map);
+                    this.gameModel.addObject("triggeringRecruit", triggeringRecruit);
                     return;
                 }
             }
