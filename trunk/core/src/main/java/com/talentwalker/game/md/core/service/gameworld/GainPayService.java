@@ -463,6 +463,17 @@ public class GainPayService extends GameSupport {
     }
 
     /**
+     * @Description:道具分布统计表
+     * @param type 道具分类
+     * @param itemId 道具id
+     * @param haveNum 拥有的数量
+     * @throws
+     */
+    private void statisticsItemDistribution(String type, String itemId, String haveNum) {
+
+    }
+
+    /**
      * @Description:
      * @param lord
      * @param itemId
