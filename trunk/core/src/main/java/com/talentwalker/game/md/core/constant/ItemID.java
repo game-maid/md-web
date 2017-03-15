@@ -68,4 +68,17 @@ public class ItemID {
      */
     public final static String ROMANCE_EXP = "romanceExp";
 
+    /**
+     * 消耗品道具
+     */
+    public final static String EXPEND = "expend";
+    /**
+     * 礼包类道具
+     */
+    public final static String ITEM_BOX = "box";
+
+    /**
+     * 货币类道具
+     */
+    public final static String CURRENCY = "currency";
 }
