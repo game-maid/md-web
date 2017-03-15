@@ -437,6 +437,7 @@ public class MissionService extends GameSupport {
             mission.setMissions(new HashMap<>());
             mission.setActive(0);
             mission.getActiveStatus().clear();
+            mission.setLastTime(System.currentTimeMillis());
             // 刷新任务
             initDailyMission(lord, mission);
             dailyRepository.save(mission);
