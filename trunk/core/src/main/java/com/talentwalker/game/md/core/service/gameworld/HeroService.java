@@ -155,7 +155,7 @@ public class HeroService extends GameSupport {
             addExpHero = new HashMap<>();
         }
         addExpHero.put(hero.getHeroUid(), exp);
-        this.gameModel.addObject("addExpHero", addExpHero);
+        this.gameModel.addObject(ResponseKey.ADD_EXP_HERO, addExpHero);
 
         int limit = lord.getLevel() * MULTIPLE_LIMIT;
         // 计算经验

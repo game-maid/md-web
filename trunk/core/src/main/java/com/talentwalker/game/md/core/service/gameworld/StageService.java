@@ -182,8 +182,8 @@ public class StageService extends GameSupport {
             Map<String, Hero> map = new HashMap<String, Hero>();
             List<FormHold> list = lord.getForm().get(0);
             for (FormHold hold : list) {
-                map.put(hold.getHeroUid(), lord.getHeros().get(hold.getHeroUid()));
                 heroService.addHeroExp(lord, hold.getHeroUid(), exp);
+                map.put(hold.getHeroUid(), lord.getHeros().get(hold.getHeroUid()));
             }
             this.gameModel.addObject(ResponseKey.HEROES, map);
         }
