@@ -8,6 +8,7 @@
 package com.talentwalker.game.md.core.service.gameworld;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,9 @@ import com.talentwalker.game.md.core.domain.gameworld.Mail;
 import com.talentwalker.game.md.core.domain.gameworld.Romance;
 import com.talentwalker.game.md.core.domain.gameworld.Skill;
 import com.talentwalker.game.md.core.domain.gameworld.SoulStore;
+import com.talentwalker.game.md.core.domain.statistics.ItemDistributionStatistics;
 import com.talentwalker.game.md.core.exception.GameErrorCode;
+import com.talentwalker.game.md.core.repository.statistics.ItemDistributionRepository;
 import com.talentwalker.game.md.core.response.ResponseKey;
 import com.talentwalker.game.md.core.util.ConfigKey;
 import com.talentwalker.game.md.core.util.GameExceptionUtils;
@@ -64,6 +67,8 @@ public class GainPayService extends GameSupport {
 
     @Autowired
     private MailService mailService;
+    @Autowired
+    private ItemDistributionRepository itemDistributionRepository;
 
     private void check(int have, int number) {
         if (have + number < 0) {
@@ -95,9 +100,14 @@ public class GainPayService extends GameSupport {
                     lord.setDiamond(diamond + number);
                     this.lordResponse(itemId, number, lord.getDiamond());
                 }
+                // 道具分布统计
+                statisticsItemDistribution(lord, ItemID.CURRENCY, ItemID.DIAMOND, lord.getDiamond());
+                statisticsItemDistribution(lord, ItemID.CURRENCY, ItemID.PERSENT_DIAMOND, lord.getPersentDiamond());
             } else if (ItemID.PERSENT_DIAMOND.equals(itemId)) {// 增加购买的钻石
                 lord.setPersentDiamond(number + lord.getPersentDiamond());
                 this.lordResponse(itemId, number, lord.getPersentDiamond());
+                // 道具分布统计
+                statisticsItemDistribution(lord, ItemID.CURRENCY, ItemID.PERSENT_DIAMOND, lord.getPersentDiamond());
             } else if (ItemID.GOLD.equals(itemId)) { // 金币
                 int gold = lord.getGold();
                 if (number < 0) {
@@ -108,6 +118,8 @@ public class GainPayService extends GameSupport {
                 }
                 lord.setGold(gold + number);
                 this.lordResponse(itemId, number, lord.getGold());
+                // 道具分布统计
+                statisticsItemDistribution(lord, ItemID.CURRENCY, ItemID.GOLD, lord.getGold());
             } else if (ItemID.BREAKCOIN.equals(itemId)) { // 突破币
                 int coin = lord.getBreakcoin();
                 if (number < 0) {
@@ -118,6 +130,8 @@ public class GainPayService extends GameSupport {
                 }
                 lord.setBreakcoin(coin + number);
                 this.lordResponse(itemId, number, lord.getBreakcoin());
+                // 道具分布统计
+                statisticsItemDistribution(lord, ItemID.CURRENCY, ItemID.BREAKCOIN, lord.getBreakcoin());
             } else if (ItemID.EXP.equals(itemId)) { // 经验
                 if (number > 0) {
                     int preLevel = lord.getLevel();
@@ -262,6 +276,9 @@ public class GainPayService extends GameSupport {
                     }
                 }
                 lord.setEquips(equips);
+                // 道具分布统计
+                int haveNum = haveNum(ItemID.EQUIP, lord, itemId);
+                statisticsItemDistribution(lord, ItemID.EQUIP, itemId, haveNum);
             } else if (StringUtils.startsWith(itemId, ItemID.SKILL)) { // 技能
                 Map<String, Skill> skills = lord.getSkills();
                 if (number > 0) {
@@ -290,6 +307,9 @@ public class GainPayService extends GameSupport {
                     }
                 }
                 lord.setSkills(skills);
+                // 道具分布统计
+                int haveNum = haveNum(ItemID.SKILL, lord, itemId);
+                statisticsItemDistribution(lord, ItemID.SKILL, itemId, haveNum);
             } else if (StringUtils.startsWith(itemId, ItemID.HERO)) { // 英雄
                 Map<String, Hero> heros = lord.getHeros();
                 if (number > 0) {
@@ -323,6 +343,9 @@ public class GainPayService extends GameSupport {
                     }
                 }
                 lord.setHeros(heros);
+                // 道具分布统计
+                int haveNum = haveNum(ItemID.HERO, lord, itemId);
+                statisticsItemDistribution(lord, ItemID.HERO, itemId, haveNum);
             } else if (itemId.startsWith(ItemID.ROMANCE_EXP)) {// 好感度经验
                 if (number > 0) {
                     String[] items = itemId.split("--");
@@ -375,6 +398,8 @@ public class GainPayService extends GameSupport {
                 }
                 this.mapIntegerResponse(ResponseKey.SOULS, itemId, number, have);
                 lord.setSouls(souls);
+                // 道具分布统计
+                statisticsItemDistribution(lord, ItemID.SOUL, itemId, have);
             } else if (this.getDataConfig().get("item").getJsonObject().containsKey(itemId)) {
                 Map<String, Integer> items = lord.getItems();
                 int count = 0;
@@ -409,6 +434,12 @@ public class GainPayService extends GameSupport {
                 }
                 this.mapIntegerResponse(ResponseKey.ITEMS, itemId, number, have);
                 lord.setItems(items);
+                // 道具分布统计
+                if (StringUtils.startsWith(itemId, ItemID.ITEM_BOX)) {
+                    statisticsItemDistribution(lord, ItemID.ITEM_BOX, itemId, have);
+                } else {
+                    statisticsItemDistribution(lord, ItemID.EXPEND, itemId, have);
+                }
             } else {
                 GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_21005, itemId);
             }
@@ -463,14 +494,74 @@ public class GainPayService extends GameSupport {
     }
 
     /**
+     * @Description:计算玩家拥有该类道具的数量
+     * @param equip
+     * @param lord
+     * @param itemId
+     * @return
+     * @throws
+     */
+    private int haveNum(String type, Lord lord, String itemId) {
+        int haveNum = 0;
+        if (ItemID.HERO.equals(type)) {
+            Map<String, Hero> heros = lord.getHeros();
+            Collection<Hero> values = heros.values();
+            for (Hero hero : values) {
+                if (hero.getHeroId().equals(itemId)) {
+                    haveNum++;
+                }
+            }
+        } else if (ItemID.EQUIP.equals(type)) {
+            Map<String, Equip> equips = lord.getEquips();
+            Collection<Equip> values = equips.values();
+            for (Equip equip : values) {
+                if (equip.getEquipId().equals(itemId)) {
+                    haveNum++;
+                }
+            }
+        } else if (ItemID.SKILL.equals(type)) {
+            Map<String, Skill> skills = lord.getSkills();
+            Collection<Skill> values = skills.values();
+            for (Skill skill : values) {
+                if (skill.getSkillId().equals(itemId)) {
+                    haveNum++;
+                }
+            }
+        }
+        return haveNum;
+    }
+
+    /**
      * @Description:道具分布统计表
      * @param type 道具分类
      * @param itemId 道具id
      * @param haveNum 拥有的数量
      * @throws
      */
-    private void statisticsItemDistribution(String type, String itemId, String haveNum) {
-
+    private void statisticsItemDistribution(Lord lord, String type, String itemId, Integer haveNum) {
+        ItemDistributionStatistics itemDS = itemDistributionRepository.findOne(lord.getId());
+        if (itemDS == null) {
+            itemDS = new ItemDistributionStatistics();
+            itemDS.setId(lord.getId());
+        }
+        if (ItemID.HERO.equals(type)) {// 武将
+            itemDS.getHero().put(itemId, haveNum);
+        } else if (ItemID.SOUL.equals(type)) {// 武将碎片（魂）
+            itemDS.getSoul().put(itemId, haveNum);
+        } else if (ItemID.EQUIP.equals(type)) {// 装备
+            itemDS.getEquip().put(itemId, haveNum);
+        } else if (ItemID.SKILL.equals(type)) {// 技能
+            itemDS.getSkill().put(itemId, haveNum);
+        } else if (ItemID.EXPEND.equals(type)) {// 消耗品道具
+            itemDS.getExpend().put(itemId, haveNum);
+        } else if (ItemID.ITEM_BOX.equals(type)) {// 礼包类道具
+            itemDS.getBox().put(itemId, haveNum);
+        } else if (ItemID.CURRENCY.equals(type)) {// 货币类道具
+            itemDS.getCurrency().put(itemId, haveNum);
+        } else {
+            return;
+        }
+        itemDistributionRepository.save(itemDS);
     }
 
     /**
