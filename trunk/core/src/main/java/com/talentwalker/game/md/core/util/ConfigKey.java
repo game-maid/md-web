@@ -97,6 +97,10 @@ public class ConfigKey {
     /**********************英雄招募*****************************/
     public static final String SHOP_HERO_RECRUIT = "shop_heroRecruit";
     /**
+     * 是否折扣
+     */
+    public static final String SHOP_HERO_RECRUIT_SINGLE_FREE = "singleFree";
+    /**
      * 新手招募招募类型
      */
     public static final String SHOP_HERO_RECRUIT_TYPE = "type";
