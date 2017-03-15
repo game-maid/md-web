@@ -110,6 +110,7 @@ public class ShopRecruitService extends GameSupport {
             recruitMap.put(ConfigKey.SHOP_HERO_RECRUIT_FIRST, recruit);
             shopRecruit.setRecruit(recruitMap);
             recruitList.add(recruit);
+            shopRecruitRepository.save(shopRecruit);
         } else if (guidanceRcruit >= 1) {
             recruitMap = shopRecruit.getRecruit();
             commonRecruit(config, recruitMap, lord, shopRecruit, activityRecruit);
@@ -197,6 +198,39 @@ public class ShopRecruitService extends GameSupport {
                     // Map<String, List<Recruit>> map = new HashMap<String, List<Recruit>>();
                     // map.put("recruit", recruit);
                     shopRecruitRepository.save(shopRecruit);
+                    this.gameModel.addObject("triggeringRecruit", triggeringRecruit);
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * @Description:触发招募
+     * @param shopRecruit
+     * @param condition
+     * @throws
+     */
+    public void triggeringRecruit(ShopRecruit shopRecruit, String condition) {
+        DataConfig config = this.getDataConfig().get(ConfigKey.SHOP_HERO_RECRUIT);
+        Iterator<String> it = config.getJsonObject().keys();
+        while (it.hasNext()) {
+            String recruitId = it.next();
+            if (shopRecruit != null && shopRecruit.getRecruit().containsKey(recruitId)) {
+                continue;
+            }
+            Integer type = config.get(recruitId).getInteger(ConfigKey.SHOP_HERO_RECRUIT_TYPE);
+            if (type == 2) {// 触发招募
+                if (config.get(recruitId).getString("typeby").equals(condition)) {
+                    // 初始化触发招募
+                    Recruit triggeringRecruit = initRecruit();
+                    triggeringRecruit.setId(recruitId);
+                    triggeringRecruit.setType(2);
+                    shopRecruit.getRecruit().put(recruitId, triggeringRecruit);
+                    // 获取当前招募列表
+                    // List<Recruit> recruit = this.getShopRecruit(shopRecruit, lord);
+                    // Map<String, List<Recruit>> map = new HashMap<String, List<Recruit>>();
+                    // map.put("recruit", recruit);
                     this.gameModel.addObject("triggeringRecruit", triggeringRecruit);
                     return;
                 }
@@ -334,12 +368,14 @@ public class ShopRecruitService extends GameSupport {
 
         recruitMap.put(recruitKey, recruit);
         shopRecruit.setRecruit(recruitMap);
+        lord.setGuidanceRcruit(lord.getGuidanceRcruit() + 1);
+        // 触发招募
+        triggeringRecruit(shopRecruit, recruitKey);
         List<Recruit> recruitList = this.getShopRecruit(shopRecruit, lord);
         Map<String, List<Recruit>> map = new HashMap<String, List<Recruit>>();
         map.put("recruit", recruitList);
         shopRecruitRepository.save(shopRecruit);
 
-        lord.setGuidanceRcruit(lord.getGuidanceRcruit() + 1);
         lordRepository.save(lord);
         this.gameModel.addObject(ResponseKey.SHOP, map);
         missionService.trigerMissionOnceForRecruit(resultHeroId);
@@ -572,6 +608,8 @@ public class ShopRecruitService extends GameSupport {
         recruit.setTenTimes(tenTimes);
         recruitMap.put(recruitKey, recruit);
         shopRecruit.setRecruit(recruitMap);
+        // 触发招募
+        triggeringRecruit(shopRecruit, recruitKey);
         // 刷新招募列表
         List<Recruit> recruitList = this.getShopRecruit(shopRecruit, lord);
         // 返回值格式
