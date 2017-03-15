@@ -100,17 +100,21 @@ public class ShopRecruitService extends GameSupport {
         DataConfig config = this.getDataConfig().get(ConfigKey.SHOP_HERO_RECRUIT);
         int guidanceRcruit = lord.getGuidanceRcruit();
         Map<String, Recruit> recruitMap = null;
-        if (guidanceRcruit == 0 && shopRecruit == null) {
-            shopRecruit = new ShopRecruit();
-            recruitMap = new HashMap<>();
-            shopRecruit.setId(lord.getId());
-            Recruit recruit = initRecruit();
-            recruit.setId(ConfigKey.SHOP_HERO_RECRUIT_FIRST);
-            recruit.setType(1);
-            recruitMap.put(ConfigKey.SHOP_HERO_RECRUIT_FIRST, recruit);
-            shopRecruit.setRecruit(recruitMap);
-            recruitList.add(recruit);
-            shopRecruitRepository.save(shopRecruit);
+        if (guidanceRcruit == 0) {
+            if (shopRecruit == null) {
+                shopRecruit = new ShopRecruit();
+                recruitMap = new HashMap<>();
+                shopRecruit.setId(lord.getId());
+                Recruit recruit = initRecruit();
+                recruit.setId(ConfigKey.SHOP_HERO_RECRUIT_FIRST);
+                recruit.setType(1);
+                recruitMap.put(ConfigKey.SHOP_HERO_RECRUIT_FIRST, recruit);
+                shopRecruit.setRecruit(recruitMap);
+                recruitList.add(recruit);
+                shopRecruitRepository.save(shopRecruit);
+            } else {
+                recruitList.addAll(shopRecruit.getRecruit().values());
+            }
         } else if (guidanceRcruit >= 1) {
             recruitMap = shopRecruit.getRecruit();
             commonRecruit(config, recruitMap, lord, shopRecruit, activityRecruit);
@@ -354,12 +358,16 @@ public class ShopRecruitService extends GameSupport {
         recruit.setOneTimes(oneTimes);
         String cost = config.getString("cost");
         int costAmount = 0;
-        if (oneTimes >= 3) {
+        if (config.getInteger(ConfigKey.SHOP_HERO_RECRUIT_SINGLE_FREE) == 1) {
+            if (oneTimes >= 3) {
+                costAmount = config.getInteger("single_3");
+            } else if (oneTimes >= 2) {
+                costAmount = config.getInteger("single_2");
+            } else {
+                costAmount = config.getInteger("single_1");
+            }
+        } else {// 无折扣
             costAmount = config.getInteger("single_3");
-        } else if (oneTimes >= 2) {
-            costAmount = config.getInteger("single_2");
-        } else {
-            costAmount = config.getInteger("single_1");
         }
         if (costAmount != 0) {
             gainPayService.pay(lord, cost, costAmount);
@@ -597,12 +605,16 @@ public class ShopRecruitService extends GameSupport {
         String cost = config.getString("cost");
         int tenTimes = recruit.getTenTimes() + 1;
         int costAmount = 0;
-        if (tenTimes <= 1) {
-            costAmount = config.getInteger("tentimes_1");
-        } else if (tenTimes <= 2) {
-            costAmount = config.getInteger("tentimes_2");
-        } else {
-            costAmount = config.getInteger("tentimes_3");
+        if (config.getInteger(ConfigKey.SHOP_HERO_RECRUIT_SINGLE_FREE) == 1) {
+            if (tenTimes <= 1) {
+                costAmount = config.getInteger("tentimes_1");
+            } else if (tenTimes <= 2) {
+                costAmount = config.getInteger("tentimes_2");
+            } else {
+                costAmount = config.getInteger("tentimes_3");
+            }
+        } else {// 无折扣
+            costAmount = config.getInteger(ConfigKey.SHOP_HERO_RECRUIT_TENTIMES_3);
         }
         gainPayService.pay(lord, cost, costAmount);
         recruit.setTenTimes(tenTimes);
@@ -643,12 +655,16 @@ public class ShopRecruitService extends GameSupport {
         // 计算消耗
         String cost = config.getCost();
         int costAmount = 0;
-        if (tenTimes <= 1) {
-            costAmount = config.getAlonePrice1();
-        } else if (tenTimes <= 2) {
-            costAmount = config.getAlonePrice2();
-        } else {
-            costAmount = config.getAlonePrice3();
+        if (config.getDiscount()) {
+            if (tenTimes <= 1) {
+                costAmount = config.getContinuousPrice1();
+            } else if (tenTimes <= 2) {
+                costAmount = config.getContinuousPrice2();
+            } else {
+                costAmount = config.getContinuousPrice3();
+            }
+        } else {// 无折扣
+            costAmount = config.getContinuousPrice3();
         }
         gainPayService.pay(lord, cost, costAmount);
         recruit.setTenTimes(tenTimes);
@@ -685,13 +701,18 @@ public class ShopRecruitService extends GameSupport {
         // 计算消耗
         String cost = config.getCost();
         int costAmount = 0;
-        if (oneTimes <= 1) {
-            costAmount = config.getAlonePrice1();
-        } else if (oneTimes <= 2) {
-            costAmount = config.getAlonePrice2();
-        } else {
+        if (config.getDiscount()) {
+            if (oneTimes <= 1) {
+                costAmount = config.getAlonePrice1();
+            } else if (oneTimes <= 2) {
+                costAmount = config.getAlonePrice2();
+            } else {
+                costAmount = config.getAlonePrice3();
+            }
+        } else {// 没有折扣
             costAmount = config.getAlonePrice3();
         }
+
         gainPayService.pay(lord, cost, costAmount);
 
         recruitMap.put(recruitKey, recruit);

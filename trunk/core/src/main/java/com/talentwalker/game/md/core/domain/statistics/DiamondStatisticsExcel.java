@@ -6,7 +6,7 @@
  * @Revision 1.0 2017年3月13日  张福涛
  */
 
-package GoldDiamondStatisticsExcel;
+package com.talentwalker.game.md.core.domain.statistics;
 
 /**
  * @ClassName: DiamondStatisticsExcel

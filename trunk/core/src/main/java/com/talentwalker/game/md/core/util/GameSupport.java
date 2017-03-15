@@ -264,8 +264,6 @@ public class GameSupport extends BaseGameSupport {
                     && lord.getLevel() < config.get(functionName).getInteger("openlevel")) {
                 isOpen = false;
             }
-        } else {
-            isOpen = false;
         }
         if (isError && !isOpen) {
             GameExceptionUtils.throwException(GameErrorCode.GAME_ERROR_39001);

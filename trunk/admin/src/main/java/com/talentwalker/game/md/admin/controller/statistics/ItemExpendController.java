@@ -8,6 +8,9 @@
 
 package com.talentwalker.game.md.admin.controller.statistics;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,5 +49,29 @@ public class ItemExpendController extends BaseController {
             Integer payType, Integer registerCondition, String function) {
         return itemExpendService.findList(startStr, endStr, zoneId, itemId, userType, lordId, payType,
                 registerCondition, function);
+    }
+
+    /**
+     * @Description:文件导出
+     * @param startStr
+     * @param endStr
+     * @param zoneId
+     * @param diamondType
+     * @param userType
+     * @param lordId
+     * @param payType
+     * @param registerCondition
+     * @param function
+     * @return
+     * @throws
+     */
+    @GameResponse
+    @RequestMapping(value = "export", method = RequestMethod.POST)
+    public Object export(String startStr, String endStr, String zoneId, String itemId, Integer userType, String lordId,
+            Integer payType, Integer registerCondition, String function, HttpServletRequest request,
+            HttpServletResponse response) {
+        itemExpendService.export(startStr, endStr, zoneId, itemId, userType, lordId, payType, registerCondition,
+                function, request, response);
+        return null;
     }
 }

@@ -152,4 +152,8 @@ public class ResponseKey {
      * 公告
      */
     public static final String NOTICE = "notice";
+    /**
+     * 每个英雄增加的武将经验
+     */
+    public static final String ADD_EXP_HERO = "addExpHero";
 }
