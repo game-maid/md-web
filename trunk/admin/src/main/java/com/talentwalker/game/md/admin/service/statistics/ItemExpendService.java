@@ -8,6 +8,15 @@
 
 package com.talentwalker.game.md.admin.service.statistics;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -15,6 +24,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -29,7 +41,9 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.talentwalker.game.md.admin.service.BaseService;
+import com.talentwalker.game.md.core.domain.statistics.ItemExpendExcel;
 import com.talentwalker.game.md.core.repository.support.SearchFilter;
+import com.talentwalker.game.md.core.util.ExportExcel;
 
 /**
  * @ClassName: ItemExpendService
@@ -415,6 +429,128 @@ public class ItemExpendService extends BaseService {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * @Description:文件导出
+     * @param startStr
+     * @param endStr
+     * @param zoneId
+     * @param itemId
+     * @param userType
+     * @param lordId
+     * @param payType
+     * @param registerCondition
+     * @param function
+     * @param request
+     * @param response
+     * @throws
+     */
+    public void export(String startStr, String endStr, String zoneId, String itemId, Integer userType, String lordId,
+            Integer payType, Integer registerCondition, String function, HttpServletRequest request,
+            HttpServletResponse response) {
+        // 查询
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        long startDate = 0L;
+        long endDate = 0L;
+        try {
+            startDate = sdf.parse(startStr).getTime();
+            endDate = sdf.parse(endStr).getTime() + DateUtils.MILLIS_PER_DAY;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        ArrayList<Map<String, Object>> content = new ArrayList<>();
+        String lordIds = null;
+        if (userType != 0) {
+            lordIds = findLordIds(startDate, endDate, zoneId, payType, registerCondition, itemId);// 符合要求的玩家id
+        }
+        findContent(startDate, endDate, zoneId, itemId, userType, lordId, payType, registerCondition, function, null,
+                content, lordIds);
+        // 生成excel文件
+        // excel 内容
+        List<ItemExpendExcel> excelList = new ArrayList<>();
+        int index = 0;
+        for (Map<String, Object> map : content) {
+            ItemExpendExcel iee = new ItemExpendExcel();
+            iee.setIndex(++index);
+            iee.setFunctionName((String) map.get("functionName"));
+            iee.setPayTimes((int) map.get("expendTimes"));
+            iee.setPayerNum((int) map.get("payerNum"));
+            iee.setItemNum((int) map.get("ItemNum"));
+            excelList.add(iee);
+        }
+        // excel 头
+        String[] header = {getMessage("sys.sequence"), getMessage("statistics.gold.function.name"),
+                getMessage("statistics.gold.item.num"), getMessage("statistics.gold.expend.times"),
+                getMessage("statistics.gold.peyer.num") };
+        ExportExcel<ItemExpendExcel> excel = new ExportExcel<>();
+        String path = request.getServletContext().getRealPath("/");
+        SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+        String fileName = "ItemExpendStatistics" + sdf1.format(System.currentTimeMillis()) + ".xls";
+        // 在服务器生成excel文件
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(path + System.getProperty("file.separator") + fileName);
+            excel.exportExcel(header, excelList, out, "yyy-MM-dd HH:mm:ss");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if (out != null) {
+                try {
+                    out.flush();
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        download(path + fileName, response);
+    }
+
+    /**
+     * @Description:下载文件
+     * @param path 要下载的文件路径
+     * @param response
+     * @throws
+     */
+    private void download(String path, HttpServletResponse response) {
+        File file = new File(path);
+        String fileName = file.getName();
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            // 读文件
+            is = new BufferedInputStream(new FileInputStream(path));
+            byte[] bufferByte = new byte[is.available()];
+            is.read(bufferByte);
+            // 清空response
+            response.reset();
+            // 设置响应头
+            response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+            response.addHeader("Content-Length", file.length() + "");
+            // 写文件
+            os = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/vnd.ms-excel;charset=gb2312");
+            os.write(bufferByte);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {// 关闭资源
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (os != null) {
+                try {
+                    os.flush();
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 }
