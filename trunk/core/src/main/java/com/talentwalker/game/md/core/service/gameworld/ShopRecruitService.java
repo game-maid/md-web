@@ -100,17 +100,21 @@ public class ShopRecruitService extends GameSupport {
         DataConfig config = this.getDataConfig().get(ConfigKey.SHOP_HERO_RECRUIT);
         int guidanceRcruit = lord.getGuidanceRcruit();
         Map<String, Recruit> recruitMap = null;
-        if (guidanceRcruit == 0 && shopRecruit == null) {
-            shopRecruit = new ShopRecruit();
-            recruitMap = new HashMap<>();
-            shopRecruit.setId(lord.getId());
-            Recruit recruit = initRecruit();
-            recruit.setId(ConfigKey.SHOP_HERO_RECRUIT_FIRST);
-            recruit.setType(1);
-            recruitMap.put(ConfigKey.SHOP_HERO_RECRUIT_FIRST, recruit);
-            shopRecruit.setRecruit(recruitMap);
-            recruitList.add(recruit);
-            shopRecruitRepository.save(shopRecruit);
+        if (guidanceRcruit == 0) {
+            if (shopRecruit == null) {
+                shopRecruit = new ShopRecruit();
+                recruitMap = new HashMap<>();
+                shopRecruit.setId(lord.getId());
+                Recruit recruit = initRecruit();
+                recruit.setId(ConfigKey.SHOP_HERO_RECRUIT_FIRST);
+                recruit.setType(1);
+                recruitMap.put(ConfigKey.SHOP_HERO_RECRUIT_FIRST, recruit);
+                shopRecruit.setRecruit(recruitMap);
+                recruitList.add(recruit);
+                shopRecruitRepository.save(shopRecruit);
+            } else {
+                recruitList.addAll(shopRecruit.getRecruit().values());
+            }
         } else if (guidanceRcruit >= 1) {
             recruitMap = shopRecruit.getRecruit();
             commonRecruit(config, recruitMap, lord, shopRecruit, activityRecruit);
